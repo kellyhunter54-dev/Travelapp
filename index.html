@@ -1,4 +1,4 @@
-﻿<!doctype html>
+<!doctype html>
 <html lang="en">
 <head>
 <meta charset="utf-8">
@@ -11,7 +11,8 @@
 :root{
   --bg:#E9EEEC; --surface:#FFFFFF; --surface-2:#F3F6F5; --fg:#16201D; --muted:#5B6964; --line:#D5DDDA;
   --accent:#0E6E66; --accent-fg:#FFFFFF; --accent-soft:#D7ECE9; --danger:#B42318;
-  --land:#EEF0EA; --water:#B9D5E0; --grid:rgba(22,32,29,.05); --label:#7A8682;
+  --land:#E9ECE5; --water:#A9CFDF; --grid:rgba(22,32,29,.05); --label:#6E7A76;
+  --park:#C9E2BD; --plaza:#F4F1EA; --street:#FFFFFF; --road:#FCE6A4; --road-casing:#DCC27A; --rail:#9AA29D; --water-edge:#94BFD2; --water-label:#4E7F96; --park-label:#4B7A3E;
   --tile-filter:none; --shadow:0 6px 24px rgba(16,30,26,.14);
   --f-display:"Bricolage Grotesque", "Figtree", system-ui, sans-serif;
   --f-body:"Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
@@ -20,13 +21,15 @@
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0D1311; --surface:#141C19; --surface-2:#1A2420; --fg:#E4ECE9; --muted:#93A39E; --line:#283430;
   --accent:#3FB5A8; --accent-fg:#06201C; --accent-soft:#163B36; --danger:#F97066;
-  --land:#1B2421; --water:#173440; --grid:rgba(228,236,233,.05); --label:#7E8D88;
+  --land:#1A2220; --water:#14303D; --grid:rgba(228,236,233,.05); --label:#7E8D88;
+  --park:#1D3325; --plaza:#242E2A; --street:#2A3632; --road:#4A4632; --road-casing:#121A17; --rail:#4D5A55; --water-edge:#1C3C4A; --water-label:#5F93A8; --park-label:#6E9B62;
   --tile-filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.9) saturate(.7); --shadow:0 6px 24px rgba(0,0,0,.45);
   color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0D1311; --surface:#141C19; --surface-2:#1A2420; --fg:#E4ECE9; --muted:#93A39E; --line:#283430;
   --accent:#3FB5A8; --accent-fg:#06201C; --accent-soft:#163B36; --danger:#F97066;
-  --land:#1B2421; --water:#173440; --grid:rgba(228,236,233,.05); --label:#7E8D88;
+  --land:#1A2220; --water:#14303D; --grid:rgba(228,236,233,.05); --label:#7E8D88;
+  --park:#1D3325; --plaza:#242E2A; --street:#2A3632; --road:#4A4632; --road-casing:#121A17; --rail:#4D5A55; --water-edge:#1C3C4A; --water-label:#5F93A8; --park-label:#6E9B62;
   --tile-filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.9) saturate(.7); --shadow:0 6px 24px rgba(0,0,0,.45);
   color-scheme:dark }
 
@@ -52,7 +55,9 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .tab{flex:1;border:0;background:transparent;padding:8px 6px;border-radius:8px;font-weight:600;color:var(--muted)}
 .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--fg)}
 .tab .n{font-family:var(--f-mono);font-size:11px;font-weight:500;margin-left:4px;opacity:.75}
-.side-scroll{flex:1;min-height:0;overflow:auto;padding:14px 14px 20px;display:grid;gap:14px;align-content:start}
+.side-scroll{flex:1;min-height:0;overflow:auto;padding:14px 14px 20px;display:grid;grid-template-columns:minmax(0,1fr);gap:14px;align-content:start}
+.side-scroll>*,.day>*,.stops>li,.extras>li,.plain>li{min-width:0}
+.row-main{overflow:hidden}
 
 .day{display:grid;gap:8px;padding-bottom:14px;border-bottom:1px solid var(--line)}
 .day:last-of-type{border-bottom:0}
@@ -114,7 +119,7 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 
 .mapwrap{position:relative;flex:1;min-height:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--land)}
 #map{position:absolute;inset:0;background:var(--land)}
-#map.sketch{background-color:var(--land);background-image:linear-gradient(var(--grid) 1px,transparent 1px),linear-gradient(90deg,var(--grid) 1px,transparent 1px);background-size:48px 48px}
+
 #map.placing,#map.placing .leaflet-grab{cursor:crosshair}
 .legend{position:absolute;left:10px;bottom:10px;z-index:1000;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);box-shadow:var(--shadow);max-width:calc(100% - 20px)}
 .legend span{display:flex;align-items:center;gap:6px}
@@ -132,7 +137,18 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .pin-extra.loose{border-style:dashed;opacity:.88}
 .pin-extra .pin-ico{transform:rotate(-45deg)}
 .sk-label{font-family:var(--f-display);font-weight:500;font-size:12px;color:var(--label);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;pointer-events:none;width:auto!important;height:auto!important;transform-origin:center}
-.sk-water{fill:var(--water);fill-opacity:1;stroke:none}
+.sk-label.water{color:var(--water-label);font-style:italic;text-transform:none;letter-spacing:.02em;font-size:14px}
+.sk-label.park{color:var(--park-label);text-transform:none;letter-spacing:0;font-size:11px;font-weight:600}
+.sk-label.small{font-size:10.5px;text-transform:none;letter-spacing:0}
+.zlow .sk-label.park,.zlow .sk-label.small{display:none}
+.bm-water{fill:var(--water);fill-opacity:1;stroke:var(--water-edge);stroke-opacity:1}
+.bm-park{fill:var(--park);fill-opacity:1;stroke:none}
+.bm-plaza{fill:var(--plaza);fill-opacity:1;stroke:var(--road-casing);stroke-opacity:.35}
+.bm-road-c{stroke:var(--road-casing);stroke-opacity:1;fill:none}
+.bm-road{stroke:var(--road);stroke-opacity:1;fill:none}
+.bm-rail{stroke:var(--rail);stroke-opacity:1;fill:none}
+.basesw{position:absolute;top:10px;right:10px;z-index:1000;box-shadow:var(--shadow)}
+.toast{position:absolute;top:58px;right:10px;z-index:1000;background:var(--fg);color:var(--bg);border-radius:10px;padding:8px 12px;font-size:13px;font-weight:500;max-width:min(320px,calc(100% - 20px));box-shadow:var(--shadow)}
 .route{stroke-linecap:round;stroke-linejoin:round}
 
 /* Popup */
@@ -255,6 +271,8 @@ textarea.inp{min-height:70px;resize:vertical}
     <div class="bar"><div class="chips" id="chips" aria-label="Filter by tag"></div></div>
     <div class="mapwrap">
       <div id="map"></div>
+      <div class="seg basesw" id="basesw" aria-label="Map style"></div>
+      <div class="toast" id="toast" hidden></div>
       <div class="banner" id="banner" hidden>Click the map where the place is <button data-act="cancel-place">Cancel</button></div>
       <div class="legend">
         <span><i class="lg-c"></i>Itinerary stop</span>
@@ -316,7 +334,7 @@ function sample(){
       P('p22','Pink Street',38.7069,-9.1442,'t8',null,false,0,''),
       P('p23','Jardim do Príncipe Real',38.7168,-9.1488,'t9',null,false,0,'Saturday organic market.')
     ],
-    view:{day:'all',mainOnly:false,hidden:[]}
+    view:{day:'all',mainOnly:false,hidden:[],basemap:'illustrated'}
   };
 }
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.places)&&Array.isArray(s.tags)&&Array.isArray(s.days))return s}catch(e){}return null}
@@ -354,22 +372,114 @@ const SVG={
 /* ---------- Map ---------- */
 const map=L.map('map',{zoomControl:true,attributionControl:true}).setView([38.71,-9.16],13);
 map.attributionControl.setPrefix(false);
-map.createPane('sketch').style.zIndex=300;
-const tiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'}).addTo(map);
-let tileOk=false,fellBack=false;
-tiles.on('tileload',()=>{tileOk=true});
-tiles.on('tileerror',()=>{if(!tileOk)fallback()});
-setTimeout(()=>{if(!tileOk)fallback()},4500);
-const sketch=L.layerGroup();
-L.polygon([[38.7000,-9.2700],[38.6895,-9.2200],[38.6925,-9.2050],[38.6945,-9.1950],[38.7010,-9.1750],[38.7045,-9.1450],[38.7058,-9.1360],[38.7080,-9.1250],[38.7170,-9.1150],[38.7330,-9.1020],[38.7520,-9.0940],[38.7800,-9.0880],[38.8100,-9.0850],[38.8100,-9.0100],[38.7000,-9.0100],[38.6600,-9.0800],[38.6560,-9.1400],[38.6700,-9.1800],[38.6750,-9.2300],[38.6700,-9.2700]],{pane:'sketch',className:'sk-water',interactive:false}).addTo(sketch);
-[['Baixa',38.7112,-9.1380],['Alfama',38.7122,-9.1285],['Bairro Alto',38.7137,-9.1462],['Belém',38.6995,-9.2010],['Alcântara',38.7065,-9.1800],['Graça',38.7180,-9.1290],['Avenidas Novas',38.7370,-9.1480],['Tagus River',38.6820,-9.1500]].forEach(([n,a,b])=>{
-  L.marker([a,b],{pane:'sketch',interactive:false,keyboard:false,icon:L.divIcon({className:'sk-label',html:esc(n),iconSize:null})}).addTo(sketch);
+/* Basemap: an illustrated city map drawn locally (no map service), plus an optional live street map */
+const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+['streets:240','base:250','baselabels:350'].forEach(x=>{const [n,z]=x.split(':');const p=map.createPane(n);p.style.zIndex=z;p.style.pointerEvents='none'});
+const WATER=[[38.6960,-9.2800],[38.6920,-9.2400],[38.6895,-9.2200],[38.6925,-9.2050],[38.6945,-9.1950],[38.7010,-9.1750],[38.7045,-9.1450],[38.7058,-9.1360],[38.7080,-9.1250],[38.7170,-9.1150],[38.7330,-9.1010],[38.7550,-9.0950],[38.7800,-9.0900],[38.8200,-9.0850],[38.8200,-8.9500],[38.6400,-8.9500],[38.6550,-9.0400],[38.6680,-9.0950],[38.6750,-9.1250],[38.6870,-9.1450],[38.6855,-9.1600],[38.6790,-9.1760],[38.6780,-9.1950],[38.6760,-9.2250],[38.6650,-9.2600],[38.6600,-9.2800]];
+const PARKS=[
+  ['Monsanto Forest Park',[38.7300,-9.2020],[[38.7480,-9.2020],[38.7420,-9.1830],[38.7300,-9.1780],[38.7180,-9.1850],[38.7120,-9.2050],[38.7200,-9.2250],[38.7380,-9.2200]]],
+  ['Tapada da Ajuda',[38.7095,-9.1850],[[38.7130,-9.1880],[38.7120,-9.1810],[38.7060,-9.1820],[38.7065,-9.1890]]],
+  ['Parque Eduardo VII',[38.7293,-9.1532],[[38.7325,-9.1560],[38.7330,-9.1530],[38.7262,-9.1505],[38.7258,-9.1530]]],
+  ['Gulbenkian Garden',[38.7380,-9.1550],[[38.7395,-9.1570],[38.7398,-9.1535],[38.7365,-9.1530],[38.7362,-9.1565]]],
+  ['Jardim da Estrela',[38.7141,-9.1604],[[38.7150,-9.1615],[38.7152,-9.1595],[38.7132,-9.1593],[38.7130,-9.1612]]],
+  ['Botanical Garden',[38.7184,-9.1491],[[38.7195,-9.1505],[38.7193,-9.1478],[38.7172,-9.1478],[38.7174,-9.1505]]],
+  ['',null,[[38.7146,-9.1345],[38.7145,-9.1322],[38.7133,-9.1322],[38.7134,-9.1345]]],
+  ['Praça do Império',[38.6954,-9.2062],[[38.6960,-9.2085],[38.6962,-9.2040],[38.6948,-9.2040],[38.6946,-9.2085]]],
+  ['',null,[[38.7172,-9.1494],[38.7171,-9.1482],[38.7164,-9.1482],[38.7165,-9.1494]]]
+];
+const PLAZAS=[[[38.7085,-9.1372],[38.7085,-9.1356],[38.7068,-9.1356],[38.7068,-9.1372]],[[38.7142,-9.1400],[38.7142,-9.1390],[38.7132,-9.1390],[38.7132,-9.1400]]];
+const ROADS=[
+  [[38.7148,-9.1415],[38.7200,-9.1458],[38.7253,-9.1500]],
+  [[38.7078,-9.1365],[38.7138,-9.1395],[38.7148,-9.1415]],
+  [[38.7068,-9.1250],[38.7068,-9.1300],[38.7066,-9.1400],[38.7055,-9.1500],[38.7048,-9.1650],[38.7030,-9.1750],[38.6985,-9.1900],[38.6968,-9.2050],[38.6940,-9.2200],[38.6965,-9.2500]],
+  [[38.7253,-9.1500],[38.7300,-9.1478],[38.7345,-9.1450],[38.7420,-9.1460],[38.7530,-9.1440],[38.7650,-9.1420]],
+  [[38.7160,-9.1370],[38.7250,-9.1350],[38.7365,-9.1335],[38.7480,-9.1310]],
+  [[38.7040,-9.1775],[38.6790,-9.1765],[38.6700,-9.1760]],
+  [[38.7060,-9.1770],[38.7200,-9.1720],[38.7330,-9.1700],[38.7420,-9.1680]],
+  [[38.7140,-9.1440],[38.7170,-9.1490],[38.7195,-9.1530],[38.7253,-9.1500]],
+  [[38.7253,-9.1500],[38.7345,-9.1560],[38.7420,-9.1640]],
+  [[38.7160,-9.1310],[38.7205,-9.1305],[38.7250,-9.1350]],
+  [[38.7066,-9.1300],[38.7110,-9.1310],[38.7160,-9.1310]]
+];
+const RAIL=[[38.7060,-9.1450],[38.7046,-9.1600],[38.7025,-9.1760],[38.6975,-9.1920],[38.6955,-9.2050],[38.6928,-9.2200],[38.6950,-9.2500]];
+const LABELS=[
+  ['Baixa',38.7112,-9.1380,''],['Alfama',38.7122,-9.1285,''],['Bairro Alto',38.7137,-9.1462,''],['Belém',38.6995,-9.2010,''],
+  ['Alcântara',38.7085,-9.1780,''],['Graça',38.7180,-9.1290,''],['Avenidas Novas',38.7400,-9.1480,''],['Estrela',38.7120,-9.1640,''],
+  ['Almada',38.6740,-9.1580,''],['Rio Tejo',38.6930,-9.1100,'water'],['Rio Tejo',38.6855,-9.2050,'water'],
+  ['Ponte 25 de Abril',38.6905,-9.1720,'small'],['Av. da Liberdade',38.7205,-9.1435,'small'],['Av. Almirante Reis',38.7290,-9.1315,'small']
+];
+function inPoly(lat,lng,poly){let c=false;for(let i=0,j=poly.length-1;i<poly.length;j=i++){const [yi,xi]=poly[i],[yj,xj]=poly[j];if(((yi>lat)!==(yj>lat))&&(lng<(xj-xi)*(lat-yi)/(yj-yi)+xi))c=!c}return c}
+const PARK_POLYS=PARKS.map(p=>p[2]);
+function hash(i,j,k){const x=Math.sin(i*127.1+j*311.7+k*74.7)*43758.5453;return x-Math.floor(x)}
+const LAT_STEP=0.0016,LNG_STEP=0.0021;
+function node(i,j){return [i*LAT_STEP+(hash(i,j,1)-.5)*.55*LAT_STEP,j*LNG_STEP+(hash(i,j,2)-.5)*.55*LNG_STEP]}
+function onLand(lat,lng){
+  if(lat<38.645||lat>38.80||lng<-9.26||lng>-9.06)return false;
+  if(inPoly(lat,lng,WATER))return false;
+  for(const p of PARK_POLYS)if(inPoly(lat,lng,p))return false;
+  return true;
+}
+const StreetGrid=L.GridLayer.extend({
+  createTile(coords){
+    const size=this.getTileSize(),dpr=Math.min(window.devicePixelRatio||1,2);
+    const c=document.createElement('canvas');c.width=size.x*dpr;c.height=size.y*dpr;
+    const z=coords.z;if(z<12)return c;
+    const ctx=c.getContext('2d');ctx.scale(dpr,dpr);
+    const nw=coords.scaleBy(size),m=this._map;
+    const a=m.unproject(nw,z),b=m.unproject(nw.add(size),z);
+    const toPx=(lat,lng)=>m.project([lat,lng],z).subtract(nw);
+    const i0=Math.floor(b.lat/LAT_STEP)-1,i1=Math.ceil(a.lat/LAT_STEP)+1,j0=Math.floor(a.lng/LNG_STEP)-1,j1=Math.ceil(b.lng/LNG_STEP)+1;
+    ctx.strokeStyle=cssVar('--street');ctx.lineCap='round';
+    ctx.lineWidth=z>=16?3:z>=15?2.4:z>=14?1.6:z>=13?1:.6;
+    ctx.globalAlpha=z>=13?1:.7;
+    ctx.beginPath();
+    for(let i=i0;i<=i1;i++)for(let j=j0;j<=j1;j++){
+      const p=node(i,j);
+      [[node(i,j+1),3],[node(i+1,j),4]].forEach(([q,k])=>{
+        if(hash(i,j,k)<.14)return;
+        const ml=(p[0]+q[0])/2,mg=(p[1]+q[1])/2;
+        if(!onLand(ml,mg))return;
+        const A=toPx(p[0],p[1]),B=toPx(q[0],q[1]);ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y);
+      });
+      if(z>=14&&hash(i,j,5)>.82){const q=node(i+1,j+1),ml=(p[0]+q[0])/2,mg=(p[1]+q[1])/2;
+        if(onLand(ml,mg)){const A=toPx(p[0],p[1]),B=toPx(q[0],q[1]);ctx.moveTo(A.x,A.y);ctx.lineTo(B.x,B.y)}}
+    }
+    ctx.stroke();
+    return c;
+  }
 });
-function fallback(){
-  if(fellBack)return;fellBack=true;
-  map.removeLayer(tiles);$('map').classList.add('sketch');sketch.addTo(map);
-  map.attributionControl.removeAttribution('&copy; OpenStreetMap contributors &copy; CARTO');
-  map.attributionControl.addAttribution('Sketch basemap. Live map tiles are blocked in this preview.');
+const illus=L.layerGroup();
+const streets=new StreetGrid({pane:'streets',maxZoom:19,attribution:'Illustrated map, not to scale'}).addTo(illus);
+L.polygon(WATER,{pane:'base',className:'bm-water',weight:1.5,interactive:false}).addTo(illus);
+PARKS.forEach(p=>L.polygon(p[2],{pane:'base',className:'bm-park',interactive:false}).addTo(illus));
+PLAZAS.forEach(p=>L.polygon(p,{pane:'base',className:'bm-plaza',weight:1,interactive:false}).addTo(illus));
+const rail=L.polyline(RAIL,{pane:'base',className:'bm-rail',weight:2,dashArray:'6 5',interactive:false}).addTo(illus);
+const roadPairs=ROADS.map(r=>[L.polyline(r,{pane:'base',className:'bm-road-c',interactive:false}).addTo(illus),null]);
+roadPairs.forEach((rp,k)=>{rp[1]=L.polyline(ROADS[k],{pane:'base',className:'bm-road',interactive:false}).addTo(illus)});
+PARKS.forEach(p=>{if(p[0])LABELS.push([p[0],p[1][0],p[1][1],'park'])});
+LABELS.forEach(([n,a,b,cls])=>L.marker([a,b],{pane:'baselabels',interactive:false,keyboard:false,icon:L.divIcon({className:'sk-label '+cls,html:esc(n),iconSize:null})}).addTo(illus));
+function styleRoads(){
+  const z=map.getZoom();
+  const cw=z>=16?13:z>=15?10:z>=14?7.5:z>=13?5.5:3.5,fw=cw-2.5;
+  roadPairs.forEach(([c,f])=>{c.setStyle({weight:cw,lineCap:'round',lineJoin:'round'});f.setStyle({weight:Math.max(fw,1.5),lineCap:'round',lineJoin:'round'})});
+  $('map').classList.toggle('zlow',z<14);
+}
+map.on('zoomend',styleRoads);styleRoads();
+const redrawStreets=()=>streets.redraw();
+try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawStreets)}catch(e){}
+new MutationObserver(redrawStreets).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
+
+const tiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'});
+let tileOk=false;
+tiles.on('tileload',()=>{tileOk=true});
+tiles.on('tileerror',()=>{if(!tileOk&&S.view.basemap==='street'){setBasemap('illustrated');toast('The live street map can’t load here, so you’re seeing the illustrated map. It works when you open the app in your own browser.')}});
+let toastT;
+function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},6000)}
+function setBasemap(kind){
+  S.view.basemap=kind;save();
+  if(kind==='street'){map.removeLayer(illus);tiles.addTo(map);setTimeout(()=>{if(!tileOk&&S.view.basemap==='street')tiles.fire('tileerror')},4500)}
+  else{map.removeLayer(tiles);illus.addTo(map)}
+  $('basesw').innerHTML=[['illustrated','Illustrated'],['street','Street']].map(([k,l])=>'<button data-act="basemap" data-kind="'+k+'" aria-pressed="'+(S.view.basemap===k)+'">'+l+'</button>').join('');
 }
 const routeLayer=L.layerGroup().addTo(map);
 const markerLayer=L.layerGroup().addTo(map);
@@ -415,7 +525,7 @@ function renderMap(){
 function fitVisible(){
   const pts=S.places.filter(visible).map(p=>[p.lat,p.lng]);
   if(pts.length===1)map.setView(pts[0],15);
-  else if(pts.length)map.fitBounds(pts,{padding:[50,50],maxZoom:16});
+  else if(pts.length)map.fitBounds(pts,{padding:[50,50],maxZoom:15});
 }
 map.on('popupopen',e=>{
   e.popup.getElement().querySelectorAll('[data-pact]').forEach(b=>b.addEventListener('click',()=>{
@@ -606,6 +716,7 @@ document.addEventListener('click',e=>{
   switch(a){
     case 'tab':ui.tab=b.dataset.tab;renderHead();renderPanel();break;
     case 'set-day':S.view.day=(S.view.day===b.dataset.day&&b.classList.contains('day-h'))?'all':b.dataset.day;save();renderPanel();renderBar();renderMap();fitVisible();break;
+    case 'basemap':setBasemap(b.dataset.kind);break;
     case 'toggle-main':S.view.mainOnly=!S.view.mainOnly;save();renderBar();renderMap();break;
     case 'toggle-tag':{const h=S.view.hidden,t=b.dataset.tag;S.view.hidden=h.includes(t)?h.filter(x=>x!==t):h.concat(t);save();renderBar();renderMap();break}
     case 'show-all-tags':S.view.hidden=[];save();renderBar();renderMap();break;
@@ -655,6 +766,7 @@ document.addEventListener('keydown',e=>{
 });
 
 if(!S.days.some(d=>d.id===S.view.day))S.view.day='all';
+setBasemap(S.view.basemap==='street'?'street':'illustrated');
 renderAll();fitVisible();
 })();
 </script>
