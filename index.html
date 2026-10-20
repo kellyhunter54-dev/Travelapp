@@ -485,12 +485,196 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .legb.sel{background:var(--dc);color:#fff}
 .legb.sel{scale:1.06}
 
+/* ---------- App shell: rail + pages ---------- */
+.app{grid-template-columns:76px minmax(320px,380px) minmax(0,1fr)}
+.rail{position:relative;display:flex;flex-direction:column;gap:6px;padding:10px 8px;background:var(--surface);border:1px solid var(--line);border-radius:14px;min-height:0;overflow:auto}
+.rail-logo{width:40px;height:40px;margin:2px auto 10px;border-radius:12px;background:var(--accent);color:var(--accent-fg);display:grid;place-items:center;flex:none}
+.rail-logo svg{width:22px;height:22px}
+.rail-items{display:flex;flex-direction:column;gap:4px}
+.rail-bottom{margin-top:auto;display:flex;flex-direction:column}
+.rail-btn{position:relative;z-index:1;display:flex;flex-direction:column;align-items:center;gap:3px;border:0;background:none;color:var(--muted);padding:8px 2px 7px;border-radius:10px;font-size:10.5px;font-weight:600;transition:color .2s ease}
+.rail-btn svg{width:21px;height:21px}
+.rail-btn:hover{color:var(--fg)}
+.rail-btn[aria-current="page"]{color:var(--accent)}
+.rail-ind{position:absolute;left:0;top:0;border-radius:10px;background:var(--accent-soft);transition:transform .38s var(--ease),width .38s var(--ease),height .38s var(--ease);z-index:0;pointer-events:none}
+.app.is-page .side,.app.is-page .mapcol{display:none}
+.page{grid-column:2 / -1;min-height:0;min-width:0;overflow:auto;background:var(--surface);border:1px solid var(--line);border-radius:14px}
+.pg{max-width:1040px;margin:0 auto;padding:30px 34px 56px;display:grid;gap:18px}
+.pg.pg-in>*{animation:riseIn .45s var(--ease) backwards;animation-delay:calc(var(--i,0)*55ms)}
+.pg-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.pg-head h1{font-size:34px;letter-spacing:-.015em;line-height:1.05;margin-top:2px}
+.pg-sub{margin:8px 0 0;color:var(--muted);display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.pg-actions{display:flex;gap:8px;flex-wrap:wrap}
+.card{border:1px solid var(--line);border-radius:14px;padding:18px;background:var(--surface);min-width:0}
+.card-h{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}
+.card-h h2{font-size:17px}
+.muted{color:var(--muted);font-size:13px;margin:0}
+.cols{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.cd{font-size:12px;font-weight:600;padding:3px 10px;border-radius:999px;background:var(--accent-soft);color:var(--fg)}
+.cd.past{background:var(--surface-2);color:var(--muted)}
+.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.stat{border:1px solid var(--line);border-radius:14px;padding:14px 16px;display:grid;gap:2px;background:var(--surface-2);min-width:0}
+.stat-l{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.stat-v{font-family:var(--f-display);font-size:28px;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
+.stat-s{font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.route-strip{display:flex;align-items:stretch;overflow-x:auto;padding:2px 2px 6px}
+.rcity{flex:1 1 0;min-width:160px;display:grid;gap:3px;align-content:start;text-align:left;border:1px solid var(--line);background:var(--surface-2);border-radius:12px;padding:12px 14px;transition:border-color .2s ease,translate .2s ease}
+.rcity:hover{border-color:var(--accent);translate:0 -2px}
+.rc-n{font-family:var(--f-display);font-weight:700;font-size:19px}
+.rc-d,.rc-h{font-size:12.5px;color:var(--muted)}
+.rc-h{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rc-dots{display:flex;gap:4px;margin-top:4px}
+.rc-dots i{width:8px;height:8px;border-radius:50%;background:var(--dc)}
+.hop{flex:none;display:grid;place-items:center;align-content:center;gap:3px;padding:0 10px;color:var(--muted);position:relative;min-width:78px}
+.hop::before{content:"";position:absolute;left:0;right:0;top:50%;border-top:2px dashed var(--line)}
+.hop-m{position:relative;font-size:18px;background:var(--surface);padding:0 6px;line-height:1.2}
+.hop-t{position:relative;font-family:var(--f-mono);font-size:11.5px;background:var(--surface);padding:0 4px}
+.mini{list-style:none;margin:0;padding:0;display:grid;gap:10px}
+.mini li{display:flex;gap:10px;align-items:center;min-width:0}
+.mini-t{display:grid;min-width:0}
+.mini-t b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mini-t small{color:var(--muted);font-size:12.5px}
+.bico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex:none;background:color-mix(in srgb,var(--bc) 16%,var(--surface))}
+.prog{display:grid;gap:6px}
+.prog-bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.prog-bar i{display:block;height:100%;width:var(--w);background:var(--accent);border-radius:inherit;transform-origin:left;animation:barIn .7s var(--ease) backwards;transition:width .5s var(--ease)}
+.prog.big .prog-bar{height:14px}
+.prog-t{font-size:13px;color:var(--muted)}
+.bbar{display:grid;gap:8px}
+.bbar-track{position:relative;height:14px;border-radius:999px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
+.bbar-track i{position:absolute;top:0;bottom:0;left:var(--l,0);width:var(--w);transform-origin:left;animation:barIn .7s var(--ease) backwards}
+.bbar-track .paid{background:var(--accent)}
+.bbar-track .plan{background:color-mix(in srgb,var(--accent) 35%,var(--surface));animation-delay:.12s}
+.bbar-track .cap{width:2px;background:var(--danger)}
+.bbar.over .bbar-track .plan{background:color-mix(in srgb,var(--danger) 45%,var(--surface))}
+.bbar-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
+.bbar-legend span{display:flex;align-items:center;gap:6px}
+.sw{width:10px;height:10px;border-radius:3px;display:inline-block}
+.sw.paid{background:var(--accent)}
+.sw.plan{background:color-mix(in srgb,var(--accent) 35%,var(--surface))}
+.good{color:var(--accent)!important;font-weight:600}
+.bad{color:var(--danger)!important;font-weight:600}
+@keyframes barIn{from{transform:scaleX(0)}}
+.dtable{display:grid}
+.drow{display:grid;grid-template-columns:24px 128px minmax(0,1fr) auto 76px;gap:12px;align-items:center;border:0;background:none;text-align:left;padding:10px 6px;border-top:1px solid var(--line);font-size:13.5px;border-radius:8px;transition:background-color .15s ease}
+.drow:first-child{border-top:0}
+.drow:hover{background:var(--surface-2)}
+.dr-d{display:grid}
+.dr-d small{color:var(--muted)}
+.dr-s{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.dr-s i{color:var(--muted)}
+.dr-t,.dr-m{font-family:var(--f-mono);font-size:12px;color:var(--muted);white-space:nowrap;text-align:right}
+.bgroup{display:grid;gap:8px}
+.bg-h{display:flex;align-items:center;gap:8px;font-size:14px;font-family:var(--f-body);font-weight:700;margin:6px 0 0}
+.bg-h .dot{width:10px;height:10px;box-shadow:none}
+.blist{display:grid;gap:8px}
+.bk{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:12px 10px 12px 14px;background:var(--surface);min-width:0}
+.bk-main{flex:1;min-width:0;display:grid;gap:3px}
+.bk-top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap}
+.bk-top b{font-weight:600;font-size:14.5px}
+.bk-type{font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);font-weight:600}
+.bk-meta{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:13px;color:var(--muted)}
+.mono{font-family:var(--f-mono)}
+.code{display:inline-flex;align-items:center;gap:6px;border:1px dashed var(--line);background:var(--surface-2);border-radius:8px;padding:5px 8px;font-size:12.5px;color:var(--fg);flex:none;transition:border-color .15s ease}
+.code svg{width:14px;height:14px;color:var(--muted)}
+.code:hover{border-color:var(--accent)}
+.bsum{display:grid;grid-template-columns:1.3fr repeat(3,1fr);gap:14px;margin-bottom:16px;align-items:end}
+.bset{display:grid;gap:6px}
+.bset>span:first-child,.bnum span{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
+.bnum{display:grid;gap:4px}
+.bnum b{font-family:var(--f-display);font-size:24px;font-weight:700;font-variant-numeric:tabular-nums}
+.money-in .inp{font-family:var(--f-display);font-size:20px;font-weight:700;padding:6px 10px}
+.hbars{display:grid;gap:10px}
+.hb{display:grid;grid-template-columns:150px minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:13.5px}
+.hb-l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hb-t{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
+.hb-t i{display:block;height:100%;width:var(--w);background:var(--bc);border-radius:inherit;transform-origin:left;animation:barIn .7s var(--ease) backwards}
+.hb-v{font-family:var(--f-mono);font-size:12.5px;text-align:right}
+.xlist{display:grid}
+.xr{display:flex;align-items:center;gap:12px;padding:10px 4px;border-top:1px solid var(--line)}
+.xr:first-child{border-top:0}
+.xr-main{flex:1;min-width:0;display:grid;border:0;background:none;text-align:left;padding:0}
+.xr-main b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xr-main small{color:var(--muted);font-size:12.5px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xr-v{font-family:var(--f-mono);font-size:13.5px;min-width:74px;text-align:right;font-variant-numeric:tabular-nums}
+.status{border:0;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:600;flex:none;transition:background-color .2s ease,color .2s ease}
+.status.paid{background:var(--accent-soft);color:var(--fg)}
+.status.plan{background:var(--surface-2);color:var(--muted);box-shadow:inset 0 0 0 1px var(--line)}
+.packgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;align-items:start}
+.checks{list-style:none;margin:0 0 10px;padding:0;display:grid;gap:2px}
+.ckrow{display:flex;align-items:center;border-radius:8px;transition:background-color .15s ease}
+.ckrow:hover{background:var(--surface-2)}
+.ck{flex:1;display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:7px 6px;min-width:0}
+.box{width:20px;height:20px;border-radius:6px;box-shadow:inset 0 0 0 1.75px var(--line);display:grid;place-items:center;flex:none;transition:background-color .2s ease,box-shadow .2s ease,scale .25s var(--spring)}
+.box svg{width:14px;height:14px;fill:none;stroke:var(--accent-fg);stroke-width:2.2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:16;stroke-dashoffset:16;transition:stroke-dashoffset .3s var(--ease) .05s}
+.ck:active .box{scale:.88}
+.ckrow.done .box{background:var(--accent);box-shadow:none}
+.ckrow.done .box svg{stroke-dashoffset:0}
+.ck-t{transition:color .2s ease;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.ckrow.done .ck-t{color:var(--muted);text-decoration:line-through}
+.xdel{opacity:0;width:26px;height:26px;font-size:12px}
+.ckrow:hover .xdel,.xdel:focus-visible{opacity:1}
+@media (hover:none){.xdel{opacity:.5}}
+.addk{font-size:13px;padding:7px 10px}
+.notes .note{min-height:360px;resize:vertical;line-height:1.55}
+.saved{font-size:12px;font-weight:600;color:var(--accent)}
+.saved.pop{animation:fadeIn .25s ease}
+.tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
+.tcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column;text-align:left;transition:translate .2s ease,box-shadow .2s ease}
+.tcard:hover{translate:0 -2px;box-shadow:var(--shadow)}
+.tcard.cur{box-shadow:0 0 0 2px var(--accent)}
+.tc-strip{display:flex;height:8px}
+.tc-strip i{flex:1}
+.tc-body{padding:14px 16px 16px;display:grid;gap:4px}
+.tc-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.tc-top h3{font-size:19px}
+.badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--accent-soft);white-space:nowrap}
+.tc-d,.tc-c,.tc-s{margin:0;font-size:13px;color:var(--muted)}
+.tc-c{color:var(--fg)}
+.tc-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tnew{align-items:center;justify-content:center;gap:8px;min-height:180px;border-style:dashed;color:var(--muted);font-weight:600;background:transparent}
+.tnew-plus{font-size:28px;line-height:1}
+.tnew:hover{color:var(--accent);border-color:var(--accent)}
+.set{display:grid}
+.srow{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:12px 0;border-top:1px solid var(--line);font-weight:500}
+.set .card-h+.srow,.set .muted+.srow{border-top:0}
+.set .muted{margin-bottom:6px}
+.srow .inp{max-width:280px}
+.srow.col{flex-direction:column;align-items:stretch;gap:8px}
+.srow.col .inp{max-width:none}
+.srow.col textarea{min-height:80px;font-family:var(--f-mono);font-size:12px}
+.sseg{display:inline-flex;flex-wrap:wrap;gap:2px;padding:3px;background:var(--surface-2);border-radius:10px;box-shadow:inset 0 0 0 1px var(--line)}
+.sseg button{border:0;background:none;border-radius:7px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--muted);transition:background-color .18s ease,color .18s ease,box-shadow .18s ease}
+.sseg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
+.gtoast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:7000;background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:10px;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
+.gtoast:not([hidden]){animation:gIn .3s var(--spring) both}
+@keyframes gIn{from{opacity:0;transform:translate(-50%,10px)}}
+@media (max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bsum{grid-template-columns:1fr 1fr}}
+@media (max-width:820px){
+  body{padding-bottom:calc(88px + env(safe-area-inset-bottom,0px))}
+  .rail{position:fixed;left:0;right:0;bottom:0;z-index:3000;flex-direction:row;border-radius:0;border:0;border-top:1px solid var(--line);padding:6px max(8px,env(safe-area-inset-right,0px)) calc(6px + env(safe-area-inset-bottom,0px)) max(8px,env(safe-area-inset-left,0px));overflow-x:auto;gap:2px;box-shadow:0 -4px 16px rgba(0,0,0,.06)}
+  .rail-logo{display:none}
+  .rail-items,.rail-bottom{flex-direction:row;gap:2px;margin:0}
+  .rail-btn{min-width:66px;flex:none}
+  .page{border-radius:14px}
+  .pg{padding:20px 16px 36px;gap:14px}
+  .pg-head h1{font-size:28px}
+  .cols,.packgrid{grid-template-columns:1fr}
+  .drow{grid-template-columns:24px minmax(0,1fr) auto}
+  .dr-s,.dr-m{display:none}
+  .hb{grid-template-columns:110px minmax(0,1fr) 72px}
+  .srow{flex-wrap:wrap}
+  .gtoast{bottom:calc(92px + env(safe-area-inset-bottom,0px))}
+  .bk{flex-wrap:wrap}
+}
+
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 
-<div class="app">
+<div class="app" id="app">
+  <nav class="rail" id="rail" aria-label="Sections"></nav>
   <aside class="side" aria-label="Trip">
     <div class="side-head">
       <div class="eyebrow">Trip plan</div>
@@ -528,7 +712,9 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
       </div>
     </div>
   </main>
+  <section class="page" id="page" hidden></section>
 </div>
+<div class="gtoast" id="gtoast" role="status" hidden></div>
 
 <div class="dlg" id="dlg" hidden><div class="dlg-card" id="dlg-card" role="dialog" aria-modal="true"></div></div>
 
@@ -644,13 +830,109 @@ function sample(){
     view:{day:'all',mainOnly:false,hidden:[],basemap:'illustrated',collapsed:[]}
   };
 }
-function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.places)&&Array.isArray(s.tags)&&Array.isArray(s.days))return s}catch(e){}return null}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+/* ================== App sections: rail, overview, bookings, budget, packing, notes, trips, settings ================== */
+const CATS=[
+  {id:'lodging',label:'Lodging',icon:'🛏️',color:'#6366F1'},
+  {id:'transport',label:'Transport',icon:'🚆',color:'#0EA5E9'},
+  {id:'food',label:'Food & drink',icon:'🍽️',color:'#F97316'},
+  {id:'activities',label:'Activities',icon:'🎟️',color:'#A855F7'},
+  {id:'shopping',label:'Shopping',icon:'🛍️',color:'#EC4899'},
+  {id:'other',label:'Other',icon:'🧾',color:'#64748B'}
+];
+const BTYPES=[
+  {id:'flight',label:'Flight',icon:'✈️',color:'#0EA5E9'},
+  {id:'train',label:'Train or bus',icon:'🚆',color:'#14B8A6'},
+  {id:'tickets',label:'Tickets',icon:'🎟️',color:'#A855F7'},
+  {id:'table',label:'Restaurant',icon:'🍽️',color:'#F97316'},
+  {id:'car',label:'Car rental',icon:'🚗',color:'#64748B'},
+  {id:'other',label:'Other',icon:'📌',color:'#64748B'}
+];
+const catOf=id=>CATS.find(c=>c.id===id)||CATS[CATS.length-1];
+const btOf=id=>BTYPES.find(c=>c.id===id)||BTYPES[BTYPES.length-1];
+const VIEWS=[
+  {id:'overview',label:'Overview',svg:'<path d="M3.5 3.5h5.5v5.5H3.5zM11 3.5h5.5v5.5H11zM3.5 11h5.5v5.5H3.5zM11 11h5.5v5.5H11z"/>'},
+  {id:'plan',label:'Itinerary',svg:'<path d="M5 16.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM15 7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M5 12.5V9a3 3 0 0 1 3-3h1.5M15 7.5V11a3 3 0 0 1-3 3h-1.5"/>'},
+  {id:'bookings',label:'Bookings',svg:'<path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 17 6.5v2a1.75 1.75 0 0 0 0 3.5v2a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 14v-2a1.75 1.75 0 0 0 0-3.5z"/><path d="M12 5v2M12 9.25v1.5M12 13v2" stroke-dasharray="0"/>'},
+  {id:'budget',label:'Budget',svg:'<path d="M3.5 6.5A1.5 1.5 0 0 1 5 5h10a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 15 16H5a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M16.5 9h-3a1.5 1.5 0 0 0 0 3h3M5.5 5l7-2 1 2"/>'},
+  {id:'packing',label:'Packing',svg:'<path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h9A1.5 1.5 0 0 1 16 7.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 14.5z"/><path d="M7.5 6V4.5A1.5 1.5 0 0 1 9 3h2a1.5 1.5 0 0 1 1.5 1.5V6M4 10.5h12"/>'},
+  {id:'notes',label:'Notes',svg:'<path d="M5.5 3h6.5l3.5 3.5v9A1.5 1.5 0 0 1 14 17H5.5A1.5 1.5 0 0 1 4 15.5v-11A1.5 1.5 0 0 1 5.5 3z"/><path d="M11.5 3v4h4M7 10.5h6M7 13.5h4"/>'},
+  {id:'trips',label:'All trips',svg:'<path d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="M3.3 8h13.4M3.3 12h13.4M10 3c-2 2.2-2.8 4.5-2.8 7s.8 4.8 2.8 7c2-2.2 2.8-4.5 2.8-7S12 5.2 10 3z"/>'},
+  {id:'settings',label:'Settings',svg:'<path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M16.2 12.2l.9 1.5-1.6 2.7-1.7-.1a6 6 0 0 1-1.5.9L11.5 18.6h-3l-.8-1.6a6 6 0 0 1-1.5-.9l-1.7.1-1.6-2.7.9-1.5a6 6 0 0 1 0-1.8l-.9-1.5 1.6-2.7 1.7.1a6 6 0 0 1 1.5-.9L8.5 1.4h3l.8 1.6a6 6 0 0 1 1.5.9l1.7-.1 1.6 2.7-.9 1.5a6 6 0 0 1 0 1.8z"/>'}
+];
+const ico=svg=>'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+svg+'</svg>';
+const money=n=>{try{return new Intl.NumberFormat('en-US',{style:'currency',currency:SET.currency||'EUR',maximumFractionDigits:0}).format(n||0)}catch(e){return Math.round(n||0)+' '+SET.currency}};
+const PACK_TEMPLATE={
+  'Documents':['Passport','Travel insurance details','Booking confirmations','Credit cards','Some local cash'],
+  'Clothes':['Walking shoes','T-shirts','Long pants','Light jacket','Sweater','Socks and underwear','Sleepwear','Something nice for dinner'],
+  'Toiletries':['Toothbrush and toothpaste','Shampoo','Deodorant','Sunscreen'],
+  'Tech':['Phone charger','Power bank','Plug adapter','Headphones'],
+  'Health':['Medications','Pain relievers','Band-aids','Hand sanitizer'],
+  'Extras':['Day bag','Reusable water bottle','Sunglasses','Umbrella']
+};
+function packFromTemplate(done){const out=[];Object.keys(PACK_TEMPLATE).forEach(cat=>PACK_TEMPLATE[cat].forEach(t=>out.push({id:'k'+Math.random().toString(36).slice(2,9),cat,text:t,done:(done||[]).includes(t)})));return out}
+function sampleExtras(t){
+  t.budget=5000;
+  t.expenses=[
+    {id:'e1',title:'Flights to Lisbon',cat:'transport',day:'before',amount:840,paid:true},
+    {id:'e2',title:'Hotel Avenida Palace (2 nights)',cat:'lodging',day:'d1',amount:420,paid:true},
+    {id:'e3',title:'Altis Belém Hotel (2 nights)',cat:'lodging',day:'d2',amount:360,paid:true},
+    {id:'e10',title:'Clube de Fado dinner',cat:'food',day:'d3',amount:120,paid:false},
+    {id:'e4',title:'Train Lisbon to Porto',cat:'transport',day:'d4',amount:64,paid:true},
+    {id:'e5',title:'Pestana Vintage Porto (3 nights)',cat:'lodging',day:'d4',amount:555,paid:true},
+    {id:'e9',title:'Livraria Lello tickets',cat:'activities',day:'d4',amount:20,paid:true},
+    {id:'e11',title:'Graham’s tasting tour',cat:'activities',day:'d5',amount:50,paid:true},
+    {id:'e6',title:'Flight Porto to Madrid',cat:'transport',day:'d7',amount:98,paid:true},
+    {id:'e7',title:'Hotel Regina (3 nights)',cat:'lodging',day:'d7',amount:480,paid:false},
+    {id:'e12',title:'Prado tickets',cat:'activities',day:'d8',amount:30,paid:false},
+    {id:'e13',title:'Sobrino de Botín dinner',cat:'food',day:'d8',amount:110,paid:false},
+    {id:'e8',title:'Flights home',cat:'transport',day:'after',amount:690,paid:true},
+    {id:'e14',title:'Food and drinks (daily estimate)',cat:'food',day:'',amount:540,paid:false},
+    {id:'e15',title:'Souvenirs',cat:'shopping',day:'',amount:150,paid:false}
+  ];
+  t.bookings=[
+    {id:'b1',type:'flight',title:'Flight to Lisbon',day:'before',time:'18:40',code:'TP8KQ2ZL',notes:'Lands the next morning. One checked bag each.'},
+    {id:'b2',type:'table',title:'Clube de Fado',day:'d3',time:'20:00',code:'CDF-1142',notes:'Table for 2, fado starts 9 pm.'},
+    {id:'b3',type:'train',title:'Alfa Pendular, Lisbon to Porto',day:'d4',time:'08:39',code:'CP3XW7D',notes:'Car 3, seats 41 and 42. From Santa Apolónia.'},
+    {id:'b4',type:'tickets',title:'Livraria Lello',day:'d4',time:'13:00',code:'LL-55821',notes:''},
+    {id:'b5',type:'tickets',title:'Graham’s tasting tour',day:'d5',time:'16:00',code:'GRH-2207',notes:''},
+    {id:'b6',type:'flight',title:'Flight Porto to Madrid',day:'d7',time:'09:35',code:'IB7HZ4QA',notes:'Carry-on only.'},
+    {id:'b7',type:'tickets',title:'Museo del Prado',day:'d8',time:'10:00',code:'MP-99102',notes:''},
+    {id:'b8',type:'table',title:'Sobrino de Botín',day:'d8',time:'21:00',code:'SB4471',notes:'Ask for the cellar room.'},
+    {id:'b9',type:'flight',title:'Flight home',day:'after',time:'11:20',code:'TP8KQ2ZL',notes:''}
+  ];
+  t.packing=packFromTemplate(['Passport','Travel insurance details','Booking confirmations','Plug adapter','Walking shoes','Power bank']);
+  t.notes='Ideas\n- Ride Tram 28 early, before the crowds\n- Try a francesinha in Porto\n- Tapas crawl around La Latina\n\nTo do\n- Download offline maps\n- Let the bank know we’re travelling';
+  t.info='Emergency number: 112 (Portugal and Spain)\nTravel insurance: policy TI-4482910, 24 h line on the card\nPlugs: type F, 230 V';
+  return t;
+}
+function normalize(t){
+  if(!Array.isArray(t.stays))t.stays=[];
+  if(!Array.isArray(t.cities)||!t.cities.length){t.cities=[{id:'c1',name:t.trip.name||'My trip'}];t.days.forEach(d=>{d.city='c1'})}
+  t.days.forEach(d=>{if(!t.cities.some(c=>c.id===d.city))d.city=t.cities[0].id;if(!d.start)d.start='09:00'});
+  t.places.forEach(p=>{if(p.stay==null)p.stay=60});
+  if(!t.view)t.view={day:'all',mainOnly:false,hidden:[],basemap:SET.map||'illustrated',collapsed:[]};
+  if(!Array.isArray(t.view.collapsed))t.view.collapsed=[];
+  if(!Array.isArray(t.view.hidden))t.view.hidden=[];
+  if(!Array.isArray(t.expenses))t.expenses=[];
+  if(!Array.isArray(t.bookings))t.bookings=[];
+  if(!Array.isArray(t.packing))t.packing=packFromTemplate([]);
+  if(typeof t.budget!=='number')t.budget=0;
+  if(typeof t.notes!=='string')t.notes='';
+  if(typeof t.info!=='string')t.info='';
+  if(!t.id)t.id='trip'+Math.random().toString(36).slice(2,9);
+  return t;
+}
 
-let S=load()||sample();
-if(!Array.isArray(S.stays))S.stays=[];
-if(!Array.isArray(S.cities)||!S.cities.length){S.cities=[{id:'c1',name:S.trip.name||'My trip'}];S.days.forEach(d=>{d.city='c1'})}
-S.days.forEach(d=>{if(!S.cities.some(c=>c.id===d.city))d.city=S.cities[0].id});S.places.forEach(p=>{if(p.stay==null)p.stay=60});S.days.forEach(d=>{if(!d.start)d.start='09:00'});
+const TKEY='waypoint-trips-v1',SKEY='waypoint-settings-v1';
+let SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'plan',map:'illustrated'};
+try{Object.assign(SET,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){}
+function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){}}
+function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.places)&&Array.isArray(s.tags)&&Array.isArray(s.days))return s}catch(e){}return null}
+let STORE=null;try{STORE=JSON.parse(localStorage.getItem(TKEY))}catch(e){}
+if(!STORE||!STORE.trips||!Object.keys(STORE.trips).length){const t=load()||sampleExtras(sample());normalize(t);STORE={current:t.id,trips:{[t.id]:t}}}
+let S=STORE.trips[STORE.current]||STORE.trips[Object.keys(STORE.trips)[0]];
+normalize(S);
+function save(){try{STORE.trips[S.id]=S;STORE.current=S.id;localStorage.setItem(TKEY,JSON.stringify(STORE))}catch(e){}}
 const ui={open:null,tab:'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
 const reduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
 const EASE='cubic-bezier(.2,.8,.2,1)';
@@ -985,9 +1267,9 @@ function legRoute(a,b,mode){
 const legMode=(a,b)=>{if(b.mode&&MODES[b.mode])return b.mode;const d=km([a.lat,a.lng],[b.lat,b.lng]);return d>400?'plane':d>2?'transit':'walk'};
 const minsFor=(mode,d)=>{const m=MODES[mode];let kmh=m.kmh,extra=m.extra;if(d>30){if(mode==='transit'){kmh=110;extra=30}else if(mode==='car'){kmh=90;extra=10}}return Math.max(1,Math.round(d/kmh*60+(d>0.05?extra:0)))};
 const toMin=s=>{const [h,m]=String(s||'09:00').split(':').map(Number);return (h||0)*60+(m||0)};
-const clock=m=>{m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60;return ((h%12)||12)+':'+String(mm).padStart(2,'0')+(h<12?' am':' pm')};
+const clock=m=>{m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60;if(SET.clock==='24')return String(h).padStart(2,'0')+':'+String(mm).padStart(2,'0');return ((h%12)||12)+':'+String(mm).padStart(2,'0')+(h<12?' am':' pm')};
 const dur=m=>m<60?m+' min':Math.floor(m/60)+' h'+(m%60?' '+(m%60)+' min':'');
-const fmtKm=d=>d<1?Math.max(10,Math.round(d*100)*10)+' m':d.toFixed(1)+' km';
+const fmtKm=d=>{if(SET.units==='mi'){const mi=d*.621371;return mi<.1?Math.max(10,Math.round(d*3280.84/10)*10)+' ft':(mi<100?mi.toFixed(1):Math.round(mi).toLocaleString('en-US'))+' mi'}return d<1?Math.max(10,Math.round(d*100)*10)+' m':(d<100?d.toFixed(1):Math.round(d).toLocaleString('en-US'))+' km'};
 // Travel between days: last stop of the previous day to the first stop of this day
 const stayForNight=n=>(S.stays||[]).find(s=>s.ci<=n&&n<s.co)||null;
 function hotelLeg(dayId,part){
@@ -1472,7 +1754,7 @@ function renderBar(){
     (v.hidden.length?'<button class="linkbtn" data-act="show-all-tags">Show all tags</button>':'');
 }
 function renderAll(){renderHead();renderPanel();renderBar();renderMap()}
-function commit(){if(qm&&qm.el)closeQuick(true);save();renderAll()}
+function commit(){if(qm&&qm.el)closeQuick(true);save();renderAll();if(SET.view!=='plan')renderPage(false)}
 
 /* ---------- Dialogs ---------- */
 function openDlg(html){ui.dlgSeq++;$('dlg').classList.remove('closing');$('dlg-card').innerHTML=html;$('dlg').hidden=false;const f=$('dlg-card').querySelector('input,textarea');if(f)setTimeout(()=>f.focus(),30)}
@@ -1736,7 +2018,7 @@ document.addEventListener('click',e=>{
     case 'remove-day':{const d=b.dataset.day;removeDayAt(dayIdx(d));if(S.view.day===d)S.view.day='all';commit();break}
     case 'reset':
       if(ui.armed!=='reset'){ui.armed='reset';renderPanel();break}
-      ui.armed=null;S=sample();ui.tab='plan';ui.open=null;ui.anim.tab=true;$('panel').classList.remove('hide-travel');commit();fitVisible(true);break;
+      ui.armed=null;{const id=S.id;S=normalize(sampleExtras(sample()));S.id=id;STORE.trips[id]=S}ui.tab='plan';ui.open=null;ui.anim.tab=true;$('panel').classList.remove('hide-travel');commit();fitVisible(true);break;
     case 'new-tag':openTag(null);break;
     case 'edit-tag':openTag(S.tags.find(t=>t.id===b.dataset.tag));break;
     case 'new-tag-from-place':{const back={form:Object.assign({},ui.form),name:$('f-name').value,notes:$('f-notes').value,day:$('f-day').value||null,stay:$('f-stay').value};openTag(null,back);break}
@@ -1891,10 +2173,370 @@ document.addEventListener('touchmove',e=>{if(drag.st&&drag.st.active)e.preventDe
 document.addEventListener('contextmenu',e=>{if(drag.st)e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(e.target.closest&&e.target.closest('#panel'))e.preventDefault()});
 
+/* ---------- small helpers ---------- */
+let gtT;
+function gtoast(msg){const t=$('gtoast');t.textContent=msg;t.hidden=false;clearTimeout(gtT);gtT=setTimeout(()=>{t.hidden=true},2600)}
+function copyText(txt,msg){
+  const done=()=>gtoast(msg||'Copied');
+  try{navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done))}catch(e){fallbackCopy(txt,done)}
+}
+function fallbackCopy(txt,done){const ta=document.createElement('textarea');ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');done()}catch(e){gtoast('Select the text and copy it')}ta.remove()}
+const dayLabel=v=>{if(v==='before')return 'Before the trip';if(v==='after')return 'After the trip';if(!v)return 'Whole trip';const i=dayIdx(v);if(i<0)return 'Whole trip';const c=cityOf(v);return 'Day '+(i+1)+' · '+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+(c?' · '+c.name:'')};
+const dayOrder=v=>v==='before'?-1:v==='after'?1e4:!v?2e4:dayIdx(v);
+function dayOptions(sel,withAll){
+  let o=(withAll?'<option value=""'+(!sel?' selected':'')+'>Whole trip</option>':'')+'<option value="before"'+(sel==='before'?' selected':'')+'>Before the trip</option>';
+  S.cities.forEach(c=>{o+='<optgroup label="'+esc(c.name)+'">'+cityDays(c.id).map(d=>{const i=dayIdx(d.id);return '<option value="'+d.id+'"'+(sel===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</option>'}).join('')+'</optgroup>'});
+  return o+'<option value="after"'+(sel==='after'?' selected':'')+'>After the trip</option>';
+}
+const clock24=s=>{if(!s)return '';const [h,m]=s.split(':').map(Number);return clock(h*60+m)};
+function tripStats(){
+  let km=0,min=0;const byMode={};
+  const add=lg=>{if(!lg)return;km+=lg.km;min+=lg.min;byMode[lg.mode]=(byMode[lg.mode]||0)+lg.km};
+  S.days.forEach(d=>{const pl=dayPlan(d.id);pl.forEach(x=>add(x.leg));add(pl.tin);add(pl.tout);add(pl.morning);add(pl.evening)});
+  return {km,min,byMode};
+}
+function budgetStats(){
+  const paid=S.expenses.filter(e=>e.paid).reduce((a,e)=>a+(+e.amount||0),0),planned=S.expenses.filter(e=>!e.paid).reduce((a,e)=>a+(+e.amount||0),0);
+  return {paid,planned,total:paid+planned,budget:S.budget||0};
+}
+function countdown(){
+  const today=new Date();today.setHours(12,0,0,0);const start=dayDate(0),end=dayDate(S.days.length-1);
+  const dd=Math.round((start-today)/864e5);
+  if(dd>1)return {txt:'Starts in '+dd+' days',cls:'soon'};
+  if(dd===1)return {txt:'Starts tomorrow',cls:'soon'};
+  const de=Math.round((end-today)/864e5);
+  if(de>=0)return {txt:'Day '+(1-dd)+' of '+S.days.length,cls:'now'};
+  return {txt:'Trip ended',cls:'past'};
+}
+const tripRange=t=>{const a=new Date(t.trip.start+'T12:00:00'),b=new Date(t.trip.start+'T12:00:00');b.setDate(b.getDate()+t.days.length-1);const o={month:'short',day:'numeric'};return fmt(a,o)+(t.days.length>1?' to '+fmt(b,a.getFullYear()===b.getFullYear()?o:{month:'short',day:'numeric',year:'numeric'}):'')+', '+b.getFullYear()};
+
+/* ---------- rail ---------- */
+function renderRail(){
+  const v=SET.view;
+  const btn=x=>'<button class="rail-btn" data-act="view" data-view="'+x.id+'"'+(v===x.id?' aria-current="page"':'')+' title="'+x.label+'">'+ico(x.svg)+'<span>'+x.label+'</span></button>';
+  $('rail').innerHTML='<div class="rail-logo" aria-hidden="true">'+ico('<path d="M10 17.5s5.5-5 5.5-9.5a5.5 5.5 0 1 0-11 0c0 4.5 5.5 9.5 5.5 9.5z"/><circle cx="10" cy="8" r="2"/>')+'</div><div class="rail-items" id="rail-items">'+VIEWS.filter(x=>x.id!=='settings').map(btn).join('')+'</div><div class="rail-bottom">'+btn(VIEWS[VIEWS.length-1])+'</div>';
+  railInd();
+}
+function railInd(){
+  const rail=$('rail'),on=rail.querySelector('[aria-current="page"]');let ind=rail.querySelector('.rail-ind');
+  if(!ind){ind=document.createElement('span');ind.className='rail-ind';rail.prepend(ind)}
+  if(!on){ind.style.opacity='0';return}
+  const r=on.getBoundingClientRect(),rr=rail.getBoundingClientRect(),to={x:r.left-rr.left+rail.scrollLeft,y:r.top-rr.top+rail.scrollTop,w:r.width,h:r.height},from=ui.railPos||to;
+  ind.style.opacity='1';ind.style.width=from.w+'px';ind.style.height=from.h+'px';ind.style.transform='translate('+from.x+'px,'+from.y+'px)';
+  ui.railPos=to;
+  if(from===to||reduced)return;
+  requestAnimationFrame(()=>requestAnimationFrame(()=>{ind.style.width=to.w+'px';ind.style.height=to.h+'px';ind.style.transform='translate('+to.x+'px,'+to.y+'px)'}));
+}
+function setView(v){
+  if(!VIEWS.some(x=>x.id===v))v='plan';
+  const was=SET.view;SET.view=v;saveSet();
+  closeQuick&&qm.el&&closeQuick(true);if(ui.placing)setPlacing(false);
+  const page=v!=='plan';
+  $('app').classList.toggle('is-page',page);$('page').hidden=!page;
+  renderRail();
+  if(page){renderPage(true);$('page').scrollTop=0}
+  else if(was!=='plan'){setTimeout(()=>{map.invalidateSize();renderRoutes()},0);ui.anim.tab=true;renderAll()}
+}
+
+/* ---------- pages ---------- */
+function pageHead(title,sub,actions,eyebrow){
+  return '<header class="pg-head"><div class="pg-titles"><div class="eyebrow">'+(eyebrow||esc(S.trip.name))+'</div><h1>'+title+'</h1>'+(sub?'<p class="pg-sub">'+sub+'</p>':'')+'</div>'+(actions?'<div class="pg-actions">'+actions+'</div>':'')+'</header>';
+}
+function renderPage(anim){
+  const v=SET.view,el=$('page'),f={overview:pgOverview,bookings:pgBookings,budget:pgBudget,packing:pgPacking,notes:pgNotes,trips:pgTrips,settings:pgSettings}[v];
+  if(!f)return;
+  const st=el.scrollTop,ae=document.activeElement,aid=ae&&ae.id;
+  el.innerHTML='<div class="pg'+(anim&&!reduced?' pg-in':'')+'">'+f()+'</div>';
+  if(anim&&!reduced)Array.from(el.firstChild.children).forEach((c,i)=>c.style.setProperty('--i',Math.min(i,8)));
+  if(!anim)el.scrollTop=st;
+  if(aid&&!anim){const n=$(aid);if(n&&n.focus){n.focus({preventScroll:true});if(n.setSelectionRange&&typeof n.value==='string'){try{const L=n.value.length;n.setSelectionRange(L,L)}catch(e){}}}}
+}
+
+function pgOverview(){
+  const cd=countdown(),ts=tripStats(),bs=budgetStats(),stops=S.places.filter(p=>p.main&&!p.stayRef).length,extrasN=S.places.filter(p=>!p.main).length;
+  const packed=S.packing.filter(k=>k.done).length;
+  const n=S.days.length,o={month:'short',day:'numeric'};
+  let h=pageHead(esc(S.trip.name),fmt(dayDate(0),o)+' to '+fmt(dayDate(n-1),{month:'short',day:'numeric',year:'numeric'})+' <span class="cd '+cd.cls+'">'+cd.txt+'</span>',
+    '<button class="btn primary" data-act="view" data-view="plan">Open itinerary</button>','Trip overview');
+  const modes=Object.keys(ts.byMode).sort((a,b)=>ts.byMode[b]-ts.byMode[a]).slice(0,2).map(m=>MODES[m].icon+' '+fmtKm(ts.byMode[m])).join(' · ');
+  h+='<section class="stats">'+
+    stat('Days',n,S.cities.length+' cit'+(S.cities.length===1?'y':'ies'))+
+    stat('Stops',stops,extrasN+' extra'+(extrasN===1?'':'s')+' saved')+
+    stat('Distance',fmtKm(ts.km),modes||'No travel yet')+
+    stat('Getting around',dur(Math.round(ts.min)),'about '+dur(Math.round(ts.min/Math.max(1,n)))+' a day')+
+    '</section>';
+  // route across cities
+  h+='<section class="card"><div class="card-h"><h2>Route</h2></div><div class="route-strip">';
+  S.cities.forEach((c,ci)=>{
+    const ds=cityDays(c.id);if(!ds.length)return;const a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id);
+    if(ci>0){const pl=dayPlan(ds[0].id),lg=pl.morning||pl.tin||(S.days[a-1]&&dayPlan(S.days[a-1].id).tout);
+      h+='<div class="hop">'+(lg?'<span class="hop-m">'+MODES[lg.mode].icon+'</span><span class="hop-t">'+dur(lg.min)+'</span>':'<span class="hop-t">·</span>')+'</div>'}
+    const hs=[...new Set(ds.map((d,k)=>stayForNight(a+k)).filter(Boolean))];
+    h+='<button class="rcity" data-act="goto-city" data-city="'+c.id+'"><span class="rc-n">'+esc(c.name)+'</span><span class="rc-d">'+fmt(dayDate(a),o)+(a===b?'':' to '+fmt(dayDate(b),o))+' · '+ds.length+' day'+(ds.length>1?'s':'')+'</span>'+(hs.length?'<span class="rc-h">🛏️ '+hs.map(x=>esc(x.name)).join(', ')+'</span>':'')+
+      '<span class="rc-dots">'+ds.map(d=>'<i style="--dc:'+dayColor(d.id)+'"></i>').join('')+'</span></button>';
+  });
+  h+='</div></section>';
+  // next bookings + budget/packing
+  const next=allBookings().slice(0,4);
+  h+='<div class="cols"><section class="card"><div class="card-h"><h2>Coming up</h2><button class="linkbtn" data-act="view" data-view="bookings">All bookings</button></div>'+
+    (next.length?'<ul class="mini">'+next.map(x=>'<li><span class="bico" style="--bc:'+x.color+'">'+x.icon+'</span><span class="mini-t"><b>'+esc(x.title)+'</b><small>'+esc(dayLabel(x.day))+(x.time?' · '+clock24(x.time):'')+'</small></span></li>').join('')+'</ul>':'<p class="empty">No bookings yet.</p>')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>Budget</h2><button class="linkbtn" data-act="view" data-view="budget">Details</button></div>'+budgetBar(bs,true)+
+    '<div class="card-h" style="margin-top:18px"><h2>Packing</h2><button class="linkbtn" data-act="view" data-view="packing">Checklist</button></div>'+
+    '<div class="prog"><div class="prog-bar"><i style="--w:'+(S.packing.length?packed/S.packing.length*100:0)+'%"></i></div><span class="prog-t">'+packed+' of '+S.packing.length+' packed</span></div></section></div>';
+  // day by day
+  h+='<section class="card"><div class="card-h"><h2>Day by day</h2></div><div class="dtable">';
+  S.days.forEach((d,i)=>{const pl=dayPlan(d.id),c=cityOf(d.id),tr=pl.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+[pl.tin,pl.tout,pl.morning,pl.evening].reduce((a,x)=>a+(x?x.min:0),0);
+    h+='<button class="drow" data-act="goto-day" data-day="'+d.id+'" style="--dc:'+dayColor(d.id)+'"><span class="num">'+(i+1)+'</span><span class="dr-d"><b>'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</b><small>'+esc(c?c.name:'')+'</small></span>'+
+      '<span class="dr-s">'+(pl.length?pl.filter(x=>!x.p.stayRef).slice(0,3).map(x=>esc(x.p.name)).join(', ')+(pl.length>3?'…':''):'<i>Nothing planned yet</i>')+'</span>'+
+      '<span class="dr-t">'+(pl.length?clock(pl[0].arrive)+' to '+clock(pl.end):'')+'</span><span class="dr-m">'+(tr?dur(tr):'')+'</span></button>'});
+  h+='</div></section>';
+  return h;
+}
+const stat=(l,v,s)=>'<div class="stat"><span class="stat-l">'+l+'</span><b class="stat-v">'+v+'</b><span class="stat-s">'+s+'</span></div>';
+function budgetBar(bs,compact){
+  const max=Math.max(bs.budget,bs.total,1),pw=bs.paid/max*100,lw=bs.planned/max*100,over=bs.budget>0&&bs.total>bs.budget;
+  return '<div class="bbar'+(over?' over':'')+'"><div class="bbar-track"><i class="paid" style="--w:'+pw+'%"></i><i class="plan" style="--w:'+lw+'%;--l:'+pw+'%"></i>'+(bs.budget>0&&bs.total>bs.budget?'<i class="cap" style="--l:'+(bs.budget/max*100)+'%"></i>':'')+'</div>'+
+    '<div class="bbar-legend"><span><i class="sw paid"></i>Paid '+money(bs.paid)+'</span><span><i class="sw plan"></i>Planned '+money(bs.planned)+'</span>'+(bs.budget>0?'<span class="'+(over?'bad':'good')+'">'+(over?money(bs.total-bs.budget)+' over budget':money(bs.budget-bs.total)+' left of '+money(bs.budget))+'</span>':(compact?'<span>No budget set</span>':''))+'</div></div>';
+}
+
+function allBookings(){
+  const out=S.bookings.map(b=>{const t=btOf(b.type);return {kind:'b',id:b.id,title:b.title,day:b.day,time:b.time,code:b.code,notes:b.notes,icon:t.icon,color:t.color,label:t.label,ord:dayOrder(b.day)*10000+(b.time?+b.time.replace(':',''):0)}});
+  S.stays.forEach(st=>{const day=st.ci<0?'before':S.days[st.ci]?S.days[st.ci].id:'after';out.push({kind:'s',id:st.id,title:st.name,day,time:'15:00',code:'',notes:nightsText(st)+(st.notes?'. '+st.notes:''),icon:'🛏️',color:'#6366F1',label:'Hotel',ord:dayOrder(day)*10000+1500})});
+  return out.sort((a,b)=>a.ord-b.ord);
+}
+function pgBookings(){
+  const all=allBookings();
+  let h=pageHead('Bookings',all.length+' booking'+(all.length===1?'':'s')+', including '+S.stays.length+' hotel'+(S.stays.length===1?'':'s'),'<button class="btn primary" data-act="add-booking">+ Add booking</button>');
+  if(!all.length)return h+'<section class="card"><p class="empty">Add flights, trains, tickets and table reservations to keep confirmation codes in one place.</p></section>';
+  const groups=[];all.forEach(x=>{const k=x.day||'';let g=groups.find(g=>g.k===k);if(!g){g={k,items:[]};groups.push(g)}g.items.push(x)});
+  groups.forEach(g=>{
+    const dc=g.k&&g.k!=='before'&&g.k!=='after'?dayColor(g.k):'var(--muted)';
+    h+='<section class="bgroup" style="--dc:'+dc+'"><h3 class="bg-h"><i class="dot"></i>'+esc(dayLabel(g.k))+'</h3><div class="blist">'+g.items.map(x=>
+      '<div class="bk"><span class="bico" style="--bc:'+x.color+'">'+x.icon+'</span><div class="bk-main"><div class="bk-top"><b>'+esc(x.title)+'</b><span class="bk-type">'+esc(x.label)+'</span></div>'+
+      '<div class="bk-meta">'+(x.time?'<span class="mono">'+(x.kind==='s'?'Check-in ':'')+clock24(x.time)+'</span>':'')+(x.notes?'<span>'+esc(x.notes)+'</span>':'')+'</div></div>'+
+      (x.code?'<button class="code" data-act="copy-code" data-code="'+esc(x.code)+'" title="Copy confirmation code"><span class="mono">'+esc(x.code)+'</span>'+ico('<rect x="7" y="7" width="9" height="9" rx="1.5"/><path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7"/>')+'</button>':'')+
+      '<button class="ib" data-act="'+(x.kind==='s'?'edit-stay" data-stay="':'edit-booking" data-id="')+x.id+'" aria-label="Edit '+esc(x.title)+'">'+SVG.edit+'</button></div>').join('')+'</div></section>';
+  });
+  return h;
+}
+
+function pgBudget(){
+  const bs=budgetStats(),n=S.days.length;
+  let h=pageHead('Budget',money(bs.total)+' total · about '+money(bs.total/Math.max(1,n))+' a day','<button class="btn primary" data-act="add-expense">+ Add expense</button>');
+  h+='<section class="card"><div class="bsum"><label class="bset"><span>Trip budget</span><span class="money-in"><input id="budget-in" class="inp" inputmode="decimal" value="'+(S.budget||'')+'" placeholder="Set a budget" aria-label="Trip budget"></span></label>'+
+    '<div class="bnum"><span>Paid</span><b>'+money(bs.paid)+'</b></div><div class="bnum"><span>Planned</span><b>'+money(bs.planned)+'</b></div><div class="bnum"><span>'+(bs.budget&&bs.total>bs.budget?'Over by':'Left')+'</span><b class="'+(bs.budget&&bs.total>bs.budget?'bad':'')+'">'+(bs.budget?money(Math.abs(bs.budget-bs.total)):'·')+'</b></div></div>'+budgetBar(bs)+'</section>';
+  // breakdowns
+  const byCat=CATS.map(c=>({c,v:S.expenses.filter(e=>e.cat===c.id).reduce((a,e)=>a+(+e.amount||0),0)})).filter(x=>x.v>0).sort((a,b)=>b.v-a.v);
+  const cityTot={};S.expenses.forEach(e=>{const k=!e.day?'Whole trip':(e.day==='before'||e.day==='after')?'Getting there and back':(cityOf(e.day)||{name:'Other'}).name;cityTot[k]=(cityTot[k]||0)+(+e.amount||0)});
+  const byCity=Object.keys(cityTot).map(k=>({k,v:cityTot[k]})).sort((a,b)=>b.v-a.v);
+  const maxC=Math.max(1,...byCat.map(x=>x.v)),maxT=Math.max(1,...byCity.map(x=>x.v));
+  h+='<div class="cols"><section class="card"><div class="card-h"><h2>By category</h2></div>'+(byCat.length?'<div class="hbars">'+byCat.map(x=>'<div class="hb"><span class="hb-l">'+x.c.icon+' '+x.c.label+'</span><span class="hb-t"><i style="--w:'+(x.v/maxC*100)+'%;--bc:'+x.c.color+'"></i></span><span class="hb-v">'+money(x.v)+'</span></div>').join('')+'</div>':'<p class="empty">No expenses yet.</p>')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>By city</h2></div>'+(byCity.length?'<div class="hbars">'+byCity.map(x=>'<div class="hb"><span class="hb-l">'+esc(x.k)+'</span><span class="hb-t"><i style="--w:'+(x.v/maxT*100)+'%;--bc:var(--accent)"></i></span><span class="hb-v">'+money(x.v)+'</span></div>').join('')+'</div>':'<p class="empty">No expenses yet.</p>')+'</section></div>';
+  // list
+  const ex=S.expenses.slice().sort((a,b)=>dayOrder(a.day)-dayOrder(b.day));
+  h+='<section class="card"><div class="card-h"><h2>Expenses</h2><span class="muted">Tap Paid or Planned to switch</span></div>'+(ex.length?'<div class="xlist">'+ex.map(e=>{const c=catOf(e.cat);
+    return '<div class="xr"><span class="bico" style="--bc:'+c.color+'">'+c.icon+'</span><button class="xr-main" data-act="edit-expense" data-id="'+e.id+'"><b>'+esc(e.title)+'</b><small>'+esc(dayLabel(e.day))+' · '+c.label+'</small></button>'+
+      '<button class="status '+(e.paid?'paid':'plan')+'" data-act="toggle-paid" data-id="'+e.id+'">'+(e.paid?'Paid':'Planned')+'</button><span class="xr-v">'+money(e.amount)+'</span></div>'}).join('')+'</div>':'<p class="empty">Add your flights, hotels and daily spending to see where the money goes.</p>')+'</section>';
+  return h;
+}
+
+function pgPacking(){
+  const done=S.packing.filter(k=>k.done).length,tot=S.packing.length;
+  let h=pageHead('Packing',done+' of '+tot+' packed',(done?'<button class="btn" data-act="pack-reset">Uncheck all</button>':''));
+  h+='<section class="card"><div class="prog big"><div class="prog-bar"><i style="--w:'+(tot?done/tot*100:0)+'%"></i></div><span class="prog-t">'+(tot&&done===tot?'All packed. Have a great trip!':Math.round(tot?done/tot*100:0)+'% packed')+'</span></div></section>';
+  const cats=[...new Set(S.packing.map(k=>k.cat).concat(Object.keys(PACK_TEMPLATE)))];
+  h+='<div class="packgrid">'+cats.map((cat,ci)=>{const items=S.packing.filter(k=>k.cat===cat),d=items.filter(k=>k.done).length;
+    return '<section class="card pack"><div class="card-h"><h2>'+esc(cat)+'</h2><span class="muted mono">'+d+'/'+items.length+'</span></div><ul class="checks">'+items.map(k=>
+      '<li class="ckrow'+(k.done?' done':'')+'"><button class="ck" data-act="pack-toggle" data-id="'+k.id+'" role="checkbox" aria-checked="'+k.done+'"><span class="box"><svg viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7"/></svg></span><span class="ck-t">'+esc(k.text)+'</span></button><button class="ib xdel" data-act="pack-del" data-id="'+k.id+'" aria-label="Remove '+esc(k.text)+'">✕</button></li>').join('')+'</ul>'+
+      '<input class="inp addk" id="addk-'+ci+'" data-cat="'+esc(cat)+'" placeholder="Add an item and press Enter" aria-label="Add to '+esc(cat)+'"></section>'}).join('')+'</div>';
+  return h;
+}
+
+function pgNotes(){
+  let h=pageHead('Notes','Saved automatically as you type <span class="saved" id="note-saved" hidden>Saved</span>');
+  h+='<div class="cols notes"><section class="card"><div class="card-h"><h2>Trip notes</h2></div><textarea class="inp note" id="note-main" placeholder="Ideas, to-dos, things people recommended">'+esc(S.notes)+'</textarea></section>'+
+    '<section class="card"><div class="card-h"><h2>Important info</h2></div><textarea class="inp note" id="note-info" placeholder="Emergency numbers, insurance, embassy, allergies">'+esc(S.info)+'</textarea></section></div>';
+  return h;
+}
+
+function pgTrips(){
+  const ids=Object.keys(STORE.trips);
+  let h=pageHead('All trips',ids.length+' trip'+(ids.length===1?'':'s'),'<button class="btn primary" data-act="new-trip">+ New trip</button>');
+  h+='<div class="tgrid">'+ids.map(id=>{const t=STORE.trips[id],cur=id===S.id,cities=(t.cities||[]).map(c=>c.name);
+    const stops=(t.places||[]).filter(p=>p.main).length,spend=(t.expenses||[]).reduce((a,e)=>a+(+e.amount||0),0);
+    const cols=t.days.slice(0,10).map((d,i)=>DAY_COLORS[i%DAY_COLORS.length]);
+    return '<article class="tcard'+(cur?' cur':'')+'"><div class="tc-strip">'+cols.map(c=>'<i style="background:'+c+'"></i>').join('')+'</div><div class="tc-body"><div class="tc-top"><h3>'+esc(t.trip.name)+'</h3>'+(cur?'<span class="badge">Open now</span>':'')+'</div>'+
+      '<p class="tc-d">'+tripRange(t)+'</p><p class="tc-c">'+(cities.length?esc(cities.join(' · ')):'No cities yet')+'</p>'+
+      '<p class="tc-s">'+t.days.length+' day'+(t.days.length===1?'':'s')+' · '+stops+' stop'+(stops===1?'':'s')+(spend?' · '+money(spend):'')+'</p>'+
+      '<div class="tc-acts">'+(cur?'<button class="btn small" data-act="view" data-view="plan">Go to itinerary</button>':'<button class="btn small primary" data-act="open-trip" data-trip="'+id+'">Open</button>')+
+      '<button class="btn small" data-act="dup-trip" data-trip="'+id+'">Duplicate</button>'+(ids.length>1?'<button class="btn small danger" data-act="del-trip" data-trip="'+id+'">Delete</button>':'')+'</div></div></article>'}).join('')+
+    '<button class="tcard tnew" data-act="new-trip"><span class="tnew-plus">+</span><span>Plan a new trip</span></button></div>';
+  return h;
+}
+
+function pgSettings(){
+  const seg=(act,cur,opts)=>'<div class="sseg">'+opts.map(([v,l])=>'<button data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'">'+l+'</button>').join('')+'</div>';
+  let h=pageHead('Settings','');
+  h+='<section class="card set"><div class="card-h"><h2>This trip</h2></div>'+
+    '<div class="srow"><label for="set-name">Trip name</label><input class="inp" id="set-name" value="'+esc(S.trip.name)+'"></div>'+
+    '<div class="srow"><label for="set-start">First day</label><input class="inp" type="date" id="set-start" value="'+esc(S.trip.start)+'"></div></section>';
+  h+='<section class="card set"><div class="card-h"><h2>Display</h2></div>'+
+    '<div class="srow"><span>Theme</span>'+seg('set-theme',SET.theme,[['system','System'],['light','Light'],['dark','Dark']])+'</div>'+
+    '<div class="srow"><span>Distances</span>'+seg('set-units',SET.units,[['km','Kilometres'],['mi','Miles']])+'</div>'+
+    '<div class="srow"><span>Time</span>'+seg('set-clock',SET.clock,[['12','9:30 pm'],['24','21:30']])+'</div>'+
+    '<div class="srow"><span>Map style</span>'+seg('set-map',S.view.basemap==='street'?'street':'illustrated',[['illustrated','Illustrated'],['street','Street']])+'</div>'+
+    '<div class="srow"><label for="set-cur">Currency</label><select class="inp" id="set-cur">'+['EUR','USD','CAD','GBP','AUD','JPY','MXN'].map(c=>'<option'+(SET.currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div></section>';
+  h+='<section class="card set"><div class="card-h"><h2>Your data</h2></div><p class="muted">Trips are saved in this browser only. Copy a trip to back it up or move it to another device, then paste it into Import there.</p>'+
+    '<div class="srow col"><span>Export this trip</span><div class="inline"><button class="btn" data-act="export-trip">Copy trip data</button></div></div>'+
+    '<div class="srow col"><label for="imp-txt">Import a trip</label><textarea class="inp" id="imp-txt" placeholder="Paste trip data here"></textarea><div class="inline"><button class="btn" data-act="import-trip">Import as a new trip</button></div><p class="err" id="imp-err" hidden></p></div>'+
+    '<div class="srow col"><span>Sample trip</span><div class="inline"><button class="btn danger'+(ui.armed==='reset2'?' armed':'')+'" data-act="reset-sample">'+(ui.armed==='reset2'?'Click again to replace this trip':'Replace this trip with the sample')+'</button></div></div></section>';
+  return h;
+}
+
+/* ---------- dialogs: expense, booking, new trip ---------- */
+function openExpense(e){
+  ui.dlg='expense';ui.form={id:e?e.id:null,cat:e?e.cat:'food',paid:e?!!e.paid:false};
+  openDlg('<h2>'+(e?'Edit expense':'Add expense')+'</h2>'+
+    '<div class="field"><label for="f-xt">What for</label><input class="inp" id="f-xt" value="'+esc(e?e.title:'')+'" placeholder="e.g. Dinner at Time Out Market" autocomplete="off"></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-xa">Amount ('+esc(SET.currency)+')</label><input class="inp" id="f-xa" inputmode="decimal" value="'+(e?e.amount:'')+'" placeholder="0"></div>'+
+    '<div class="field"><label for="f-xd">When</label><select class="inp" id="f-xd">'+dayOptions(e?e.day:(S.view.day&&dayIdx(S.view.day)>=0?S.view.day:''),true)+'</select></div></div>'+
+    '<div class="field"><span>Category</span><div class="pick" id="f-xc">'+CATS.map(c=>'<button type="button" class="chip" style="--tc:'+c.color+'" data-act="pick-xcat" data-cat="'+c.id+'" aria-pressed="'+(ui.form.cat===c.id)+'">'+c.icon+' '+c.label+'</button>').join('')+'</div></div>'+
+    '<div class="field"><span>Status</span><div class="sseg" id="f-xp"><button type="button" data-act="pick-xpaid" data-v="0" aria-pressed="'+!ui.form.paid+'">Planned</button><button type="button" data-act="pick-xpaid" data-v="1" aria-pressed="'+ui.form.paid+'">Paid</button></div></div>'+
+    '<p class="err" id="f-err" hidden></p><div class="dlg-acts">'+(e?'<button class="btn danger" data-act="delete-expense">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-expense">'+(e?'Save':'Add expense')+'</button></div>');
+}
+function saveExpense(){
+  const f=ui.form,title=$('f-xt').value.trim(),amount=parseFloat(String($('f-xa').value).replace(/[^\d.,-]/g,'').replace(',','.'));
+  const err=m=>{$('f-err').textContent=m;$('f-err').hidden=false};
+  if(!title)return err('Say what the expense is for.');
+  if(!(amount>=0))return err('Enter an amount, like 45 or 12.50.');
+  let e=S.expenses.find(x=>x.id===f.id);if(!e){e={id:uid('e')};S.expenses.push(e)}
+  Object.assign(e,{title,amount:Math.round(amount*100)/100,cat:f.cat,day:$('f-xd').value,paid:f.paid});closeDlg();commit();
+}
+function openBooking(b){
+  ui.dlg='booking';ui.form={id:b?b.id:null,type:b?b.type:'tickets'};
+  openDlg('<h2>'+(b?'Edit booking':'Add booking')+'</h2>'+
+    '<div class="field"><span>Type</span><div class="pick" id="f-bt">'+BTYPES.map(t=>'<button type="button" class="chip" style="--tc:'+t.color+'" data-act="pick-btype" data-type="'+t.id+'" aria-pressed="'+(ui.form.type===t.id)+'">'+t.icon+' '+t.label+'</button>').join('')+'</div><div class="modehint">Hotels come from your stays in the itinerary.</div></div>'+
+    '<div class="field"><label for="f-bn">Name</label><input class="inp" id="f-bn" value="'+esc(b?b.title:'')+'" placeholder="e.g. Flight to Lisbon" autocomplete="off"></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-bd">Day</label><select class="inp" id="f-bd">'+dayOptions(b?b.day:(S.days[0]||{}).id,false)+'</select></div><div class="field"><label for="f-bh">Time</label><input class="inp" type="time" id="f-bh" value="'+esc(b?b.time:'')+'"></div></div>'+
+    '<div class="field"><label for="f-bc">Confirmation code</label><input class="inp mono" id="f-bc" value="'+esc(b?b.code:'')+'" placeholder="Optional" autocomplete="off"></div>'+
+    '<div class="field"><label for="f-bo">Notes</label><textarea class="inp" id="f-bo" placeholder="Seats, terminal, what to bring">'+esc(b?b.notes:'')+'</textarea></div>'+
+    '<p class="err" id="f-err" hidden></p><div class="dlg-acts">'+(b?'<button class="btn danger" data-act="delete-booking">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-booking">'+(b?'Save':'Add booking')+'</button></div>');
+}
+function saveBooking(){
+  const f=ui.form,title=$('f-bn').value.trim();
+  if(!title){$('f-err').textContent='Give the booking a name.';$('f-err').hidden=false;return}
+  let b=S.bookings.find(x=>x.id===f.id);if(!b){b={id:uid('b')};S.bookings.push(b)}
+  Object.assign(b,{type:f.type,title,day:$('f-bd').value,time:$('f-bh').value,code:$('f-bc').value.trim(),notes:$('f-bo').value.trim()});closeDlg();commit();
+}
+function openNewTrip(){
+  ui.dlg='trip';ui.form={};
+  const t=new Date();t.setDate(t.getDate()+30);const iso=t.toISOString().slice(0,10);
+  openDlg('<h2>Plan a new trip</h2>'+
+    '<div class="field"><label for="f-tn">Trip name</label><input class="inp" id="f-tn" placeholder="e.g. Japan in spring" autocomplete="off"></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-ts">First day</label><input class="inp" type="date" id="f-ts" value="'+iso+'"></div><div class="field"><label for="f-td">Days in the first city</label><select class="inp" id="f-td">'+[1,2,3,4,5,6,7,10,14].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+'</option>').join('')+'</select></div></div>'+
+    '<div class="field"><label for="f-tc">First city</label><input class="inp" id="f-tc" placeholder="e.g. Tokyo" autocomplete="off"></div>'+
+    '<p class="modehint">Your tags carry over. Add places by clicking the map in the itinerary.</p>'+
+    '<p class="err" id="f-err" hidden></p><div class="dlg-acts"><span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-trip">Create trip</button></div>');
+}
+function saveNewTrip(){
+  const name=$('f-tn').value.trim(),city=$('f-tc').value.trim(),start=$('f-ts').value,n=+$('f-td').value||3;
+  const err=m=>{$('f-err').textContent=m;$('f-err').hidden=false};
+  if(!name)return err('Give the trip a name.');if(!city)return err('Add the first city.');if(!start)return err('Pick the first day.');
+  const cid=uid('c'),t={id:uid('trip'),trip:{name,start},cities:[{id:cid,name:city}],days:[],tags:JSON.parse(JSON.stringify(S.tags)),places:[],stays:[],
+    view:{day:'all',mainOnly:false,hidden:[],basemap:SET.map||'illustrated',collapsed:[]}};
+  for(let i=0;i<n;i++)t.days.push({id:uid('d'),city:cid,start:'09:00'});
+  normalize(t);STORE.trips[t.id]=t;closeDlg();openTrip(t.id,'plan');gtoast('Created '+name);
+}
+function openTrip(id,view){
+  if(!STORE.trips[id])return;
+  save();S=STORE.trips[id];normalize(S);STORE.current=id;ui.open=null;ui.armed=null;ui.prevLegs=new Set();
+  if(!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
+  save();setBasemap(S.view.basemap==='street'?'street':'illustrated');$('panel').classList.toggle('hide-travel',!!S.view.hideTravel);
+  ui.anim.tab=true;renderAll();fitVisible(false);
+  setView(view||SET.view);
+}
+
+/* ---------- settings application ---------- */
+function applyTheme(){
+  const r=document.documentElement;
+  if(SET.theme==='light'||SET.theme==='dark'){r.setAttribute('data-theme',SET.theme);r.dataset.wpTheme='1'}
+  else if(r.dataset.wpTheme){r.removeAttribute('data-theme');delete r.dataset.wpTheme}
+}
+
+/* ---------- events for the new sections ---------- */
+document.addEventListener('click',e=>{
+  const b=e.target.closest&&e.target.closest('[data-act]');if(!b)return;
+  const a=b.dataset.act;
+  switch(a){
+    case 'view':setView(b.dataset.view);break;
+    case 'goto-day':S.view.day=b.dataset.day;save();setView('plan');renderBar();renderMap();syncDayFocus(true);setTimeout(()=>fitVisible(true),40);break;
+    case 'goto-city':S.view.day=b.dataset.city;save();setView('plan');renderBar();renderMap();syncDayFocus(true);setTimeout(()=>fitVisible(true),40);break;
+    case 'copy-code':copyText(b.dataset.code,'Copied '+b.dataset.code);break;
+    case 'add-booking':openBooking(null);break;
+    case 'edit-booking':{const x=S.bookings.find(y=>y.id===b.dataset.id);if(x)openBooking(x);break}
+    case 'pick-btype':ui.form.type=b.dataset.type;document.querySelectorAll('#f-bt [data-type]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.type===ui.form.type));break;
+    case 'save-booking':saveBooking();break;
+    case 'delete-booking':if(!arm('del',b,'Click again to delete'))break;S.bookings=S.bookings.filter(x=>x.id!==ui.form.id);closeDlg();commit();break;
+    case 'add-expense':openExpense(null);break;
+    case 'edit-expense':{const x=S.expenses.find(y=>y.id===b.dataset.id);if(x)openExpense(x);break}
+    case 'pick-xcat':ui.form.cat=b.dataset.cat;document.querySelectorAll('#f-xc [data-cat]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.cat===ui.form.cat));break;
+    case 'pick-xpaid':ui.form.paid=b.dataset.v==='1';document.querySelectorAll('#f-xp [data-v]').forEach(c=>c.setAttribute('aria-pressed',(c.dataset.v==='1')===ui.form.paid));break;
+    case 'save-expense':saveExpense();break;
+    case 'delete-expense':if(!arm('del',b,'Click again to delete'))break;S.expenses=S.expenses.filter(x=>x.id!==ui.form.id);closeDlg();commit();break;
+    case 'toggle-paid':{const x=S.expenses.find(y=>y.id===b.dataset.id);if(x){x.paid=!x.paid;commit()}break}
+    case 'pack-toggle':{const k=S.packing.find(y=>y.id===b.dataset.id);if(!k)break;k.done=!k.done;save();
+      const row=b.closest('.ckrow');if(row){row.classList.toggle('done',k.done);b.setAttribute('aria-checked',k.done)}
+      clearTimeout(ui.packT);ui.packT=setTimeout(()=>renderPage(false),420);break}
+    case 'pack-del':S.packing=S.packing.filter(y=>y.id!==b.dataset.id);commit();break;
+    case 'pack-reset':S.packing.forEach(k=>{k.done=false});commit();break;
+    case 'new-trip':openNewTrip();break;
+    case 'save-trip':saveNewTrip();break;
+    case 'open-trip':openTrip(b.dataset.trip,'overview');gtoast('Opened '+S.trip.name);break;
+    case 'dup-trip':{const src=b.dataset.trip===S.id?S:STORE.trips[b.dataset.trip],t=JSON.parse(JSON.stringify(src));t.id=uid('trip');t.trip.name='Copy of '+src.trip.name;STORE.trips[t.id]=t;save();renderPage(false);gtoast('Duplicated '+src.trip.name);break}
+    case 'del-trip':{const id=b.dataset.trip;if(ui.armed!=='deltrip-'+id){ui.armed='deltrip-'+id;b.classList.add('armed');b.textContent='Click again';break}
+      ui.armed=null;const name=STORE.trips[id].trip.name;delete STORE.trips[id];if(id===S.id){openTrip(Object.keys(STORE.trips)[0],'trips')}else{save();renderPage(false)}gtoast('Deleted '+name);break}
+    case 'set-theme':SET.theme=b.dataset.v;saveSet();applyTheme();renderPage(false);break;
+    case 'set-units':SET.units=b.dataset.v;saveSet();renderAll();renderPage(false);break;
+    case 'set-clock':SET.clock=b.dataset.v;saveSet();renderAll();renderPage(false);break;
+    case 'set-map':SET.map=b.dataset.v;saveSet();setBasemap(b.dataset.v);renderPage(false);break;
+    case 'export-trip':copyText(JSON.stringify(S),'Trip data copied');break;
+    case 'import-trip':{const er=$('imp-err');try{const t=JSON.parse($('imp-txt').value);if(!t||!Array.isArray(t.days)||!Array.isArray(t.places)||!t.trip)throw 0;t.id=uid('trip');normalize(t);STORE.trips[t.id]=t;openTrip(t.id,'overview');gtoast('Imported '+t.trip.name)}
+      catch(x){er.textContent='That doesn’t look like trip data. Copy it again with "Copy trip data" and paste the whole thing.';er.hidden=false}break}
+    case 'reset-sample':{if(ui.armed!=='reset2'){ui.armed='reset2';renderPage(false);break}ui.armed=null;const id=S.id;const t=normalize(sampleExtras(sample()));t.id=id;STORE.trips[id]=t;S=t;openTrip(id,'overview');gtoast('Sample trip restored');break}
+  }
+});
+document.addEventListener('change',e=>{
+  const t=e.target;
+  if(t.id==='budget-in'){const v=parseFloat(String(t.value).replace(/[^\d.]/g,''));S.budget=v>0?Math.round(v):0;commit()}
+  else if(t.id==='set-name'){const v=t.value.trim();if(v){S.trip.name=v;commit()}}
+  else if(t.id==='set-start'){if(t.value){S.trip.start=t.value;commit()}}
+  else if(t.id==='set-cur'){SET.currency=t.value;saveSet();renderPage(false)}
+});
+document.addEventListener('input',e=>{
+  const t=e.target;
+  if(t.id==='note-main'||t.id==='note-info'){
+    if(t.id==='note-main')S.notes=t.value;else S.info=t.value;
+    clearTimeout(ui.noteT);ui.noteT=setTimeout(()=>{save();const s=$('note-saved');if(s){s.hidden=false;s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')}},450);
+  }
+});
+document.addEventListener('keydown',e=>{
+  const t=e.target;
+  if(e.key==='Enter'&&t.classList&&t.classList.contains('addk')){
+    e.preventDefault();const v=t.value.trim();if(!v)return;
+    S.packing.push({id:uid('k'),cat:t.dataset.cat,text:v,done:false});save();const id=t.id;renderPage(false);const n=$(id);if(n){n.value='';n.focus()}
+  }
+  if(e.key==='Enter'&&t.id==='budget-in'){t.blur()}
+  if(e.key==='Enter'&&!$('dlg').hidden&&t.tagName==='INPUT'){
+    if(ui.dlg==='expense'){e.preventDefault();saveExpense()}else if(ui.dlg==='booking'){e.preventDefault();saveBooking()}else if(ui.dlg==='trip'){e.preventDefault();saveNewTrip()}
+  }
+});
+window.addEventListener('resize',()=>{clearTimeout(ui.railT);ui.railT=setTimeout(()=>{ui.railPos=null;railInd()},120)});
+
 if(!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
 setBasemap(S.view.basemap==='street'?'street':'illustrated');
 $('panel').classList.toggle('hide-travel',!!S.view.hideTravel);
 renderAll();fitVisible();
+applyTheme();renderRail();setView(SET.view);
 })();
 </script>
 
