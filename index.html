@@ -140,7 +140,8 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .hnum svg{width:14px;height:14px}
 .stays{display:grid;gap:4px;padding:10px 10px 6px;border:1px solid var(--line);border-radius:12px}
 .stays .sub-h{margin:0 0 2px;padding-left:4px}
-.stays .row .tg{font-family:var(--f-mono);font-size:11.5px}
+.stays .nm{display:grid;line-height:1.25}
+.snights{font-family:var(--f-mono);font-size:11.5px;font-weight:400;color:var(--muted)}
 .stays .linkbtn{justify-self:start}
 .stays .empty{padding:2px 4px 4px}
 .linkbtn.sm{font-size:12.5px;padding:4px}
@@ -156,8 +157,10 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .xinner{min-height:0;overflow:hidden}
 .xinner .extras{padding-top:4px}
 .addstay{margin-top:-2px}
-.pin-hotel{width:30px;height:30px;background:transparent;font-size:24px;line-height:1;filter:drop-shadow(0 1px 1.5px rgba(0,0,0,.45)) drop-shadow(0 0 1px rgba(0,0,0,.25))}
-.lg-h{font-style:normal;font-size:14px;line-height:1}
+.pin-home{width:28px;height:28px;border-radius:50%;background:var(--surface);color:var(--c);box-shadow:0 0 0 2.5px var(--c),0 2px 7px rgba(0,0,0,.3);display:grid;place-items:center}
+.pin-home svg{width:16px;height:16px}
+.lg-home{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--fg);color:var(--fg);display:grid;place-items:center}
+.lg-home svg{width:9px;height:9px}
 .dt-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .inline{display:flex;gap:8px}
 .inline .inp{flex:1;min-width:0}
@@ -213,6 +216,9 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 /* Map column */
 .mapcol{display:flex;flex-direction:column;gap:10px;min-width:0;min-height:0}
 .bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.bar:first-child{flex-wrap:nowrap}
+.bar:first-child .seg{flex:0 1 auto;min-width:0}
+.bar:first-child .toggle,.bar:first-child .btn{flex:none}
 .seg{display:flex;gap:2px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:3px;overflow-x:auto;max-width:100%}
 .seg button{border:0;background:transparent;padding:6px 11px;border-radius:7px;font-weight:600;color:var(--muted);white-space:nowrap;display:flex;align-items:center;gap:6px}
 .seg button[aria-pressed="true"]{color:var(--bg)}
@@ -255,6 +261,11 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .sk-label.park{color:var(--park-label);text-transform:none;letter-spacing:0;font-size:11px;font-weight:600}
 .sk-label.small{font-size:10.5px;text-transform:none;letter-spacing:0}
 .zlow .sk-label.park,.zlow .sk-label.small{display:none}
+.sk-label.city,.sk-label.country,.sk-label.ocean{display:none}
+.zfar .sk-label{display:none}
+.zfar .sk-label.city{display:block;margin-left:18px;margin-top:-9px;color:var(--fg);font-weight:700;font-size:13px;letter-spacing:.06em;text-shadow:0 0 3px var(--land),0 0 3px var(--land)}
+.zfar .sk-label.country{display:block;font-size:14px;letter-spacing:.32em;opacity:.6}
+.zfar .sk-label.ocean{display:block;color:var(--water-label);font-style:italic;text-transform:none;letter-spacing:.04em;font-size:14px}
 .bm-water{fill:var(--water);fill-opacity:1;stroke:var(--water-edge);stroke-opacity:1}
 .bm-park{fill:var(--park);fill-opacity:1;stroke:none}
 .bm-plaza{fill:var(--plaza);fill-opacity:1;stroke:var(--road-casing);stroke-opacity:.35}
@@ -351,6 +362,8 @@ textarea.inp{min-height:70px;resize:vertical}
 .leaflet-div-icon{background:none;border:0}
 
 @media (max-width:820px){
+  .bar:first-child{flex-wrap:wrap}
+  .bar:first-child .seg{flex:1 1 100%}
   html,body{height:auto}
   body{overflow:auto}
   .app{display:flex;flex-direction:column;height:auto}
@@ -402,6 +415,23 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .chev svg{transition:transform .3s var(--ease)}
 .day.collapsed .chev svg{transform:rotate(-90deg)}
 .ib.chev{width:24px;height:24px;margin-left:-4px}
+.city{display:grid;gap:4px;transition:opacity .35s ease}
+.city-head{display:flex;align-items:center;gap:6px;padding:8px 0 2px;border-top:1px solid var(--line)}
+.city:first-of-type .city-head{border-top:0}
+.city-h{flex:1;min-width:0;display:grid;gap:1px;border:0;background:none;text-align:left;padding:2px 0;border-radius:8px}
+.city-n{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;line-height:1.1;transition:color .25s ease}
+.city-d{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.city-h:hover .city-n,.city.cfocus .city-n{color:var(--accent)}
+.city.cdim .city-head{opacity:.45}
+.city-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .38s var(--ease,ease),opacity .28s ease}
+.city.ccol .city-body{grid-template-rows:0fr;opacity:0}
+.city-inner{min-height:0;overflow:hidden;display:grid;gap:8px;padding:1px}
+.city .chev svg{transition:transform .3s var(--ease,ease)}
+.city.ccol>.city-head .chev svg{transform:rotate(-90deg)}
+.addday{padding:0 0 6px 2px}
+.seg-sep{width:1px;align-self:stretch;margin:5px 3px;background:var(--line);flex:none}
+.seg .seg-city{font-weight:700}
+.seg .seg-day{padding:6px 9px;font-family:var(--f-mono);font-size:12.5px}
 .plan-tools{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:-4px 0 -4px}
 .plan-tools .linkbtn{margin-left:auto}
 .mini-toggle{display:inline-flex;align-items:center;gap:8px;border:0;background:none;padding:4px 2px;font-size:13px;font-weight:600;color:var(--muted)}
@@ -488,7 +518,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
         <span><i class="lg-c"></i>Itinerary stop</span>
         <span><i class="lg-d"></i>Extra for a day</span>
         <span><i class="lg-d loose"></i>Saved, not scheduled</span>
-        <span><i class="lg-h">🛏️</i>Hotel</span>
+        <span><i class="lg-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 7.4 8 3l5.2 4.4"/><path d="M4.3 6.3V13h7.4V6.3"/></svg></i>Hotel</span>
         <i class="lg-sep"></i>
         <span><svg class="lg-l" viewBox="0 0 24 8"><line x1="2" y1="4" x2="22" y2="4" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.5 5"/></svg>Walk</span>
         <span><svg class="lg-l" viewBox="0 0 24 8"><line x1="1" y1="4" x2="23" y2="4" stroke-width="2.5" stroke-dasharray="5 3"/></svg>Bike</span>
@@ -506,7 +536,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 <script>
 (function(){
 const KEY='waypoint-planner-v1';
-const DAY_COLORS=['#2F6FDE','#E8590C','#2B8A3E','#AE3EC9','#0C8599','#C2255C','#5F3DC4','#A07800'];
+const DAY_COLORS=['#2F6FDE','#E8590C','#2B8A3E','#AE3EC9','#0C8599','#C2255C','#5F3DC4','#A07800','#E03131','#5C940D'];
 const MODES={
   walk:{label:'Walk',icon:'🚶',kmh:4.8,extra:0,profile:'foot'},
   bike:{label:'Bike',icon:'🚲',kmh:13,extra:2,profile:'bike'},
@@ -521,14 +551,20 @@ const COLORS=['#D97706','#DC2626','#92400E','#7C3AED','#2563EB','#DB2777','#0891
 
 function P(id,name,lat,lng,tag,day,main,order,notes){return {id,name,lat,lng,tag,day,main,order,notes:notes||''}}
 function withMeta(pl){
-  const meta={p1:[null,45],p2:['walk',30],p3:['walk',75],p4:['transit',90],p7:[null,90],p8:['walk',30],p9:['walk',45],p10:['transit',90],p13:[null,120],p14:['walk',30],p15:['walk',60],p16:['walk',120]};
+  const meta={p1:[null,45],p2:['walk',30],p3:['walk',75],p4:['transit',90],p7:[null,90],p8:['walk',30],p9:['walk',45],p10:['transit',90],p13:[null,120],p14:['walk',30],p15:['walk',60],p16:['walk',120],
+    p24:[null,30],p25:[null,45],p26:[null,45],p27:[null,90],p28:[null,60],p30:[null,45],p31:[null,30],p32:[null,60],p33:[null,60],p34:[null,90],p36:[null,150],p37:[null,60],p38:[null,60],p39:[null,45],
+    p41:[null,30],p42:[null,30],p43:[null,45],p44:[null,75],p45:[null,60],p47:[null,180],p48:[null,90],p49:[null,45],p50:[null,90],p52:[null,120],p53:[null,30],p54:[null,120],p55:[null,120]};
   pl.forEach(p=>{const m=meta[p.id];p.stay=m?m[1]:60;if(m&&m[0])p.mode=m[0]});
+  const link={p24:'s3',p41:'s4'};pl.forEach(p=>{if(link[p.id])p.stayRef=link[p.id]});
   return pl;
 }
 function sample(){
   return {
-    trip:{name:'Lisbon',start:'2026-11-12'},
-    days:[{id:'d1',start:'09:30'},{id:'d2',start:'09:00'},{id:'d3',start:'09:30'}],
+    trip:{name:'Portugal & Spain',start:'2026-11-12'},
+    cities:[{id:'c1',name:'Lisbon'},{id:'c2',name:'Porto'},{id:'c3',name:'Madrid'}],
+    days:[{id:'d1',city:'c1',start:'09:30'},{id:'d2',city:'c1',start:'09:00'},{id:'d3',city:'c1',start:'09:30'},
+      {id:'d4',city:'c2',start:'08:00',mmode:'transit'},{id:'d5',city:'c2',start:'09:30'},{id:'d6',city:'c2',start:'09:30'},
+      {id:'d7',city:'c3',start:'08:30',mmode:'plane'},{id:'d8',city:'c3',start:'09:30'},{id:'d9',city:'c3',start:'10:00'}],
     tags:[
       {id:'t1',name:'Must-see',icon:'⭐',color:'#D97706'},
       {id:'t2',name:'Food',icon:'🍽️',color:'#DC2626'},
@@ -538,7 +574,8 @@ function sample(){
       {id:'t6',name:'Shopping',icon:'🛍️',color:'#DB2777'},
       {id:'t7',name:'Photo spot',icon:'📸',color:'#0891B2'},
       {id:'t8',name:'Nightlife',icon:'🍷',color:'#9F1239'},
-      {id:'t9',name:'Green space',icon:'🌳',color:'#15803D'}
+      {id:'t9',name:'Green space',icon:'🌳',color:'#15803D'},
+      {id:'t10',name:'Hotel',icon:'🛏️',color:'#334155'}
     ],
     places:withMeta([
       P('p1','Praça do Comércio',38.7075,-9.1364,'t1','d1',true,1,'Start here, walk up Rua Augusta.'),
@@ -563,11 +600,46 @@ function sample(){
       P('p20','Livraria Bertrand',38.7110,-9.1424,'t6',null,false,0,'Oldest bookshop in the world.'),
       P('p21','Gulbenkian Museum',38.7376,-9.1545,'t5',null,false,0,''),
       P('p22','Pink Street',38.7069,-9.1442,'t8',null,false,0,''),
-      P('p23','Jardim do Príncipe Real',38.7168,-9.1488,'t9',null,false,0,'Saturday organic market.')
+      P('p23','Jardim do Príncipe Real',38.7168,-9.1488,'t9',null,false,0,'Saturday organic market.'),
+      P('p24','Pestana Vintage Porto',41.1404,-8.6146,'t10','d4',true,1,''),
+      P('p25','Livraria Lello',41.1469,-8.6149,'t6','d4',true,2,'Timed tickets. Book ahead.'),
+      P('p26','Torre dos Clérigos',41.1457,-8.6141,'t4','d4',true,3,''),
+      P('p27','Ribeira',41.1406,-8.6131,'t1','d4',true,4,''),
+      P('p28','Jardim do Morro',41.1373,-8.6093,'t4','d4',true,5,'Sunset over the river.'),
+      P('p29','Ponte Luís I upper deck',41.1400,-8.6094,'t7','d4',false,0,''),
+      P('p30','Sé do Porto',41.1428,-8.6112,'t1','d5',true,1,''),
+      P('p31','São Bento Station',41.1456,-8.6105,'t7','d5',true,2,'Look up at the azulejo tiles.'),
+      P('p32','Mercado do Bolhão',41.1495,-8.6060,'t2','d5',true,3,''),
+      P('p33','Café Santiago',41.1466,-8.6056,'t2','d5',true,4,'Francesinha for lunch.'),
+      P('p34','Graham’s Port Lodge',41.1335,-8.6150,'t8','d5',true,5,'Book the tasting tour.'),
+      P('p35','Capela das Almas',41.1493,-8.6066,'t7','d5',false,0,''),
+      P('p36','Serralves',41.1597,-8.6597,'t5','d6',true,1,'Museum and gardens.'),
+      P('p37','Foz do Douro',41.1500,-8.6760,'t7','d6',true,2,''),
+      P('p38','Palácio de Cristal gardens',41.1483,-8.6255,'t9','d6',true,3,''),
+      P('p39','Café Majestic',41.1470,-8.6060,'t3','d6',true,4,''),
+      P('p40','Casa da Música',41.1589,-8.6305,'t5',null,false,0,''),
+      P('p41','Hotel Regina',40.4182,-3.6990,'t10','d7',true,1,''),
+      P('p42','Puerta del Sol',40.4169,-3.7035,'t1','d7',true,2,''),
+      P('p43','Plaza Mayor',40.4155,-3.7074,'t1','d7',true,3,''),
+      P('p44','Mercado de San Miguel',40.4154,-3.7090,'t2','d7',true,4,'Tapas crawl.'),
+      P('p45','Templo de Debod',40.4240,-3.7177,'t4','d7',true,5,'Sunset.'),
+      P('p46','Chocolatería San Ginés',40.4168,-3.7068,'t3','d7',false,0,'Churros, open late.'),
+      P('p47','Museo del Prado',40.4138,-3.6921,'t5','d8',true,1,'Free entry the last 2 hours.'),
+      P('p48','Parque del Retiro',40.4136,-3.6829,'t9','d8',true,2,'Rowing boats on the lake.'),
+      P('p49','Círculo de Bellas Artes rooftop',40.4185,-3.6965,'t4','d8',true,3,''),
+      P('p50','Sobrino de Botín',40.4141,-3.7080,'t2','d8',true,4,'Oldest restaurant in the world. Book ahead.'),
+      P('p51','Museo Thyssen',40.4161,-3.6949,'t5','d8',false,0,''),
+      P('p52','Palacio Real',40.4179,-3.7143,'t1','d9',true,1,''),
+      P('p53','Catedral de la Almudena',40.4157,-3.7146,'t1','d9',true,2,''),
+      P('p54','Museo Reina Sofía',40.4086,-3.6945,'t5','d9',true,3,'See Guernica.'),
+      P('p55','Malasaña',40.4260,-3.7040,'t8','d9',true,4,''),
+      P('p56','El Rastro',40.4087,-3.7075,'t6',null,false,0,'Sundays only.')
     ]),
     stays:[
       {id:'s1',name:'Hotel Avenida Palace',lat:38.7148,lng:-9.1410,ci:-1,co:1,notes:'Breakfast 7 to 10:30.'},
-      {id:'s2',name:'Altis Belém Hotel',lat:38.6936,lng:-9.2102,ci:1,co:3,notes:'Check-in from 3 pm.'}
+      {id:'s2',name:'Altis Belém Hotel',lat:38.6936,lng:-9.2102,ci:1,co:3,notes:'Check-in from 3 pm.'},
+      {id:'s3',name:'Pestana Vintage Porto',lat:41.1404,lng:-8.6146,ci:3,co:6,notes:'Bags any time, rooms from 3 pm.'},
+      {id:'s4',name:'Hotel Regina',lat:40.4182,lng:-3.6990,ci:6,co:9,notes:''}
     ],
     view:{day:'all',mainOnly:false,hidden:[],basemap:'illustrated',collapsed:[]}
   };
@@ -576,7 +648,9 @@ function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.is
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
 
 let S=load()||sample();
-if(!Array.isArray(S.stays))S.stays=[];S.places.forEach(p=>{if(p.stay==null)p.stay=60});S.days.forEach(d=>{if(!d.start)d.start='09:00'});
+if(!Array.isArray(S.stays))S.stays=[];
+if(!Array.isArray(S.cities)||!S.cities.length){S.cities=[{id:'c1',name:S.trip.name||'My trip'}];S.days.forEach(d=>{d.city='c1'})}
+S.days.forEach(d=>{if(!S.cities.some(c=>c.id===d.city))d.city=S.cities[0].id});S.places.forEach(p=>{if(p.stay==null)p.stay=60});S.days.forEach(d=>{if(!d.start)d.start='09:00'});
 const ui={open:null,tab:'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
 const reduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
 const EASE='cubic-bezier(.2,.8,.2,1)';
@@ -644,11 +718,15 @@ const mains=id=>S.places.filter(p=>p.day===id&&p.main).sort((a,b)=>a.order-b.ord
 const extras=id=>S.places.filter(p=>p.day===id&&!p.main);
 const loose=()=>S.places.filter(p=>!p.day);
 function renumber(id){mains(id).forEach((p,i)=>p.order=i+1)}
+const isCity=v=>(S.cities||[]).some(c=>c.id===v);
+const cityOf=dayId=>{const d=S.days.find(x=>x.id===dayId);return d&&S.cities.find(c=>c.id===d.city)};
+const cityDays=cid=>S.days.filter(d=>d.city===cid);
+function inView(dayId){const v=S.view.day;if(v==='all'||v===dayId)return true;if(isCity(v)){const d=S.days.find(x=>x.id===dayId);return !!d&&d.city===v}return false}
 function visible(p){
   const v=S.view;
   if(v.hidden.includes(p.tag))return false;
   if(v.mainOnly&&!p.main)return false;
-  if(v.day!=='all'&&p.day!==v.day)return false;
+  if(v.day!=='all'&&!(p.day&&inView(p.day)))return false;
   return true;
 }
 const SVG={
@@ -666,6 +744,14 @@ map.attributionControl.setPrefix(false);
 const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
 ['streets:240','base:250','baselabels:350'].forEach(x=>{const [n,z]=x.split(':');const p=map.createPane(n);p.style.zIndex=z;p.style.pointerEvents='none'});
 const WATER=[[38.6960,-9.2800],[38.6920,-9.2400],[38.6895,-9.2200],[38.6925,-9.2050],[38.6945,-9.1950],[38.7010,-9.1750],[38.7045,-9.1450],[38.7058,-9.1360],[38.7080,-9.1250],[38.7170,-9.1150],[38.7330,-9.1010],[38.7550,-9.0950],[38.7800,-9.0900],[38.8200,-9.0850],[38.8200,-8.9500],[38.6400,-8.9500],[38.6550,-9.0400],[38.6680,-9.0950],[38.6750,-9.1250],[38.6870,-9.1450],[38.6855,-9.1600],[38.6790,-9.1760],[38.6780,-9.1950],[38.6760,-9.2250],[38.6650,-9.2600],[38.6600,-9.2800]];
+const DOURO=[[41.1485,-8.675],[41.1440,-8.655],[41.1415,-8.640],[41.1402,-8.625],[41.1398,-8.613],[41.1398,-8.605],[41.1410,-8.592],[41.1425,-8.578],[41.1440,-8.560],[41.1440,-8.540],[41.1420,-8.540],[41.1420,-8.560],[41.1405,-8.578],[41.1390,-8.592],[41.1384,-8.605],[41.1383,-8.613],[41.1385,-8.625],[41.1398,-8.640],[41.1420,-8.655],[41.1460,-8.675],[41.1470,-8.690],[41.1500,-8.690]];
+const MANZ=[[40.4400,-3.7268],[40.4250,-3.7238],[40.4100,-3.7180],[40.3950,-3.7080],[40.3850,-3.6990],[40.3842,-3.6972],[40.3940,-3.7058],[40.4090,-3.7158],[40.4245,-3.7216],[40.4400,-3.7246]];
+const IBERIA=[[36.15,-5.35],[36.0,-5.6],[36.5,-6.3],[36.8,-6.4],[37.2,-7.4],[37.0,-8.0],[37.1,-8.65],[37.0,-8.95],[37.9,-8.8],[38.45,-8.9],[38.41,-9.21],[38.64,-9.24],[38.68,-9.33],[38.70,-9.42],[38.78,-9.50],[39.35,-9.40],[40.15,-8.87],[41.15,-8.682],[41.9,-8.87],[42.9,-9.27],[43.35,-8.4],[43.78,-7.7],[43.55,-5.9],[43.45,-3.8],[43.3,-2.0],[43.4,-1.6],[44.6,-1.25],[45.6,-1.1],[46.2,-1.2],[47.2,-2.2],[47.8,-4.3],[48.4,-4.8],[48.8,-3.0],[48.6,-1.5],[49.7,-1.9],[49.3,0.1],[50.0,1.5],[51.0,2.4],[51.5,6],[47,10],[44.4,8.9],[43.7,7.3],[43.3,5.4],[43.5,3.6],[42.5,3.1],[41.4,2.2],[40.6,0.6],[39.5,-0.35],[38.7,0.2],[37.6,-0.7],[36.75,-2.1],[36.7,-4.4]];
+const AFRICA=[[35.8,-5.9],[35.9,-5.3],[35.2,-2.9],[35.1,-2.0],[35.3,-0.8],[36.8,3.0],[37.0,10],[28,10],[28,-13],[33.6,-7.6],[34.3,-6.6]];
+const MALLORCA=[[39.95,3.1],[39.65,3.45],[39.27,3.0],[39.55,2.4]];
+const OCEAN=[[[25,-25],[56,-25],[56,15],[25,15]],IBERIA,AFRICA,MALLORCA];
+const CITY_AREAS=[{bb:[38.645,38.80,-9.26,-9.06],water:[WATER]},{bb:[41.12,41.19,-8.70,-8.56],water:[DOURO]},{bb:[40.37,40.48,-3.78,-3.63],water:[MANZ]}];
+const cityArea=(lat,lng)=>CITY_AREAS.find(c=>lat>=c.bb[0]&&lat<=c.bb[1]&&lng>=c.bb[2]&&lng<=c.bb[3]);
 const PARKS=[
   ['Monsanto Forest Park',[38.7300,-9.2020],[[38.7480,-9.2020],[38.7420,-9.1830],[38.7300,-9.1780],[38.7180,-9.1850],[38.7120,-9.2050],[38.7200,-9.2250],[38.7380,-9.2200]]],
   ['Tapada da Ajuda',[38.7095,-9.1850],[[38.7130,-9.1880],[38.7120,-9.1810],[38.7060,-9.1820],[38.7065,-9.1890]]],
@@ -675,10 +761,25 @@ const PARKS=[
   ['Botanical Garden',[38.7184,-9.1491],[[38.7195,-9.1505],[38.7193,-9.1478],[38.7172,-9.1478],[38.7174,-9.1505]]],
   ['',null,[[38.7146,-9.1345],[38.7145,-9.1322],[38.7133,-9.1322],[38.7134,-9.1345]]],
   ['Praça do Império',[38.6954,-9.2062],[[38.6960,-9.2085],[38.6962,-9.2040],[38.6948,-9.2040],[38.6946,-9.2085]]],
-  ['',null,[[38.7172,-9.1494],[38.7171,-9.1482],[38.7164,-9.1482],[38.7165,-9.1494]]]
+  ['',null,[[38.7172,-9.1494],[38.7171,-9.1482],[38.7164,-9.1482],[38.7165,-9.1494]]],
+  ['Parque da Cidade',[41.1700,-8.6740],[[41.176,-8.684],[41.177,-8.668],[41.166,-8.664],[41.163,-8.680]]],
+  ['Jardins do Palácio de Cristal',[41.1483,-8.6255],[[41.1500,-8.6285],[41.1505,-8.6235],[41.1465,-8.6225],[41.1460,-8.6280]]],
+  ['',null,[[41.1380,-8.6100],[41.1382,-8.6085],[41.1366,-8.6083],[41.1364,-8.6098]]],
+  ['El Retiro',[40.4160,-3.6830],[[40.4235,-3.6895],[40.4230,-3.6770],[40.4075,-3.6765],[40.4080,-3.6870],[40.4140,-3.6895]]],
+  ['Casa de Campo',[40.4180,-3.7500],[[40.440,-3.765],[40.438,-3.735],[40.420,-3.729],[40.400,-3.735],[40.398,-3.760],[40.415,-3.775]]],
+  ['Campo del Moro',[40.4185,-3.7178],[[40.4205,-3.7195],[40.4205,-3.7165],[40.4165,-3.7160],[40.4160,-3.7190]]]
 ];
 const PLAZAS=[[[38.7085,-9.1372],[38.7085,-9.1356],[38.7068,-9.1356],[38.7068,-9.1372]],[[38.7142,-9.1400],[38.7142,-9.1390],[38.7132,-9.1390],[38.7132,-9.1400]]];
 const ROADS=[
+  [[41.1460,-8.6110],[41.1485,-8.6112],[41.1505,-8.6105]],
+  [[41.1412,-8.6095],[41.1372,-8.6092]],
+  [[41.1460,-8.6070],[41.1520,-8.6055]],
+  [[41.1410,-8.6170],[41.1425,-8.6300],[41.1440,-8.6420],[41.1470,-8.6580],[41.1500,-8.6720]],
+  [[41.1505,-8.6105],[41.1560,-8.6150],[41.1620,-8.6300],[41.1600,-8.6500]],
+  [[40.4205,-3.7115],[40.4200,-3.7050],[40.4192,-3.6990],[40.4190,-3.6965]],
+  [[40.4480,-3.6905],[40.4300,-3.6910],[40.4205,-3.6930],[40.4140,-3.6925],[40.4070,-3.6915]],
+  [[40.4170,-3.7030],[40.4192,-3.6965],[40.4205,-3.6890],[40.4240,-3.6760]],
+  [[40.4169,-3.7035],[40.4155,-3.7100],[40.4160,-3.7140],[40.4220,-3.7140]],
   [[38.7148,-9.1415],[38.7200,-9.1458],[38.7253,-9.1500]],
   [[38.7078,-9.1365],[38.7138,-9.1395],[38.7148,-9.1415]],
   [[38.7068,-9.1250],[38.7068,-9.1300],[38.7066,-9.1400],[38.7055,-9.1500],[38.7048,-9.1650],[38.7030,-9.1750],[38.6985,-9.1900],[38.6968,-9.2050],[38.6940,-9.2200],[38.6965,-9.2500]],
@@ -693,6 +794,12 @@ const ROADS=[
 ];
 const RAIL=[[38.7060,-9.1450],[38.7046,-9.1600],[38.7025,-9.1760],[38.6975,-9.1920],[38.6955,-9.2050],[38.6928,-9.2200],[38.6950,-9.2500]];
 const LABELS=[
+  ['Ribeira',41.1420,-8.6170,''],['Baixa',41.1480,-8.6080,''],['Vila Nova de Gaia',41.1320,-8.6120,''],['Foz do Douro',41.1530,-8.6700,''],['Boavista',41.1580,-8.6350,''],['Cedofeita',41.1530,-8.6200,''],
+  ['Rio Douro',41.1405,-8.6360,'water'],['Ponte Luís I',41.1392,-8.6070,'small'],['Av. dos Aliados',41.1490,-8.6125,'small'],
+  ['Sol',40.4182,-3.7055,''],['Malasaña',40.4275,-3.7065,''],['Chueca',40.4225,-3.6970,''],['Salamanca',40.4275,-3.6820,''],['La Latina',40.4110,-3.7115,''],['Lavapiés',40.4085,-3.7010,''],['Chamberí',40.4345,-3.7010,''],
+  ['Gran Vía',40.4210,-3.7080,'small'],['Paseo del Prado',40.4110,-3.6940,'small'],['Río Manzanares',40.4060,-3.7190,'water'],
+  ['Lisbon',38.7250,-9.1400,'city'],['Porto',41.1600,-8.6100,'city'],['Madrid',40.4300,-3.7000,'city'],
+  ['PORTUGAL',39.7,-8.1,'country'],['SPAIN',39.4,-4.6,'country'],['FRANCE',46.6,1.8,'country'],['MOROCCO',32.6,-6.4,'country'],['Atlantic Ocean',39.9,-10.1,'ocean'],
   ['Baixa',38.7112,-9.1380,''],['Alfama',38.7122,-9.1285,''],['Bairro Alto',38.7137,-9.1462,''],['Belém',38.6995,-9.2010,''],
   ['Alcântara',38.7085,-9.1780,''],['Graça',38.7180,-9.1290,''],['Avenidas Novas',38.7400,-9.1480,''],['Estrela',38.7120,-9.1640,''],
   ['Almada',38.6740,-9.1580,''],['Rio Tejo',38.6930,-9.1100,'water'],['Rio Tejo',38.6855,-9.2050,'water'],
@@ -704,8 +811,8 @@ function hash(i,j,k){const x=Math.sin(i*127.1+j*311.7+k*74.7)*43758.5453;return 
 const LAT_STEP=0.0016,LNG_STEP=0.0021;
 function node(i,j){return [i*LAT_STEP+(hash(i,j,1)-.5)*.55*LAT_STEP,j*LNG_STEP+(hash(i,j,2)-.5)*.55*LNG_STEP]}
 function onLand(lat,lng){
-  if(lat<38.645||lat>38.80||lng<-9.26||lng>-9.06)return false;
-  if(inPoly(lat,lng,WATER))return false;
+  const ca=cityArea(lat,lng);if(!ca)return false;
+  for(const w of ca.water)if(inPoly(lat,lng,w))return false;
   for(const p of PARK_POLYS)if(inPoly(lat,lng,p))return false;
   return true;
 }
@@ -740,7 +847,8 @@ const StreetGrid=L.GridLayer.extend({
 });
 const illus=L.layerGroup();
 const streets=new StreetGrid({pane:'streets',maxZoom:19,attribution:'Illustrated map, not to scale'}).addTo(illus);
-L.polygon(WATER,{pane:'base',className:'bm-water',weight:1.5,interactive:false}).addTo(illus);
+L.polygon(OCEAN,{pane:'base',className:'bm-water',weight:1.2,interactive:false}).addTo(illus);
+[WATER,DOURO,MANZ].forEach(w=>L.polygon(w,{pane:'base',className:'bm-water',weight:1.2,interactive:false}).addTo(illus));
 PARKS.forEach(p=>L.polygon(p[2],{pane:'base',className:'bm-park',interactive:false}).addTo(illus));
 PLAZAS.forEach(p=>L.polygon(p,{pane:'base',className:'bm-plaza',weight:1,interactive:false}).addTo(illus));
 const rail=L.polyline(RAIL,{pane:'base',className:'bm-rail',weight:2,dashArray:'6 5',interactive:false}).addTo(illus);
@@ -752,7 +860,7 @@ function styleRoads(){
   const z=map.getZoom();
   const cw=z>=16?13:z>=15?10:z>=14?7.5:z>=13?5.5:3.5,fw=cw-2.5;
   roadPairs.forEach(([c,f])=>{c.setStyle({weight:cw,lineCap:'round',lineJoin:'round'});f.setStyle({weight:Math.max(fw,1.5),lineCap:'round',lineJoin:'round'})});
-  $('map').classList.toggle('zlow',z<14);
+  $('map').classList.toggle('zlow',z<14);$('map').classList.toggle('zfar',z<11);
 }
 map.on('zoomend',styleRoads);styleRoads();
 const redrawStreets=()=>streets.redraw();
@@ -791,7 +899,10 @@ function iconFor(p,anim){
 function km(a,b){const R=6371,r=Math.PI/180,dLat=(b[0]-a[0])*r,x=(b[1]-a[1])*r*Math.cos((a[0]+b[0])/2*r);return R*Math.sqrt(dLat*dLat+x*x)}
 const edgeMemo=new Map();
 // Routes may use any street on land, including footpaths through parks (not drawn), but never cross water
-const walkable=(lat,lng)=>lat>=38.645&&lat<=38.80&&lng>=-9.26&&lng<=-9.06&&!inPoly(lat,lng,WATER);
+// Walkers can cross rivers on bridges (Porto) and anywhere over the narrow Manzanares (Madrid)
+const BRIDGES=[{lat:[41.1355,41.1430],lng:-8.6094},{lat:[41.1355,41.1430],lng:-8.6020},{lat:[41.1370,41.1440],lng:-8.6400}];
+const onBridge=(lat,lng)=>BRIDGES.some(b=>lat>=b.lat[0]&&lat<=b.lat[1]&&Math.abs(lng-b.lng)<=.0012);
+const walkable=(lat,lng)=>{const ca=cityArea(lat,lng);if(!ca)return false;if(onBridge(lat,lng))return true;return !ca.water.some(w=>w!==MANZ&&inPoly(lat,lng,w))};
 function edgeOK(i,j,di,dj){
   let a=i,b=j,k;
   if(di===0&&(dj===1||dj===-1)){if(dj<0)b=j-1;k=3}
@@ -865,14 +976,14 @@ function arcPath(A,B){const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2,dx=B[0]-A[0],dy=B[
 function legRoute(a,b,mode){
   const A=[a.lat,a.lng],B=[b.lat,b.lng];
   if(mode==='plane')return {path:arcPath(A,B),km:hav(A,B),live:false,air:true};
-  if(S.view.basemap!=='street'&&hav(A,B)>30){const d=hav(A,B);return {path:[A,B],km:d*1.25,live:false}}
+  if(S.view.basemap!=='street'&&hav(A,B)>30){const d=hav(A,B);return {path:[A,B],km:d*1.15,live:false}}
   if(S.view.basemap==='street'){const prof=MODES[mode].profile,c=liveCache[liveKey(A,B,prof)];if(c)return {path:c.path,km:c.km,live:true};requestLive(A,B,prof)}
   const gk=A.join()+'|'+B.join();let r=gridCache.get(gk);
   if(!r){const path=gridRoute(A,B);let d=0;for(let i=1;i<path.length;i++)d+=km(path[i-1],path[i]);r={path,km:d};gridCache.set(gk,r)}
   return {path:r.path,km:r.km,live:false};
 }
 const legMode=(a,b)=>{if(b.mode&&MODES[b.mode])return b.mode;const d=km([a.lat,a.lng],[b.lat,b.lng]);return d>400?'plane':d>2?'transit':'walk'};
-const minsFor=(mode,d)=>{const m=MODES[mode];return Math.max(1,Math.round(d/m.kmh*60+(d>0.05?m.extra:0)))};
+const minsFor=(mode,d)=>{const m=MODES[mode];let kmh=m.kmh,extra=m.extra;if(d>30){if(mode==='transit'){kmh=110;extra=30}else if(mode==='car'){kmh=90;extra=10}}return Math.max(1,Math.round(d/kmh*60+(d>0.05?extra:0)))};
 const toMin=s=>{const [h,m]=String(s||'09:00').split(':').map(Number);return (h||0)*60+(m||0)};
 const clock=m=>{m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=m%60;return ((h%12)||12)+':'+String(mm).padStart(2,'0')+(h<12?' am':' pm')};
 const dur=m=>m<60?m+' min':Math.floor(m/60)+' h'+(m%60?' '+(m%60)+' min':'');
@@ -942,9 +1053,11 @@ function drawLeg(lg,dc,p,isNew,isSel,onBadge,title){
 }
 function syncDayFocus(scroll){
   const v=S.view.day;
-  document.querySelectorAll('#panel .day[data-day]').forEach(sec=>{const id=sec.dataset.day;sec.classList.toggle('focus',v===id);sec.classList.toggle('dim',v!=='all'&&v!==id);
+  document.querySelectorAll('#panel .day[data-day]').forEach(sec=>{const id=sec.dataset.day;sec.classList.toggle('focus',v===id);sec.classList.toggle('dim',v!=='all'&&!inView(id));
     const h=sec.querySelector('.day-h');if(h)h.setAttribute('aria-pressed',v===id)});
-  if(scroll&&v!=='all'){const sec=document.querySelector('#panel .day[data-day="'+v+'"]'),sc=panelScroller();
+  document.querySelectorAll('#panel .city[data-city]').forEach(sec=>{const id=sec.dataset.city,mine=v===id||cityDays(id).some(d=>d.id===v);sec.classList.toggle('cfocus',v===id);sec.classList.toggle('cdim',v!=='all'&&!mine);
+    const h=sec.querySelector('.city-h');if(h)h.setAttribute('aria-pressed',v===id)});
+  if(scroll&&v!=='all'){const sec=document.querySelector(isCity(v)?'#panel .city[data-city="'+v+'"]':'#panel .day[data-day="'+v+'"]'),sc=panelScroller();
     if(sec&&sc){const r=sec.getBoundingClientRect(),sr=sc.getBoundingClientRect();if(r.top<sr.top||r.top>sr.top+sr.height*.35)sc.scrollTo({top:sc.scrollTop+r.top-sr.top-6,behavior:reduced?'auto':'smooth'})}}
 }
 function refreshSel(was){[was,ui.open].forEach(id=>{const q=id&&S.places.find(x=>x.id===id);if(q&&markers[id]){markers[id].setIcon(iconFor(q));markers[id]._wk=iconKey(q)}})}
@@ -1102,7 +1215,7 @@ function renderRoutes(){
   if(fadeOld){old.eachLayer(l=>{const el=l.getElement&&l.getElement();if(el)el.classList.add('rt-out')});setTimeout(()=>map.removeLayer(old),240)}
   else map.removeLayer(old);
   if(ui.routeHold){ui.prevLegs=new Set();return}
-  const days=S.view.day==='all'?S.days:S.days.filter(d=>d.id===S.view.day);
+  const days=S.days.filter(d=>inView(d.id));
   const now=new Set();
   days.forEach(d=>{const dc=dayColor(d.id);dayPlan(d.id).forEach(x=>{if(!x.leg||!visible(x.p)||!visible(x.leg.from))return;
     const key=x.p.id+'|'+x.leg.from.id+'|'+x.leg.mode+'|'+(x.leg.live?1:0);now.add(key);
@@ -1110,11 +1223,11 @@ function renderRoutes(){
   // travel between days
   for(let i=1;i<S.days.length;i++){
     const x=transferOf(i);if(!x)continue;
-    const v=S.view.day,mine=v==='all'||v===x.owner;if(!mine)continue;
+    const v=S.view.day;if(!inView(x.owner))continue;
     if(v==='all'&&(!visible(x.from)||!visible(x.to)))continue;
     const key='x|'+x.day+'|'+x.mode+'|'+x.when+'|'+(x.live?1:0);now.add(key);
     drawLeg(x,dayColor(x.owner),x.to,!reduced&&!ui.prevLegs.has(key),false,at=>openXferPopup(x.day,at),MODES[x.mode].label+' from Day '+i+' to Day '+(i+1));
-    if(v!=='all'){const g=v===x.day?x.from:x.to,gd=v===x.day?x.prevDay:x.day,t=tagOf(g);
+    if(v!=='all'&&!(inView(x.day)&&inView(x.prevDay))){const g=inView(x.day)?x.from:x.to,gd=inView(x.day)?x.prevDay:x.day,t=tagOf(g);
       L.marker([g.lat,g.lng],{keyboard:false,title:g.name+' (Day '+(dayIdx(gd)+1)+')',zIndexOffset:300,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],
         html:'<div class="pin pin-ghost" style="--c:'+dayColor(gd)+'"><span class="pin-ico">'+esc(t.icon)+'</span></div>'})})
         .on('click',()=>{const btn=document.querySelector('.seg [data-day="'+gd+'"]');if(btn)btn.click()}).addTo(routeLayer)}
@@ -1122,7 +1235,7 @@ function renderRoutes(){
   // hotels, and the legs to and from them
   const vd=S.view.day,shownStays=new Set();
   S.days.forEach((d,i)=>{
-    if(vd!=='all'&&vd!==d.id)return;
+    if(!inView(d.id))return;
     ['m','e'].forEach(part=>{const lg=hotelLeg(d.id,part);if(!lg||!visible(part==='m'?lg.to:lg.from))return;
       const key='h|'+d.id+'|'+part+'|'+lg.mode+'|'+(lg.live?1:0);now.add(key);
       drawLeg(lg,dayColor(d.id),lg.to,!reduced&&!ui.prevLegs.has(key),false,at=>openHlegPopup(d.id,part,at),MODES[lg.mode].label+(part==='m'?' from ':' to ')+lg.stay.name)});
@@ -1130,7 +1243,7 @@ function renderRoutes(){
   });
   if(vd==='all')S.stays.forEach(st=>shownStays.add(st));
   shownStays.forEach(st=>{
-    const m=L.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:L.divIcon({className:'',iconSize:[30,30],iconAnchor:[15,15],popupAnchor:[0,-14],html:'<div class="pin pin-hotel"><span class="pin-ico">🛏️</span></div>'})});
+    const m=L.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:L.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
     m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">Edit</button></div></div>',{maxWidth:260});
     m.on('dragend',e=>{const ll=e.target.getLatLng();st.lat=+ll.lat.toFixed(6);st.lng=+ll.lng.toFixed(6);S.places.forEach(p=>{if(p.stayRef===st.id){p.lat=st.lat;p.lng=st.lng}});commit()});
     m.addTo(routeLayer);
@@ -1184,9 +1297,9 @@ function renderMap(){
 }
 function fitVisible(fly,done){
   const pts=S.places.filter(visible).map(p=>[p.lat,p.lng]);fly=fly&&!reduced;
-  if(S.view.day!=='all'){const di=dayIdx(S.view.day);[stayForNight(di-1),stayForNight(di)].forEach(st=>{if(st)pts.push([st.lat,st.lng])})}
+  if(S.view.day!=='all'){const cv=isCity(S.view.day);S.days.forEach((d,di)=>{if(!inView(d.id))return;const first=cv&&(di===0||S.days[di-1].city!==d.city);[first?null:stayForNight(di-1),stayForNight(di)].forEach(st=>{if(st)pts.push([st.lat,st.lng])})})}
   else S.stays.forEach(st=>pts.push([st.lat,st.lng]));
-  if(S.view.day!=='all')for(let i=1;i<S.days.length;i++){const x=transferOf(i);if(x&&x.owner===S.view.day){pts.push([x.from.lat,x.from.lng],[x.to.lat,x.to.lng])}}
+  if(S.view.day!=='all')for(let i=1;i<S.days.length;i++){const x=transferOf(i);if(x&&inView(x.owner)&&!isCity(S.view.day)){pts.push([x.from.lat,x.from.lng],[x.to.lat,x.to.lng])}}
   if(!pts.length){done&&done();return}
   if(pts.length===1){fly?glideTo(pts[0],15,null,done):(map.setView(pts[0],15),done&&done())}
   else{fly?glideBounds(pts,{padding:[50,50],maxZoom:15},done):(map.fitBounds(pts,{padding:[50,50],maxZoom:15}),done&&done())}
@@ -1212,7 +1325,7 @@ map.on('click',e=>{
   if(!ui.placing)return;
   const kind=ui.placeKind;setPlacing(false);
   if(kind==='stay'){openStay(null,{lat:+e.latlng.lat.toFixed(6),lng:+e.latlng.lng.toFixed(6),ci:ui.stayCi});return}
-  const d=S.view.day!=='all'?S.view.day:null;
+  const d=S.days.some(x=>x.id===S.view.day)?S.view.day:(isCity(S.view.day)?(cityDays(S.view.day)[0]||{}).id||null:null);
   openPlace(null,{lat:+e.latlng.lat.toFixed(6),lng:+e.latlng.lng.toFixed(6),day:d});
 });
 function setPlacing(on,kind){ui.placing=on;ui.placeKind=kind||'place';$('banner').firstChild.textContent=ui.placeKind==='stay'?'Click the map where your hotel is ':'Click the map where the place is ';$('banner').hidden=!on;$('map').classList.toggle('placing',on)}
@@ -1222,7 +1335,7 @@ function renderHead(){
   $('trip-name').textContent=S.trip.name;
   const n=S.days.length,a=dayDate(0),b=dayDate(n-1);
   const range=n>1?fmt(a,{month:'short',day:'numeric'})+' to '+fmt(b,{month:'short',day:'numeric',year:'numeric'}):fmt(a,{month:'short',day:'numeric',year:'numeric'});
-  $('trip-meta').textContent=range+' · '+n+' day'+(n>1?'s':'')+' · '+S.places.length+' places';
+  const nc=S.cities.length;$('trip-meta').textContent=range+' · '+n+' day'+(n>1?'s':'')+(nc>1?' · '+nc+' cities':'')+' · '+S.places.length+' places';
   const tabs=[['plan','Itinerary',S.places.filter(p=>p.main).length],['saved','Saved',loose().length],['tags','Tags',S.tags.length]];
   $('tabs').innerHTML=tabs.map(([id,l,c])=>'<button class="tab" role="tab" data-act="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+l+'<span class="n">'+c+'</span></button>').join('');
   pill($('tabs'),'[aria-selected="true"]','tabs');
@@ -1256,6 +1369,17 @@ function stopName(p,i){
   if(st.co===i)return '<span class="hlab">Back to</span> '+esc(st.name)+' <span class="hlab">for bags</span>';
   return '<span class="hlab">Stop at</span> '+esc(st.name);
 }
+function cityHead(c){
+  const ds=cityDays(c.id),a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id),o={month:'short',day:'numeric'},v=S.view.day;
+  const cc=(S.view.ccol||[]).includes(c.id),mine=v===c.id||ds.some(d=>d.id===v);
+  const stops=ds.reduce((n,d)=>n+mains(d.id).length,0);
+  return '<section class="city'+(cc?' ccol':'')+(v===c.id?' cfocus':'')+(v!=='all'&&!mine?' cdim':'')+'" data-city="'+c.id+'"><div class="city-head" data-flip="ch-'+c.id+'">'+
+    '<button class="ib chev" data-act="collapse-city" data-city="'+c.id+'" aria-expanded="'+!cc+'" aria-label="Show or hide '+esc(c.name)+'">'+SVG.down+'</button>'+
+    '<button class="city-h" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v===c.id)+'" title="Show only '+esc(c.name)+' on the map"><span class="city-n">'+esc(c.name)+'</span>'+
+    '<span class="city-d">'+(a===b?'Day '+(a+1):'Days '+(a+1)+' to '+(b+1))+' · '+fmt(dayDate(a),o)+(a===b?'':' to '+fmt(dayDate(b),o))+' · '+stops+' stop'+(stops===1?'':'s')+'</span></button>'+
+    '<button class="ib" data-act="edit-city" data-city="'+c.id+'" aria-label="Edit '+esc(c.name)+'">'+SVG.edit+'</button></div>'+
+    '<div class="city-body"><div class="city-inner">';
+}
 function hotelRow(st,part,i,time){
   const linked=linkedStop(st,S.days[i].id);
   const lab=part==='m'?(st.co===i&&!linked?'Check out of':'Leave'):(st.ci===i&&!linked?'Check in at':'Back to');
@@ -1277,15 +1401,17 @@ function renderPanel(){
     h+='<div class="plan-tools"><button class="mini-toggle" data-act="toggle-travel" aria-pressed="'+!S.view.hideTravel+'" title="Show or hide travel between stops"><span class="sw2"></span>Travel</button>'+
       (S.days.length>1?'<button class="linkbtn" data-act="collapse-all">'+(S.days.every(d=>S.view.collapsed.includes(d.id))?'Expand all days':'Collapse all days')+'</button>':'')+'</div>';
     h+='<div class="stays" data-flip="stays"><div class="sub-h">Where you\u2019re staying</div>'+
-      (S.stays.length?'<ul class="plain">'+S.stays.slice().sort((a,b)=>a.ci-b.ci).map(st=>'<li class="row"><span class="hico" aria-hidden="true">🛏️</span><button class="row-main" data-act="edit-stay" data-stay="'+st.id+'"><span class="nm">'+esc(st.name)+'</span><span class="tg">'+nightsText(st)+'</span></button></li>').join('')+'</ul>':'<p class="empty">Add your hotels and each day will start and end there.</p>')+
+      (S.stays.length?'<ul class="plain">'+S.stays.slice().sort((a,b)=>a.ci-b.ci).map(st=>'<li class="row"><span class="hico" aria-hidden="true">🛏️</span><button class="row-main" data-act="edit-stay" data-stay="'+st.id+'"><span class="nm">'+esc(st.name)+'<small class="snights">'+nightsText(st)+'</small></span></button></li>').join('')+'</ul>':'<p class="empty">Add your hotels and each day will start and end there.</p>')+
       '<button class="linkbtn sm" data-act="add-stay">+ Add a hotel</button></div>';
     S.days.forEach((d,i)=>{
+      const cty=S.cities.find(c=>c.id===d.city)||S.cities[0],cFirst=i===0||S.days[i-1].city!==d.city,cLast=i===S.days.length-1||S.days[i+1].city!==d.city;
+      if(cFirst)h+=cityHead(cty);
       const plan=dayPlan(d.id),ms=plan.map(x=>x.p),xs=extras(d.id),dc=dayColor(d.id);
       const travel=plan.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+(plan.tin?plan.tin.min:0)+(plan.tout?plan.tout.min:0)+(plan.morning?plan.morning.min:0)+(plan.evening?plan.evening.min:0);
       const mst=stayForNight(i-1),est=stayForNight(i);
       const col=S.view.collapsed.includes(d.id);
-      h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'?' dim':'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span><span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+ms.length+' stop'+(ms.length===1?'':'s')+'</span>'+
-        (i===S.days.length-1&&S.days.length>1&&!ms.length&&!xs.length?'<button class="ib" data-act="remove-day" data-day="'+d.id+'" aria-label="Remove this day">✕</button>':'')+'</div>';
+      h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'&&!inView(d.id)?' dim':'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span><span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+ms.length+' stop'+(ms.length===1?'':'s')+'</span>'+
+        (cityDays(d.city).length>1&&!ms.length&&!xs.length?'<button class="ib" data-act="remove-day" data-day="'+d.id+'" aria-label="Remove this day">✕</button>':'')+'</div>';
       h+='<div class="day-body"><div class="day-inner">';
       h+='<div class="day-sum" data-flip="ds-'+d.id+'"><span>Starts</span><label class="tpick" title="Change start time"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><input type="time" id="ds-'+d.id+'" data-act="day-start" data-day="'+d.id+'" value="'+esc(d.start||'09:00')+'" aria-label="Day '+(i+1)+' start time"></label>'+
         (plan.length?'<span>· ends about '+clock(plan.end)+'</span>'+(travel?'<span>· '+dur(travel)+' getting around</span>':''):'')+'</div>';
@@ -1310,8 +1436,9 @@ function renderPanel(){
         h+='<div class="xwrap'+(xc?' xcol':'')+'" data-flip="sh-'+d.id+'"><button class="sub-h xtoggle" data-act="toggle-extras" data-day="'+d.id+'" aria-expanded="'+!xc+'">'+CHEV+'<span>Extras if there is time</span><span class="xcount">'+xs.length+'</span></button>'+
           '<div class="xbody"><div class="xinner"><ul class="extras">'+xs.map(p=>rowExtra(p,false)).join('')+'</ul></div></div></div>'}
       h+='</div></div></section>';
+      if(cLast)h+='<div class="addday" data-flip="ad-'+cty.id+'"><button class="linkbtn sm" data-act="add-day" data-city="'+cty.id+'">+ Add a day in '+esc(cty.name)+'</button></div></div></div></section>';
     });
-    h+='<div data-flip="add-day"><button class="btn" data-act="add-day">+ Add a day</button></div>';
+    h+='<div data-flip="add-city"><button class="btn" data-act="add-city">+ Add a city</button></div>';
   }else if(ui.tab==='saved'){
     const ls=loose();
     h+='<p class="note" style="padding:0">Places you want to keep in mind but haven\'t put on a day. They show on the map as dashed diamonds when viewing all days.</p>';
@@ -1335,11 +1462,12 @@ function renderPanel(){
 }
 function renderBar(){
   const v=S.view;
-  $('dayseg').innerHTML='<button data-act="set-day" data-day="all" aria-pressed="'+(v.day==='all')+'">All days</button>'+
-    S.days.map((d,i)=>'<button data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(v.day===d.id)+'"><span class="dot" style="--dc:'+dayColor(d.id)+'"></span>Day '+(i+1)+'</button>').join('');
+  $('dayseg').innerHTML='<button data-act="set-day" data-day="all" aria-pressed="'+(v.day==='all')+'">All</button>'+
+    S.cities.map(c=>'<i class="seg-sep" aria-hidden="true"></i><button class="seg-city" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v.day===c.id)+'">'+esc(c.name)+'</button>'+
+      cityDays(c.id).map(d=>'<button class="seg-day" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(v.day===d.id)+'" aria-label="Day '+(dayIdx(d.id)+1)+'"><span class="dot" style="--dc:'+dayColor(d.id)+'"></span>'+(dayIdx(d.id)+1)+'</button>').join('')).join('');
   pill($('dayseg'),'[aria-pressed="true"]','seg');
   $('mainonly').setAttribute('aria-pressed',v.mainOnly);
-  $('chips').innerHTML=S.tags.map(t=>{const c=S.places.filter(p=>p.tag===t.id&&(!v.mainOnly||p.main)&&(v.day==='all'||p.day===v.day)).length;
+  $('chips').innerHTML=S.tags.map(t=>{const c=S.places.filter(p=>p.tag===t.id&&(!v.mainOnly||p.main)&&(v.day==='all'||(p.day&&inView(p.day)))).length;
     return '<button class="chip" style="--tc:'+esc(t.color)+'" data-act="toggle-tag" data-tag="'+t.id+'" aria-pressed="'+!v.hidden.includes(t.id)+'">'+esc(t.icon)+' '+esc(t.name)+' <span class="c">'+c+'</span></button>'}).join('')+
     (v.hidden.length?'<button class="linkbtn" data-act="show-all-tags">Show all tags</button>':'');
 }
@@ -1404,6 +1532,31 @@ function saveStay(){
   if(!st){st={id:uid('s'),lat:f.lat,lng:f.lng};S.stays.push(st)}
   Object.assign(st,{name,ci,co,notes});
   S.places.forEach(p=>{if(p.stayRef===st.id)p.name=st.name});
+  closeDlg();commit();
+}
+function insertDayAt(k,day){
+  S.days.splice(k,0,day);
+  S.stays.forEach(st=>{if(st.ci>=k)st.ci++;if(st.co>=k)st.co++});
+}
+function removeDayAt(k){
+  if(k<0)return;S.days.splice(k,1);
+  S.stays.forEach(st=>{if(st.ci>=k)st.ci--;if(st.co>k)st.co--});
+  S.stays=S.stays.filter(st=>st.co>st.ci);
+}
+function openCity(c){
+  ui.dlg='city';ui.form={id:c?c.id:null};
+  openDlg('<h2>'+(c?'Edit city':'Add a city')+'</h2>'+
+    '<div class="field"><label for="f-cname">City name</label><input class="inp" id="f-cname" value="'+esc(c?c.name:'')+'" placeholder="e.g. Seville" autocomplete="off"></div>'+
+    (c?'':'<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+[1,2,3,4,5,6,7].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">Added after your last city. You can add more days later.</div></div>')+
+    '<p class="err" id="f-err" hidden></p>'+
+    '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
+}
+function saveCity(){
+  const name=$('f-cname').value.trim();
+  if(!name){$('f-err').textContent='Give the city a name.';$('f-err').hidden=false;return}
+  let c=S.cities.find(x=>x.id===ui.form.id);
+  if(c){c.name=name}
+  else{c={id:uid('c'),name};S.cities.push(c);const n=+$('f-cdays').value||1;for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'})}
   closeDlg();commit();
 }
 function ensureHotelTag(){let t=S.tags.find(x=>x.name.toLowerCase()==='hotel');if(!t){t={id:uid('t'),name:'Hotel',icon:'🛏️',color:'#334155'};S.tags.push(t)}return t.id}
@@ -1498,7 +1651,7 @@ function arm(key,btn,label){
 function focusPlace(p){
   let changed=false;
   if(!visible(p)){
-    if(S.view.day!=='all'&&p.day!==S.view.day){S.view.day='all';changed=true}
+    if(S.view.day!=='all'&&!(p.day&&inView(p.day))){S.view.day='all';changed=true}
     if(S.view.mainOnly&&!p.main){S.view.mainOnly=false;changed=true}
     S.view.hidden=S.view.hidden.filter(x=>x!==p.tag);changed=true;
     save();renderBar();renderPanel();renderMap();
@@ -1518,7 +1671,7 @@ document.addEventListener('click',e=>{
   switch(a){
     case 'tab':if(ui.tab!==b.dataset.tab){ui.tab=b.dataset.tab;ui.anim.tab=true;renderHead();renderPanel()}break;
     case 'set-day':{
-      const nd=(S.view.day===b.dataset.day&&b.classList.contains('day-h'))?'all':b.dataset.day;
+      const nd=(S.view.day===b.dataset.day&&(b.classList.contains('day-h')||b.classList.contains('city-h')))?'all':b.dataset.day;
       if(nd===S.view.day)break;
       S.view.day=nd;save();renderBar();syncDayFocus(true);
       map.closePopup();
@@ -1563,8 +1716,24 @@ document.addEventListener('click',e=>{
     case 'edit':if(p)openPlace(p);break;
     case 'add-place':setPlacing(!ui.placing);if(ui.placing&&window.matchMedia('(max-width:820px)').matches)document.querySelector('.mapwrap').scrollIntoView({behavior:'smooth',block:'center'});break;
     case 'cancel-place':setPlacing(false);break;
-    case 'add-day':S.days.push({id:uid('d')});commit();break;
-    case 'remove-day':{const d=b.dataset.day;S.days=S.days.filter(x=>x.id!==d);S.stays.forEach(st=>{st.co=Math.min(st.co,S.days.length)});S.stays=S.stays.filter(st=>st.co>st.ci);if(S.view.day===d)S.view.day='all';commit();break}
+    case 'add-day':{const cid=b.dataset.city||S.cities[S.cities.length-1].id,ds=cityDays(cid),k=ds.length?dayIdx(ds[ds.length-1].id)+1:S.days.length;
+      insertDayAt(k,{id:uid('d'),city:cid,start:'09:00'});S.view.ccol=(S.view.ccol||[]).filter(x=>x!==cid);commit();break}
+    case 'add-city':openCity(null);break;
+    case 'edit-city':{const c=S.cities.find(x=>x.id===b.dataset.city);if(c)openCity(c);break}
+    case 'save-city':saveCity();break;
+    case 'delete-city':{
+      const c=S.cities.find(x=>x.id===ui.form.id),ds=cityDays(c.id);
+      if(S.cities.length<2){$('f-err').textContent='A trip needs at least one city.';$('f-err').hidden=false;break}
+      if(S.places.some(p=>ds.some(d=>d.id===p.day))){$('f-err').textContent='Move or delete the stops in '+c.name+' first.';$('f-err').hidden=false;break}
+      if(!arm('del',b,'Click again to delete'))break;
+      ds.slice().reverse().forEach(d=>removeDayAt(dayIdx(d.id)));S.cities=S.cities.filter(x=>x!==c);
+      if(S.view.day===c.id||!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
+      closeDlg();commit();break}
+    case 'collapse-city':{
+      const id=b.dataset.city,c=S.view.ccol||(S.view.ccol=[]),now=!c.includes(id);
+      S.view.ccol=now?c.concat(id):c.filter(x=>x!==id);save();
+      const sec=b.closest('.city');if(sec)sec.classList.toggle('ccol',now);b.setAttribute('aria-expanded',!now);break}
+    case 'remove-day':{const d=b.dataset.day;removeDayAt(dayIdx(d));if(S.view.day===d)S.view.day='all';commit();break}
     case 'reset':
       if(ui.armed!=='reset'){ui.armed='reset';renderPanel();break}
       ui.armed=null;S=sample();ui.tab='plan';ui.open=null;ui.anim.tab=true;$('panel').classList.remove('hide-travel');commit();fitVisible(true);break;
@@ -1612,7 +1781,7 @@ document.addEventListener('keydown',e=>{
       if(ms[j]){const o=ms[j].order;ms[j].order=p.order;p.order=o;commit();const f=document.querySelector('.row-main[data-id="'+p.id+'"]');if(f)f.focus()}return}
   }
   if(e.key==='Escape'){if(!$('dlg').hidden){const back=ui.dlg==='tag'&&ui.form&&ui.form.back;closeDlg();if(back)reopenPlace(back)}else if(ui.placing)setPlacing(false)}
-  if(e.key==='Enter'&&!$('dlg').hidden&&e.target.tagName==='INPUT'){e.preventDefault();if(ui.dlg==='place')savePlace();else if(ui.dlg==='tag')saveTag();else if(ui.dlg==='stay')saveStay()}
+  if(e.key==='Enter'&&!$('dlg').hidden&&e.target.tagName==='INPUT'){e.preventDefault();if(ui.dlg==='place')savePlace();else if(ui.dlg==='tag')saveTag();else if(ui.dlg==='stay')saveStay();else if(ui.dlg==='city')saveCity()}
 });
 
 /* ---------- Drag to reorder (mouse, touch, pen) ---------- */
@@ -1722,7 +1891,7 @@ document.addEventListener('touchmove',e=>{if(drag.st&&drag.st.active)e.preventDe
 document.addEventListener('contextmenu',e=>{if(drag.st)e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(e.target.closest&&e.target.closest('#panel'))e.preventDefault()});
 
-if(!S.days.some(d=>d.id===S.view.day))S.view.day='all';
+if(!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
 setBasemap(S.view.basemap==='street'?'street':'illustrated');
 $('panel').classList.toggle('hide-travel',!!S.view.hideTravel);
 renderAll();fitVisible();
