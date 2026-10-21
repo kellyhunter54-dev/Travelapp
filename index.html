@@ -47,11 +47,69 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 
 /* Sidebar */
 .side{display:flex;flex-direction:column;min-height:0;min-width:0;background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
-.side-head{padding:18px 18px 12px;border-bottom:1px solid var(--line);display:grid;gap:4px}
+.side-foot{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border-top:1px solid var(--line);flex:none}
+.sf-btn{display:flex;align-items:center;justify-content:center;gap:8px;border:0;background:var(--surface);padding:14px 10px;font-weight:600;font-size:14px;color:var(--fg);transition:background-color .18s ease,color .18s ease}
+.sf-btn svg{width:19px;height:19px;color:var(--accent);transition:transform .25s var(--spring,ease)}
+.sf-btn:hover{background:var(--accent-soft)}
+.sf-btn:hover svg{transform:scale(1.12)}
+.sf-btn:active{background:color-mix(in srgb,var(--accent) 22%,var(--surface))}
+.side-head{position:relative;padding:18px 18px 12px;border-bottom:1px solid var(--line);display:grid;gap:4px}
+.side-head h1{padding-right:0}
+.tsw{display:grid;justify-items:start;gap:4px;border:0;background:none;text-align:left;color:inherit;padding:4px 8px;margin:-4px -8px;border-radius:10px;min-width:0;max-width:calc(100% - 26px);transition:background-color .18s ease}
+.tsw:hover,.tsw[aria-expanded="true"]{background:var(--surface-2)}
+.tsw-row{display:flex;align-items:center;gap:8px;min-width:0;max-width:100%}
+.tsw-row h1{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tsw-chev{width:12px;height:8px;flex:none;color:var(--muted);transition:transform .3s var(--ease,ease),color .18s ease}
+.tsw:hover .tsw-chev{color:var(--fg)}
+.tsw[aria-expanded="true"] .tsw-chev{transform:rotate(180deg)}
+.tsw-eb{display:inline-flex;align-items:center;gap:6px;padding:3px 8px;margin:-3px -8px}
+.tsw-eb .tsw-chev{width:9px;height:6px}
+.tsw-h1{max-width:100%;margin:-4px -8px 0}
+.tsw-h1 .tsw-row{align-items:center}
+.tsw-h1 .tsw-row h1{white-space:normal;overflow:visible;text-wrap:balance}
+.pg-titles{flex:1 1 320px;min-width:0}
+.tsw-h1 .tsw-chev{width:14px;height:9px;margin-top:4px}
+.tmenu{width:320px;max-width:calc(100vw - 16px)}
+.tmenu .qopt{align-items:center}
+.tm-dots{display:grid;grid-template-columns:repeat(3,6px);gap:2px;flex:none;width:22px;justify-content:center}
+.tm-dots i{width:6px;height:6px;border-radius:50%}
+.tm-t{display:grid;min-width:0;flex:1}
+.tm-t b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tm-t small{font-size:12px;color:var(--muted);font-weight:400;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-foot{display:grid;border-top:1px solid var(--line);margin-top:4px;padding-top:4px}
+.tm-foot .qi{display:grid;place-items:center;color:var(--muted);font-size:17px}
+.tm-foot .qi svg{width:16px;height:16px}
+.side-cog{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:9px}
+.side-cog svg{width:18px;height:18px;transition:rotate .5s var(--ease,ease)}
+.side-cog:hover svg{rotate:60deg}
 .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
 .side-head h1{font-size:30px;font-weight:700;letter-spacing:-.01em;line-height:1.05}
 .trip-meta{color:var(--muted);font-size:13px}
 .tabs{display:flex;gap:4px;padding:10px 12px;border-bottom:1px solid var(--line)}
+.sm-city{display:grid;gap:6px;padding-bottom:6px}
+.sm-ch{display:grid;gap:1px;border:0;background:none;text-align:left;padding:6px 8px;margin:0 -8px;border-radius:10px;transition:background-color .2s ease}
+.sm-ch:hover{background:var(--surface-2)}
+.sm-city.on>.sm-ch .city-n{color:var(--accent)}
+.sm-hotels{display:flex;flex-wrap:wrap;gap:6px}
+.sm-hotel{display:inline-flex;align-items:center;gap:6px;border:0;background:var(--surface-2);border-radius:999px;padding:4px 10px;font-size:12.5px;font-weight:500}
+.sm-hotel small{color:var(--muted);font-family:var(--f-mono);font-size:11px}
+.sm-hotel:hover{background:var(--line)}
+.sm-day{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:2px 4px;padding:8px 6px 10px 6px;border-radius:12px;transition:background-color .25s ease,box-shadow .25s ease}
+.sm-day.on{background:color-mix(in srgb,var(--dc) 9%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--dc) 22%,transparent)}
+.sm-dmain{display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:0;min-width:0}
+.sm-dt{display:grid;min-width:0}
+.sm-dt b{font-weight:600;font-size:14px}
+.sm-dt small{font-size:12px;color:var(--muted);font-family:var(--f-mono);line-height:1.4}
+.sm-open{align-self:center}
+.sm-open svg{width:14px;height:14px}
+.sm-stops{grid-column:1 / -1;padding-left:34px;display:flex;flex-wrap:wrap;align-items:center;gap:2px 4px;font-size:13px;line-height:1.5}
+.sm-s{display:inline-flex;align-items:center;gap:4px}
+.sm-s i{font-style:normal;font-size:12px}
+.sm-arr{color:var(--muted)}
+.sm-none{color:var(--muted);font-style:italic}
+.sm-hop{display:flex;align-items:center;gap:8px;font-size:12.5px;color:var(--muted);padding:2px 4px 8px}
+.sm-hop .legline{height:22px}
+.sm-hop .legt{margin-left:auto}
 .tab{flex:1;border:0;background:transparent;padding:8px 6px;border-radius:8px;font-weight:600;color:var(--muted)}
 .tab[aria-selected="true"]{color:var(--fg)}
 .tab .n{font-family:var(--f-mono);font-size:11px;font-weight:500;margin-left:4px;opacity:.75}
@@ -138,12 +196,17 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .hrow .nm{font-weight:600}
 .hnum{width:24px;height:24px;border-radius:50%;flex:none;display:grid;place-items:center;color:color-mix(in srgb,var(--dc) 85%,var(--fg));background:color-mix(in srgb,var(--dc) 12%,var(--surface));box-shadow:inset 0 0 0 1.75px var(--dc)}
 .hnum svg{width:14px;height:14px}
-.stays{display:grid;gap:4px;padding:10px 10px 6px;border:1px solid var(--line);border-radius:12px}
-.stays .sub-h{margin:0 0 2px;padding-left:4px}
-.stays .nm{display:grid;line-height:1.25}
+.cstays{display:grid;gap:2px;padding:8px 10px 6px;margin:2px 0 4px 30px;border-radius:12px;background:var(--surface-2)}
+.cstays .sub-h{margin:0 0 2px;padding-left:4px}
+.cstays .nm{display:grid;line-height:1.25}
+.cstays .row:hover{background:var(--surface)}
+.cstays .linkbtn{justify-self:start}
+.cstays:not(:has(.row)){background:none;padding:0 0 2px;margin-top:-2px}
+.country{display:flex;align-items:center;gap:10px;margin:10px 0 -2px;font-size:11px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+.country::after{content:"";flex:1;height:1px;background:var(--line)}
+.country:first-child{margin-top:0}
+.country+.city .city-head{border-top:0;padding-top:2px}
 .snights{font-family:var(--f-mono);font-size:11.5px;font-weight:400;color:var(--muted)}
-.stays .linkbtn{justify-self:start}
-.stays .empty{padding:2px 4px 4px}
 .linkbtn.sm{font-size:12.5px;padding:4px}
 .xwrap{display:grid}
 .xtoggle{display:flex;align-items:center;gap:6px;width:100%;border:0;background:none;text-align:left;cursor:pointer;padding:4px 4px;border-radius:7px;transition:color .18s ease,background-color .18s ease}
@@ -409,7 +472,8 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 
 /* Day collapse */
 .day-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .36s var(--ease),opacity .28s ease}
-.day-inner{min-height:0;overflow:hidden;display:grid;gap:8px;padding:1px}
+.day-inner{min-height:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:1px}
+.day-inner>*,.city-inner>*,.stops>*{min-width:0}
 .day.collapsed .day-body{grid-template-rows:0fr;opacity:0}
 .day.collapsed{gap:0}
 .chev svg{transition:transform .3s var(--ease)}
@@ -425,7 +489,8 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .city.cdim .city-head{opacity:.45}
 .city-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .38s var(--ease,ease),opacity .28s ease}
 .city.ccol .city-body{grid-template-rows:0fr;opacity:0}
-.city-inner{min-height:0;overflow:hidden;display:grid;gap:8px;padding:1px}
+.city-inner{min-height:0;overflow:hidden;display:grid;grid-template-columns:minmax(0,1fr);gap:8px;padding:1px 10px;margin:0 -10px}
+.libc .city-inner{margin:0}
 .city .chev svg{transition:transform .3s var(--ease,ease)}
 .city.ccol>.city-head .chev svg{transform:rotate(-90deg)}
 .addday{padding:0 0 6px 2px}
@@ -537,14 +602,14 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .bico{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;font-size:16px;flex:none;background:color-mix(in srgb,var(--bc) 16%,var(--surface))}
 .prog{display:grid;gap:6px}
 .prog-bar{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
-.prog-bar i{display:block;height:100%;width:var(--w);background:var(--accent);border-radius:inherit;transform-origin:left;animation:barIn .7s var(--ease) backwards;transition:width .5s var(--ease)}
+.prog-bar i{display:block;height:100%;width:var(--w);background:var(--accent);border-radius:inherit;transform-origin:left;transition:width .5s var(--ease)}
 .prog.big .prog-bar{height:14px}
 .prog-t{font-size:13px;color:var(--muted)}
 .bbar{display:grid;gap:8px}
 .bbar-track{position:relative;height:14px;border-radius:999px;background:var(--surface-2);overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
-.bbar-track i{position:absolute;top:0;bottom:0;left:var(--l,0);width:var(--w);transform-origin:left;animation:barIn .7s var(--ease) backwards}
+.bbar-track i{position:absolute;top:0;bottom:0;left:var(--l,0);width:var(--w);transform-origin:left}
 .bbar-track .paid{background:var(--accent)}
-.bbar-track .plan{background:color-mix(in srgb,var(--accent) 35%,var(--surface));animation-delay:.12s}
+.bbar-track .plan{background:color-mix(in srgb,var(--accent) 35%,var(--surface))}
 .bbar-track .cap{width:2px;background:var(--danger)}
 .bbar.over .bbar-track .plan{background:color-mix(in srgb,var(--danger) 45%,var(--surface))}
 .bbar-legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:13px;color:var(--muted)}
@@ -588,7 +653,9 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .hb{display:grid;grid-template-columns:150px minmax(0,1fr) 84px;gap:10px;align-items:center;font-size:13.5px}
 .hb-l{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .hb-t{height:10px;border-radius:999px;background:var(--surface-2);overflow:hidden}
-.hb-t i{display:block;height:100%;width:var(--w);background:var(--bc);border-radius:inherit;transform-origin:left;animation:barIn .7s var(--ease) backwards}
+.hb-t i{display:block;height:100%;width:var(--w);background:var(--bc);border-radius:inherit;transform-origin:left}
+.pg-in .prog-bar i,.pg-in .bbar-track i,.pg-in .hb-t i{animation:barIn .75s var(--ease) backwards;animation-delay:.18s}
+.pg-in .bbar-track .plan{animation-delay:.3s}
 .hb-v{font-family:var(--f-mono);font-size:12.5px;text-align:right}
 .xlist{display:grid}
 .xr{display:flex;align-items:center;gap:12px;padding:10px 4px;border-top:1px solid var(--line)}
@@ -619,6 +686,49 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .notes .note{min-height:360px;resize:vertical;line-height:1.55}
 .saved{font-size:12px;font-weight:600;color:var(--accent)}
 .saved.pop{animation:fadeIn .25s ease}
+.libbar{display:grid;gap:10px}
+.libsearch{position:relative;display:block}
+.libsearch svg{position:absolute;left:12px;top:50%;width:17px;height:17px;transform:translateY(-50%);color:var(--muted)}
+.libsearch .inp{padding-left:38px;font-size:14.5px;padding-block:10px}
+.libtags{flex-wrap:wrap}
+.libc{padding:0;overflow:hidden}
+.libc-h{display:flex;align-items:center;gap:6px;padding-right:12px;transition:background-color .18s ease}
+.libc-h:hover{background:var(--surface-2)}
+.libc-t{flex:1;min-width:0;display:flex;align-items:center;gap:10px;border:0;background:none;text-align:left;padding:16px 8px 16px 18px}
+.libc-add,.lcity-add{display:grid;place-items:center;border:0;flex:none;color:var(--accent);background:var(--accent-soft);transition:background-color .18s ease,transform .2s var(--spring,ease)}
+.libc-add{width:32px;height:32px;border-radius:10px}
+.libc-add svg{width:17px;height:17px}
+.lcity-add{width:22px;height:22px;border-radius:7px;margin-left:2px;opacity:.75}
+.lcity-add svg{width:13px;height:13px}
+.libcity:hover .lcity-add,.lcity-add:focus-visible{opacity:1}
+.libc-add:hover,.lcity-add:hover{background:color-mix(in srgb,var(--accent) 28%,var(--surface));transform:scale(1.08)}
+.libc-h h2{font-size:20px}
+.libc-n{margin-left:auto;font-size:12.5px;color:var(--muted)}
+.chevw svg{width:14px;height:14px;color:var(--muted);transition:transform .3s var(--ease,ease)}
+.libc.ccol .chevw svg{transform:rotate(-90deg)}
+.libc .city-body{display:grid;grid-template-rows:1fr;transition:grid-template-rows .38s var(--ease,ease),opacity .28s ease}
+.libc.ccol .city-body{grid-template-rows:0fr;opacity:0}
+.libc .city-inner{padding:0 18px 14px;gap:14px}
+.libcity h3{display:flex;align-items:center;gap:8px;font-size:12px;font-family:var(--f-body);font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);margin:2px 0 8px}
+.libcity h3 span{font-family:var(--f-mono);font-weight:500;letter-spacing:0;padding:0 6px;border-radius:999px;background:var(--surface-2)}
+.liblist{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,330px),1fr));gap:8px}
+.lib{display:flex;align-items:center;gap:12px;border:1px solid var(--line);border-radius:12px;padding:10px 10px 10px 12px;min-width:0;transition:border-color .18s ease}
+.lib:hover{border-color:color-mix(in srgb,var(--accent) 40%,var(--line))}
+.lib-main{flex:1;min-width:0;display:grid;gap:2px;border:0;background:none;text-align:left;padding:0}
+.lib-main b{font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-main small{color:var(--muted);font-size:12.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.lib-in{display:flex;flex-wrap:wrap;gap:4px;margin-top:3px}
+.lib-in i{font-style:normal;font-size:11px;font-weight:600;padding:1px 8px;border-radius:999px;background:var(--accent-soft)}
+.lib-in i.warn{background:color-mix(in srgb,#D97706 18%,var(--surface))}
+.lib .btn{flex:none}
+.tagset{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;margin-top:4px}
+.tagcard{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:var(--surface);border-radius:12px;padding:8px 10px;text-align:left;transition:border-color .18s ease}
+.tagcard:hover{border-color:var(--tc)}
+.tagcard>svg{width:14px;height:14px;color:var(--muted);flex:none}
+.tg-ico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;background:color-mix(in srgb,var(--tc) 16%,var(--surface));font-size:16px;flex:none;box-shadow:inset 0 0 0 1.5px color-mix(in srgb,var(--tc) 40%,transparent)}
+.tg-t{flex:1;display:grid;min-width:0}
+.tg-t b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.tg-t small{font-size:12px;color:var(--muted)}
 .tgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px}
 .tcard{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--surface);display:flex;flex-direction:column;text-align:left;transition:translate .2s ease,box-shadow .2s ease}
 .tcard:hover{translate:0 -2px;box-shadow:var(--shadow)}
@@ -632,6 +742,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .tc-d,.tc-c,.tc-s{margin:0;font-size:13px;color:var(--muted)}
 .tc-c{color:var(--fg)}
 .tc-acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tc-acts .btn svg{width:14px;height:14px}
 .tnew{align-items:center;justify-content:center;gap:8px;min-height:180px;border-style:dashed;color:var(--muted);font-weight:600;background:transparent}
 .tnew-plus{font-size:28px;line-height:1}
 .tnew:hover{color:var(--accent);border-color:var(--accent)}
@@ -640,6 +751,11 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .set .card-h+.srow,.set .muted+.srow{border-top:0}
 .set .muted{margin-bottom:6px}
 .srow .inp{max-width:280px}
+.slab{display:grid;gap:2px}
+.slab small{font-size:12.5px;font-weight:400;color:var(--muted)}
+.srow .btn svg,.pg-actions .btn svg{width:16px;height:16px}
+.dz{padding-top:12px;border-top:1px solid var(--line)}
+.inline.wrap{flex-wrap:wrap}
 .srow.col{flex-direction:column;align-items:stretch;gap:8px}
 .srow.col .inp{max-width:none}
 .srow.col textarea{min-height:80px;font-family:var(--f-mono);font-size:12px}
@@ -669,6 +785,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 }
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{transition:none!important;animation:none!important}}
+:root.no-motion *,:root.no-motion *::before,:root.no-motion *::after{transition:none!important;animation:none!important}
 </style>
 </head>
 <body>
@@ -677,12 +794,19 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
   <nav class="rail" id="rail" aria-label="Sections"></nav>
   <aside class="side" aria-label="Trip">
     <div class="side-head">
-      <div class="eyebrow">Trip plan</div>
-      <h1 id="trip-name">Lisbon</h1>
+      <button class="ib side-cog" data-act="trip-settings" aria-label="Trip settings" title="Trip settings"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M16.2 12.2l.9 1.5-1.6 2.7-1.7-.1a6 6 0 0 1-1.5.9L11.5 18.6h-3l-.8-1.6a6 6 0 0 1-1.5-.9l-1.7.1-1.6-2.7.9-1.5a6 6 0 0 1 0-1.8l-.9-1.5 1.6-2.7 1.7.1a6 6 0 0 1 1.5-.9L8.5 1.4h3l.8 1.6a6 6 0 0 1 1.5.9l1.7-.1 1.6 2.7-.9 1.5a6 6 0 0 1 0 1.8z"/></svg></button>
+      <button class="tsw" data-act="trip-menu" aria-haspopup="menu" aria-expanded="false" title="Switch trip">
+        <span class="eyebrow" id="trip-eyebrow">Trip plan</span>
+        <span class="tsw-row"><h1 id="trip-name">Lisbon</h1><svg class="tsw-chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </button>
       <div class="trip-meta" id="trip-meta"></div>
     </div>
     <div class="tabs" role="tablist" id="tabs"></div>
     <div class="side-scroll" id="panel"></div>
+    <div class="side-foot">
+      <button class="sf-btn" data-act="add-city"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17h14M5 17V8l4-2.5V17M9 17V4l6 3.5V17M12 10h1M12 13h1M6.5 11h.5M6.5 14h.5"/></svg>Add city</button>
+      <button class="sf-btn" data-act="add-location"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M10 17.5s5.5-5 5.5-9.5a5.5 5.5 0 1 0-11 0c0 4.5 5.5 9.5 5.5 9.5z"/><path d="M10 5.8v4.4M7.8 8h4.4"/></svg>Add location</button>
+    </div>
   </aside>
 
   <main class="mapcol">
@@ -701,8 +825,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
       <div class="legend">
         <span><i class="lg-c"></i>Itinerary stop</span>
         <span><i class="lg-d"></i>Extra for a day</span>
-        <span><i class="lg-d loose"></i>Saved, not scheduled</span>
-        <span><i class="lg-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 7.4 8 3l5.2 4.4"/><path d="M4.3 6.3V13h7.4V6.3"/></svg></i>Hotel</span>
+                <span><i class="lg-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 7.4 8 3l5.2 4.4"/><path d="M4.3 6.3V13h7.4V6.3"/></svg></i>Hotel</span>
         <i class="lg-sep"></i>
         <span><svg class="lg-l" viewBox="0 0 24 8"><line x1="2" y1="4" x2="22" y2="4" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.5 5"/></svg>Walk</span>
         <span><svg class="lg-l" viewBox="0 0 24 8"><line x1="1" y1="4" x2="23" y2="4" stroke-width="2.5" stroke-dasharray="5 3"/></svg>Bike</span>
@@ -747,7 +870,7 @@ function withMeta(pl){
 function sample(){
   return {
     trip:{name:'Portugal & Spain',start:'2026-11-12'},
-    cities:[{id:'c1',name:'Lisbon'},{id:'c2',name:'Porto'},{id:'c3',name:'Madrid'}],
+    cities:[{id:'c1',name:'Lisbon',country:'Portugal'},{id:'c2',name:'Porto',country:'Portugal'},{id:'c3',name:'Madrid',country:'Spain'}],
     days:[{id:'d1',city:'c1',start:'09:30'},{id:'d2',city:'c1',start:'09:00'},{id:'d3',city:'c1',start:'09:30'},
       {id:'d4',city:'c2',start:'08:00',mmode:'transit'},{id:'d5',city:'c2',start:'09:30'},{id:'d6',city:'c2',start:'09:30'},
       {id:'d7',city:'c3',start:'08:30',mmode:'plane'},{id:'d8',city:'c3',start:'09:30'},{id:'d9',city:'c3',start:'10:00'}],
@@ -850,17 +973,19 @@ const BTYPES=[
 const catOf=id=>CATS.find(c=>c.id===id)||CATS[CATS.length-1];
 const btOf=id=>BTYPES.find(c=>c.id===id)||BTYPES[BTYPES.length-1];
 const VIEWS=[
-  {id:'overview',label:'Overview',svg:'<path d="M3.5 3.5h5.5v5.5H3.5zM11 3.5h5.5v5.5H11zM3.5 11h5.5v5.5H3.5zM11 11h5.5v5.5H11z"/>'},
+  {id:'overview',label:'Dashboard',svg:'<path d="M3.5 3.5h5.5v5.5H3.5zM11 3.5h5.5v5.5H11zM3.5 11h5.5v5.5H3.5zM11 11h5.5v5.5H11z"/>'},
   {id:'plan',label:'Itinerary',svg:'<path d="M5 16.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4zM15 7.5a2 2 0 1 0 0-4 2 2 0 0 0 0 4z"/><path d="M5 12.5V9a3 3 0 0 1 3-3h1.5M15 7.5V11a3 3 0 0 1-3 3h-1.5"/>'},
   {id:'bookings',label:'Bookings',svg:'<path d="M3 6.5a1.5 1.5 0 0 1 1.5-1.5h11A1.5 1.5 0 0 1 17 6.5v2a1.75 1.75 0 0 0 0 3.5v2a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 3 14v-2a1.75 1.75 0 0 0 0-3.5z"/><path d="M12 5v2M12 9.25v1.5M12 13v2" stroke-dasharray="0"/>'},
   {id:'budget',label:'Budget',svg:'<path d="M3.5 6.5A1.5 1.5 0 0 1 5 5h10a1.5 1.5 0 0 1 1.5 1.5v8A1.5 1.5 0 0 1 15 16H5a1.5 1.5 0 0 1-1.5-1.5z"/><path d="M16.5 9h-3a1.5 1.5 0 0 0 0 3h3M5.5 5l7-2 1 2"/>'},
   {id:'packing',label:'Packing',svg:'<path d="M4 7.5A1.5 1.5 0 0 1 5.5 6h9A1.5 1.5 0 0 1 16 7.5v7a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 4 14.5z"/><path d="M7.5 6V4.5A1.5 1.5 0 0 1 9 3h2a1.5 1.5 0 0 1 1.5 1.5V6M4 10.5h12"/>'},
   {id:'notes',label:'Notes',svg:'<path d="M5.5 3h6.5l3.5 3.5v9A1.5 1.5 0 0 1 14 17H5.5A1.5 1.5 0 0 1 4 15.5v-11A1.5 1.5 0 0 1 5.5 3z"/><path d="M11.5 3v4h4M7 10.5h6M7 13.5h4"/>'},
+  {id:'saved',label:'Saved',svg:'<path d="M5.5 3.5h9a1 1 0 0 1 1 1v12.2l-5.5-3.6-5.5 3.6V4.5a1 1 0 0 1 1-1z"/>'},
   {id:'trips',label:'All trips',svg:'<path d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="M3.3 8h13.4M3.3 12h13.4M10 3c-2 2.2-2.8 4.5-2.8 7s.8 4.8 2.8 7c2-2.2 2.8-4.5 2.8-7S12 5.2 10 3z"/>'},
   {id:'settings',label:'Settings',svg:'<path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M16.2 12.2l.9 1.5-1.6 2.7-1.7-.1a6 6 0 0 1-1.5.9L11.5 18.6h-3l-.8-1.6a6 6 0 0 1-1.5-.9l-1.7.1-1.6-2.7.9-1.5a6 6 0 0 1 0-1.8l-.9-1.5 1.6-2.7 1.7.1a6 6 0 0 1 1.5-.9L8.5 1.4h3l.8 1.6a6 6 0 0 1 1.5.9l1.7-.1 1.6 2.7-.9 1.5a6 6 0 0 1 0 1.8z"/>'}
 ];
 const ico=svg=>'<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+svg+'</svg>';
-const money=n=>{try{return new Intl.NumberFormat('en-US',{style:'currency',currency:SET.currency||'EUR',maximumFractionDigits:0}).format(n||0)}catch(e){return Math.round(n||0)+' '+SET.currency}};
+const curOf=t=>(t&&t.currency)||SET.currency||'EUR';
+const money=(n,cur)=>{cur=cur||curOf(S);try{return new Intl.NumberFormat('en-US',{style:'currency',currency:cur,maximumFractionDigits:0}).format(n||0)}catch(e){return Math.round(n||0)+' '+cur}};
 const PACK_TEMPLATE={
   'Documents':['Passport','Travel insurance details','Booking confirmations','Credit cards','Some local cash'],
   'Clothes':['Walking shoes','T-shirts','Long pants','Light jacket','Sweater','Socks and underwear','Sleepwear','Something nice for dinner'],
@@ -870,6 +995,51 @@ const PACK_TEMPLATE={
   'Extras':['Day bag','Reusable water bottle','Sunglasses','Umbrella']
 };
 function packFromTemplate(done){const out=[];Object.keys(PACK_TEMPLATE).forEach(cat=>PACK_TEMPLATE[cat].forEach(t=>out.push({id:'k'+Math.random().toString(36).slice(2,9),cat,text:t,done:(done||[]).includes(t)})));return out}
+function sampleLibrary(){
+  const L=(id,name,lat,lng,tag,country,city,notes)=>({id,name,lat,lng,tag,country,city,notes:notes||''});
+  return [
+    L('l1','Pena Palace',38.7876,-9.3906,'t1','Portugal','Sintra','Book the first entry slot of the day.'),
+    L('l2','Quinta da Regaleira',38.7963,-9.3961,'t7','Portugal','Sintra','Walk down the Initiation Well.'),
+    L('l3','Cervejaria Ramiro',38.7206,-9.1356,'t2','Portugal','Lisbon','Seafood. No reservations, go early.'),
+    L('l4','Taberna dos Mercadores',41.1409,-8.6136,'t2','Portugal','Porto','Tiny place, book ahead.'),
+    L('l5','Sagrada Família',41.4036,2.1744,'t1','Spain','Barcelona','Book tickets weeks ahead.'),
+    L('l6','Park Güell',41.4145,2.1527,'t9','Spain','Barcelona',''),
+    L('l7','Mercat de la Boqueria',41.3817,2.1716,'t2','Spain','Barcelona','Go before noon.'),
+    L('l8','El Xampanyet',41.3843,2.1814,'t8','Spain','Barcelona','Cava and anchovies.'),
+    L('l9','Real Alcázar',37.3831,-5.9902,'t1','Spain','Seville',''),
+    L('l10','Plaza de España',37.3772,-5.9869,'t7','Spain','Seville','Best light late afternoon.'),
+    L('l11','Mercado de San Ildefonso',40.4237,-3.7027,'t2','Spain','Madrid','Street food market in Malasaña.'),
+    L('l12','Pantheon',41.8986,12.4769,'t1','Italy','Rome',''),
+    L('l13','Da Enzo al 29',41.8887,12.4770,'t2','Italy','Rome','Carbonara. Queue before opening.'),
+    L('l14','Giolitti',41.9012,12.4775,'t3','Italy','Rome','Gelato since 1900.'),
+    L('l15','Piazzale Michelangelo',43.7629,11.2650,'t4','Italy','Florence','Sunset over the Duomo.'),
+    L('l16','Fushimi Inari Taisha',34.9671,135.7727,'t1','Japan','Kyoto','Go at sunrise to beat the crowds.'),
+    L('l17','Arashiyama Bamboo Grove',35.0170,135.6713,'t9','Japan','Kyoto',''),
+    L('l18','Tsukiji Outer Market',35.6655,139.7707,'t2','Japan','Tokyo','Breakfast sushi.'),
+    L('l19','Shibuya Sky',35.6585,139.7022,'t4','Japan','Tokyo','Reserve a sunset slot.')
+  ];
+}
+let TAGS=null;
+// Tags are shared by every trip and the saved-places library
+function linkTags(t){if(!TAGS)return;(t.tags||[]).forEach(x=>{if(x&&!TAGS.some(y=>y.id===x.id))TAGS.push(x)});t.tags=TAGS}
+// Places a trip had saved without a day now live in the shared library
+function migrateLoose(t){
+  const loose=t.places.filter(p=>!p.day);if(!loose.length)return;
+  const sched=t.places.filter(p=>p.day);
+  loose.forEach(p=>{
+    let near=null,bd=Infinity;sched.forEach(q=>{const d=Math.hypot(q.lat-p.lat,q.lng-p.lng);if(d<bd){bd=d;near=q}});
+    const dd=near&&t.days.find(d=>d.id===near.day),c=dd&&t.cities.find(c=>c.id===dd.city);
+    if(!STORE.library.some(l=>l.name===p.name&&Math.abs((l.lat||0)-p.lat)<.002&&Math.abs((l.lng||0)-p.lng)<.002))
+      STORE.library.push({id:'l'+Math.random().toString(36).slice(2,9),name:p.name,lat:p.lat,lng:p.lng,tag:p.tag,notes:p.notes||'',country:c?c.country||'':'',city:c?c.name:''});
+  });
+  t.places=sched;
+}
+function initStore(){
+  if(!Array.isArray(STORE.tags))STORE.tags=[];
+  TAGS=STORE.tags;
+  if(!Array.isArray(STORE.library)){STORE.library=sampleLibrary();sample().tags.forEach(x=>{if(!TAGS.some(y=>y.id===x.id))TAGS.push(x)})}
+  Object.values(STORE.trips).forEach(t=>{linkTags(t);migrateLoose(t)});
+}
 function sampleExtras(t){
   t.budget=5000;
   t.expenses=[
@@ -905,9 +1075,18 @@ function sampleExtras(t){
   t.info='Emergency number: 112 (Portugal and Spain)\nTravel insurance: policy TI-4482910, 24 h line on the card\nPlugs: type F, 230 V';
   return t;
 }
+const COUNTRY_GUESS={lisbon:'Portugal',lisboa:'Portugal',porto:'Portugal',sintra:'Portugal',faro:'Portugal',lagos:'Portugal',coimbra:'Portugal',madeira:'Portugal',
+  madrid:'Spain',barcelona:'Spain',seville:'Spain',sevilla:'Spain',valencia:'Spain',granada:'Spain',malaga:'Spain','málaga':'Spain',bilbao:'Spain','san sebastian':'Spain',ibiza:'Spain',mallorca:'Spain',
+  paris:'France',nice:'France',lyon:'France',marseille:'France',bordeaux:'France',rome:'Italy',roma:'Italy',florence:'Italy',venice:'Italy',milan:'Italy',naples:'Italy',
+  london:'United Kingdom',edinburgh:'United Kingdom',dublin:'Ireland',amsterdam:'Netherlands',berlin:'Germany',munich:'Germany',vienna:'Austria',prague:'Czechia',budapest:'Hungary',
+  athens:'Greece',santorini:'Greece',istanbul:'Türkiye',zurich:'Switzerland',copenhagen:'Denmark',stockholm:'Sweden',oslo:'Norway',reykjavik:'Iceland',
+  tokyo:'Japan',kyoto:'Japan',osaka:'Japan',seoul:'South Korea',bangkok:'Thailand',singapore:'Singapore','hong kong':'Hong Kong',bali:'Indonesia',sydney:'Australia',melbourne:'Australia',auckland:'New Zealand',
+  'new york':'United States','los angeles':'United States','san francisco':'United States',chicago:'United States',vancouver:'Canada',toronto:'Canada',montreal:'Canada','mexico city':'Mexico',cancun:'Mexico'};
+const guessCountry=n=>COUNTRY_GUESS[String(n||'').trim().toLowerCase()]||'';
 function normalize(t){
   if(!Array.isArray(t.stays))t.stays=[];
   if(!Array.isArray(t.cities)||!t.cities.length){t.cities=[{id:'c1',name:t.trip.name||'My trip'}];t.days.forEach(d=>{d.city='c1'})}
+  t.cities.forEach(c=>{if(typeof c.country!=='string')c.country=guessCountry(c.name)});
   t.days.forEach(d=>{if(!t.cities.some(c=>c.id===d.city))d.city=t.cities[0].id;if(!d.start)d.start='09:00'});
   t.places.forEach(p=>{if(p.stay==null)p.stay=60});
   if(!t.view)t.view={day:'all',mainOnly:false,hidden:[],basemap:SET.map||'illustrated',collapsed:[]};
@@ -917,35 +1096,44 @@ function normalize(t){
   if(!Array.isArray(t.bookings))t.bookings=[];
   if(!Array.isArray(t.packing))t.packing=packFromTemplate([]);
   if(typeof t.budget!=='number')t.budget=0;
+  if(!t.currency)t.currency=SET.currency||'EUR';
   if(typeof t.notes!=='string')t.notes='';
   if(typeof t.info!=='string')t.info='';
   if(!t.id)t.id='trip'+Math.random().toString(36).slice(2,9);
+  if(TAGS)linkTags(t);
+  if(STORE&&Array.isArray(STORE.library))migrateLoose(t);
   return t;
 }
 
 const TKEY='waypoint-trips-v1',SKEY='waypoint-settings-v1';
-let SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'plan',map:'illustrated'};
+let SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'plan',map:'illustrated',motion:'system',start:'last'};
 try{Object.assign(SET,JSON.parse(localStorage.getItem(SKEY))||{})}catch(e){}
 function saveSet(){try{localStorage.setItem(SKEY,JSON.stringify(SET))}catch(e){}}
 function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.isArray(s.places)&&Array.isArray(s.tags)&&Array.isArray(s.days))return s}catch(e){}return null}
 let STORE=null;try{STORE=JSON.parse(localStorage.getItem(TKEY))}catch(e){}
 if(!STORE||!STORE.trips||!Object.keys(STORE.trips).length){const t=load()||sampleExtras(sample());normalize(t);STORE={current:t.id,trips:{[t.id]:t}}}
+initStore();
 let S=STORE.trips[STORE.current]||STORE.trips[Object.keys(STORE.trips)[0]];
 normalize(S);
 function save(){try{STORE.trips[S.id]=S;STORE.current=S.id;localStorage.setItem(TKEY,JSON.stringify(STORE))}catch(e){}}
-const ui={open:null,tab:'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
-const reduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
+const ui={open:null,tab:SET.panelTab==='sum'?'sum':'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
+const sysReduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
+let reduced=sysReduced||SET.motion==='reduce';
+function applyMotion(){reduced=sysReduced||SET.motion==='reduce';document.documentElement.classList.toggle('no-motion',SET.motion==='reduce')}
 const EASE='cubic-bezier(.2,.8,.2,1)';
 if(!Array.isArray(S.view.collapsed))S.view.collapsed=[];
 // Sliding highlight behind the selected tab / segment
 function pill(box,selector,key){
   const on=box.querySelector(selector),ind=document.createElement('span');ind.className='pill';ind.setAttribute('aria-hidden','true');box.prepend(ind);
-  if(!on){ind.style.opacity='0';delete ui.pills[key];return}
+  if(!on||!on.offsetWidth){ind.style.opacity='0';delete ui.pills[key];return}
   const to={x:on.offsetLeft,w:on.offsetWidth,y:on.offsetTop,h:on.offsetHeight},from=ui.pills[key]||to;
+  // place it at the previous selection with no transition, then glide to the new one
+  ind.style.transition='none';
   ind.style.top=to.y+'px';ind.style.height=to.h+'px';ind.style.width=from.w+'px';ind.style.transform='translateX('+from.x+'px)';
+  void ind.offsetWidth;ind.style.transition='';
   ui.pills[key]=to;
-  if(from===to||reduced)return;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ind.style.width=to.w+'px';ind.style.transform='translateX('+to.x+'px)'}));
+  if(from===to||reduced||(from.x===to.x&&from.w===to.w))return;
+  requestAnimationFrame(()=>{ind.style.width=to.w+'px';ind.style.transform='translateX('+to.x+'px)'});
 }
 // Re-render a container and glide rows that moved (FLIP)
 // Smooth camera move: pans and zooms together on a straight path (no zoom-out arc)
@@ -1333,10 +1521,43 @@ function drawLeg(lg,dc,p,isNew,isSel,onBadge,title){
       .on('click',()=>{if(onBadge){onBadge(mid);return}const q=S.places.find(x=>x.id===p.id);if(q)openLegPopup(q,mid)}).addTo(routeLayer);
   }
 }
+function setMapView(nd){
+  if(nd===S.view.day)return;
+  S.view.day=nd;save();renderBar();syncDayFocus(true);
+  map.closePopup();
+  ui.routeHold=true;ui.enterDelay=reduced?0:300;renderMap();ui.enterDelay=0;
+  const seq=ui.daySeq=(ui.daySeq||0)+1;
+  fitVisible(true,()=>{if(ui.daySeq!==seq)return;ui.routeHold=false;renderRoutes()});
+}
+function summaryHtml(){
+  let h='',prevC=null;const multi=countriesOf().length>1,v=S.view.day;
+  S.cities.forEach((c,ci)=>{
+    const ds=cityDays(c.id);if(!ds.length)return;
+    const a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id),o={month:'short',day:'numeric'},cn=(c.country||'').trim();
+    if(ci>0){const pl=dayPlan(ds[0].id),lg=pl.morning||pl.tin||(S.days[a-1]&&dayPlan(S.days[a-1].id).tout);
+      if(lg)h+='<div class="sm-hop" data-flip="smh-'+c.id+'"><span class="legline '+lg.mode+'" style="--dc:'+dayColor(ds[0].id)+'"></span>'+MODES[lg.mode].icon+' '+MODES[lg.mode].label+' to '+esc(c.name)+'<span class="legt">'+dur(lg.min)+' · '+fmtKm(lg.km)+'</span></div>'}
+    if(multi&&cn&&(!prevC||(prevC.country||'').trim()!==cn))h+='<div class="country"><span>'+esc(cn)+'</span></div>';
+    prevC=c;
+    const hs=S.stays.filter(st=>stayCityId(st)===c.id).sort((x,y)=>x.ci-y.ci);
+    h+='<section class="sm-city'+(v===c.id?' on':'')+'" data-city="'+c.id+'"><button class="sm-ch" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v===c.id)+'"><span class="city-n">'+esc(c.name)+'</span><span class="city-d">'+(a===b?'Day '+(a+1):'Days '+(a+1)+' to '+(b+1))+' · '+fmt(dayDate(a),o)+(a===b?'':' to '+fmt(dayDate(b),o))+'</span></button>'+
+      (hs.length?'<div class="sm-hotels">'+hs.map(st=>'<button class="sm-hotel" data-act="edit-stay" data-stay="'+st.id+'">🛏️ '+esc(st.name)+'<small>'+(st.co-st.ci)+' night'+(st.co-st.ci===1?'':'s')+'</small></button>').join('')+'</div>':'');
+    ds.forEach(d=>{
+      const i=dayIdx(d.id),pl=dayPlan(d.id),stops=pl.filter(x=>!x.p.stayRef),xs=extras(d.id).length;
+      h+='<div class="sm-day'+(v===d.id?' on':'')+'" data-day="'+d.id+'" style="--dc:'+dayColor(d.id)+'"><button class="sm-dmain" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(v===d.id)+'">'+
+        '<span class="num">'+(i+1)+'</span><span class="sm-dt"><b>'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</b><small>'+(pl.length?clock(toMin(d.start))+' to '+clock(pl.end)+' · ':'')+stops.length+' stop'+(stops.length===1?'':'s')+(xs?' · '+xs+' extra'+(xs===1?'':'s'):'')+'</small></span></button>'+
+        '<button class="ib sm-open" data-act="open-day" data-day="'+d.id+'" aria-label="Open Day '+(i+1)+' in Daily Plan" title="Open in Daily Plan"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 4l4 4-4 4"/></svg></button>'+
+        '<div class="sm-stops">'+(stops.length?stops.map(x=>'<span class="sm-s"><i>'+esc(tagOf(x.p).icon)+'</i>'+esc(x.p.name)+'</span>').join('<span class="sm-arr" aria-hidden="true">›</span>'):'<span class="sm-none">Nothing planned yet</span>')+'</div></div>';
+    });
+    h+='</section>';
+  });
+  return h||'<p class="empty">Add a city to start planning.</p>';
+}
 function syncDayFocus(scroll){
   const v=S.view.day;
   document.querySelectorAll('#panel .day[data-day]').forEach(sec=>{const id=sec.dataset.day;sec.classList.toggle('focus',v===id);sec.classList.toggle('dim',v!=='all'&&!inView(id));
     const h=sec.querySelector('.day-h');if(h)h.setAttribute('aria-pressed',v===id)});
+  document.querySelectorAll('#panel .sm-day').forEach(x=>{const on=x.dataset.day===v;x.classList.toggle('on',on);const bb=x.querySelector('.sm-dmain');if(bb)bb.setAttribute('aria-pressed',on)});
+  document.querySelectorAll('#panel .sm-city').forEach(x=>{const on=x.dataset.city===v;x.classList.toggle('on',on);const bb=x.querySelector('.sm-ch');if(bb)bb.setAttribute('aria-pressed',on)});
   document.querySelectorAll('#panel .city[data-city]').forEach(sec=>{const id=sec.dataset.city,mine=v===id||cityDays(id).some(d=>d.id===v);sec.classList.toggle('cfocus',v===id);sec.classList.toggle('cdim',v!=='all'&&!mine);
     const h=sec.querySelector('.city-h');if(h)h.setAttribute('aria-pressed',v===id)});
   if(scroll&&v!=='all'){const sec=document.querySelector(isCity(v)?'#panel .city[data-city="'+v+'"]':'#panel .day[data-day="'+v+'"]'),sc=panelScroller();
@@ -1404,6 +1625,28 @@ function openLegPopup(p,at){
     '<div class="pop" style="--dc:'+dayColor(p.day)+'"><div class="pop-tag">'+esc(x.leg.from.name)+' to '+esc(p.name)+'</div>'+quickOptions(p,'data-pact')+'</div>').openOn(map);
 }
 const qm={el:null,btn:null};
+function shortRange(t){const a=new Date(t.trip.start+'T12:00:00'),b=new Date(a);b.setDate(b.getDate()+t.days.length-1);
+  const m=d=>d.toLocaleDateString('en-US',{month:'short'});
+  if(t.days.length<2)return m(a)+' '+a.getDate()+', '+a.getFullYear();
+  if(a.getFullYear()!==b.getFullYear())return m(a)+' '+a.getDate()+', '+a.getFullYear()+' to '+m(b)+' '+b.getDate()+', '+b.getFullYear();
+  return m(a)+' '+a.getDate()+' to '+(a.getMonth()===b.getMonth()?'':m(b)+' ')+b.getDate()+', '+b.getFullYear()}
+function openTripMenu(btn){
+  if(qm.btn===btn){closeQuick();return}
+  closeQuick(true);
+  const ids=Object.keys(STORE.trips).sort((a,b)=>String(STORE.trips[a].trip.start).localeCompare(String(STORE.trips[b].trip.start)));
+  const el=document.createElement('div');el.className='qmenu tmenu';el.setAttribute('role','menu');el.style.setProperty('--dc','var(--accent)');
+  el.innerHTML='<div class="qhead">Switch trip</div>'+ids.map(id=>{const t=STORE.trips[id],cur=id===S.id,cols=t.days.slice(0,6).map((d,i)=>DAY_COLORS[i%DAY_COLORS.length]);
+      return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+cur+'" data-act="switch-trip" data-trip="'+id+'"><span class="tm-dots">'+cols.map(c=>'<i style="background:'+c+'"></i>').join('')+'</span>'+
+        '<span class="tm-t"><b>'+esc(t.trip.name)+'</b><small>'+shortRange(t)+' · '+t.days.length+' day'+(t.days.length===1?'':'s')+'</small></span>'+CHECK+'</button>'}).join('')+
+    '<div class="tm-foot"><button type="button" class="qopt" data-act="new-trip"><span class="qi">+</span><span>New trip</span></button><button type="button" class="qopt" data-act="view" data-view="trips"><span class="qi">'+ico('<path d="M10 17a7 7 0 1 0 0-14 7 7 0 0 0 0 14z"/><path d="M3.3 8h13.4M3.3 12h13.4"/>')+'</span><span>All trips</span></button></div>';
+  document.body.appendChild(el);
+  const anchor=btn.querySelector('h1')||btn,r=anchor.getBoundingClientRect(),h=el.offsetHeight,w=el.offsetWidth;
+  let left=Math.min(Math.max(8,r.left-8),innerWidth-w-8),top=btn.getBoundingClientRect().bottom+6,oy='0';
+  if(top+h>innerHeight-8&&r.top-h-6>8){top=r.top-h-6;oy='100%'}
+  el.style.left=left+'px';el.style.top=Math.max(8,top)+'px';el.style.setProperty('--ox',(r.left-left+20)+'px');el.style.setProperty('--oy',oy);
+  btn.setAttribute('aria-expanded','true');qm.el=el;qm.btn=btn;
+  const curEl=el.querySelector('[aria-checked="true"]')||el.querySelector('.qopt');if(curEl)curEl.focus({preventScroll:true});
+}
 function closeQuick(instant){
   const el=qm.el,btn=qm.btn;qm.el=null;qm.btn=null;
   if(btn){btn.setAttribute('aria-expanded','false')}
@@ -1607,18 +1850,23 @@ map.on('click',e=>{
   if(!ui.placing)return;
   const kind=ui.placeKind;setPlacing(false);
   if(kind==='stay'){openStay(null,{lat:+e.latlng.lat.toFixed(6),lng:+e.latlng.lng.toFixed(6),ci:ui.stayCi});return}
+  if(kind==='lib'){const d=ui.libDraft||{};d.lat=+e.latlng.lat.toFixed(6);d.lng=+e.latlng.lng.toFixed(6);
+    if(!d.city){const c=nearestCity(d.lat,d.lng);if(c){d.city=c.name;if(!d.country)d.country=c.country||''}}
+    if(ui.libReturn!=='plan')setView('saved');openLib(d);return}
   const d=S.days.some(x=>x.id===S.view.day)?S.view.day:(isCity(S.view.day)?(cityDays(S.view.day)[0]||{}).id||null:null);
   openPlace(null,{lat:+e.latlng.lat.toFixed(6),lng:+e.latlng.lng.toFixed(6),day:d});
 });
-function setPlacing(on,kind){ui.placing=on;ui.placeKind=kind||'place';$('banner').firstChild.textContent=ui.placeKind==='stay'?'Click the map where your hotel is ':'Click the map where the place is ';$('banner').hidden=!on;$('map').classList.toggle('placing',on)}
+function setPlacing(on,kind){ui.placing=on;ui.placeKind=kind||'place';$('banner').firstChild.textContent=ui.placeKind==='stay'?'Click the map where your hotel is ':ui.placeKind==='lib'?'Click the map where '+((ui.libDraft&&ui.libDraft.name)||'the place')+' is ':'Click the map where the place is ';$('banner').hidden=!on;$('map').classList.toggle('placing',on)}
 
 /* ---------- Sidebar + toolbar ---------- */
+const countriesOf=()=>[...new Set(S.cities.map(c=>(c.country||'').trim()).filter(Boolean))];
+function countryTitle(){const cs=countriesOf();if(!cs.length)return S.trip.name;if(cs.length===1)return cs[0];if(cs.length===2)return cs[0]+' & '+cs[1];return cs.slice(0,-1).join(', ')+' & '+cs[cs.length-1]}
 function renderHead(){
-  $('trip-name').textContent=S.trip.name;
+  const ct=countryTitle();$('trip-name').textContent=ct;$('trip-eyebrow').textContent=ct===S.trip.name?'Trip plan':S.trip.name;
   const n=S.days.length,a=dayDate(0),b=dayDate(n-1);
   const range=n>1?fmt(a,{month:'short',day:'numeric'})+' to '+fmt(b,{month:'short',day:'numeric',year:'numeric'}):fmt(a,{month:'short',day:'numeric',year:'numeric'});
   const nc=S.cities.length;$('trip-meta').textContent=range+' · '+n+' day'+(n>1?'s':'')+(nc>1?' · '+nc+' cities':'')+' · '+S.places.length+' places';
-  const tabs=[['plan','Itinerary',S.places.filter(p=>p.main).length],['saved','Saved',loose().length],['tags','Tags',S.tags.length]];
+  const tabs=[['sum','Overview',S.days.length],['plan','Daily Plan',S.places.filter(p=>p.main).length]];
   $('tabs').innerHTML=tabs.map(([id,l,c])=>'<button class="tab" role="tab" data-act="tab" data-tab="'+id+'" aria-selected="'+(ui.tab===id)+'">'+l+'<span class="n">'+c+'</span></button>').join('');
   pill($('tabs'),'[aria-selected="true"]','tabs');
 }
@@ -1660,7 +1908,15 @@ function cityHead(c){
     '<button class="city-h" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v===c.id)+'" title="Show only '+esc(c.name)+' on the map"><span class="city-n">'+esc(c.name)+'</span>'+
     '<span class="city-d">'+(a===b?'Day '+(a+1):'Days '+(a+1)+' to '+(b+1))+' · '+fmt(dayDate(a),o)+(a===b?'':' to '+fmt(dayDate(b),o))+' · '+stops+' stop'+(stops===1?'':'s')+'</span></button>'+
     '<button class="ib" data-act="edit-city" data-city="'+c.id+'" aria-label="Edit '+esc(c.name)+'">'+SVG.edit+'</button></div>'+
-    '<div class="city-body"><div class="city-inner">';
+    '<div class="city-body"><div class="city-inner">'+cityStays(c,a,b);
+}
+// Hotels belong to the city of their first night
+function stayCityId(st){const n=Math.max(0,Math.min(st.ci,S.days.length-1));return S.days[n]?S.days[n].city:null}
+function cityStays(c,a,b){
+  const list=S.stays.filter(st=>stayCityId(st)===c.id).sort((x,y)=>x.ci-y.ci);
+  let free=null;for(let n=(a===0?-1:a);n<=b;n++)if(!stayForNight(n)){free=n;break}
+  const add=free!=null?'<button class="linkbtn sm" data-act="add-stay" data-ci="'+free+'">+ Add a hotel'+(list.length?'':' in '+esc(c.name))+'</button>':'';
+  return '<div class="cstays" data-flip="cs-'+c.id+'">'+(list.length?'<div class="sub-h">Where you\u2019re staying</div><ul class="plain">'+list.map(st=>'<li class="row"><span class="hico" aria-hidden="true">🛏️</span><button class="row-main" data-act="edit-stay" data-stay="'+st.id+'"><span class="nm">'+esc(st.name)+'<small class="snights">'+nightsText(st)+'</small></span></button></li>').join('')+'</ul>':'')+add+'</div>';
 }
 function hotelRow(st,part,i,time){
   const linked=linkedStop(st,S.days[i].id);
@@ -1682,12 +1938,13 @@ function renderPanel(){
   if(ui.tab==='plan'){
     h+='<div class="plan-tools"><button class="mini-toggle" data-act="toggle-travel" aria-pressed="'+!S.view.hideTravel+'" title="Show or hide travel between stops"><span class="sw2"></span>Travel</button>'+
       (S.days.length>1?'<button class="linkbtn" data-act="collapse-all">'+(S.days.every(d=>S.view.collapsed.includes(d.id))?'Expand all days':'Collapse all days')+'</button>':'')+'</div>';
-    h+='<div class="stays" data-flip="stays"><div class="sub-h">Where you\u2019re staying</div>'+
-      (S.stays.length?'<ul class="plain">'+S.stays.slice().sort((a,b)=>a.ci-b.ci).map(st=>'<li class="row"><span class="hico" aria-hidden="true">🛏️</span><button class="row-main" data-act="edit-stay" data-stay="'+st.id+'"><span class="nm">'+esc(st.name)+'<small class="snights">'+nightsText(st)+'</small></span></button></li>').join('')+'</ul>':'<p class="empty">Add your hotels and each day will start and end there.</p>')+
-      '<button class="linkbtn sm" data-act="add-stay">+ Add a hotel</button></div>';
     S.days.forEach((d,i)=>{
       const cty=S.cities.find(c=>c.id===d.city)||S.cities[0],cFirst=i===0||S.days[i-1].city!==d.city,cLast=i===S.days.length-1||S.days[i+1].city!==d.city;
-      if(cFirst)h+=cityHead(cty);
+      if(cFirst){
+        const pc=i>0?S.cities.find(c=>c.id===S.days[i-1].city):null,multi=countriesOf().length>1,cn=(cty.country||'').trim();
+        if(multi&&cn&&(!pc||(pc.country||'').trim()!==cn))h+='<div class="country" data-flip="co-'+esc(cn)+'"><span>'+esc(cn)+'</span></div>';
+        h+=cityHead(cty);
+      }
       const plan=dayPlan(d.id),ms=plan.map(x=>x.p),xs=extras(d.id),dc=dayColor(d.id);
       const travel=plan.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+(plan.tin?plan.tin.min:0)+(plan.tout?plan.tout.min:0)+(plan.morning?plan.morning.min:0)+(plan.evening?plan.evening.min:0);
       const mst=stayForNight(i-1),est=stayForNight(i);
@@ -1720,22 +1977,7 @@ function renderPanel(){
       h+='</div></div></section>';
       if(cLast)h+='<div class="addday" data-flip="ad-'+cty.id+'"><button class="linkbtn sm" data-act="add-day" data-city="'+cty.id+'">+ Add a day in '+esc(cty.name)+'</button></div></div></div></section>';
     });
-    h+='<div data-flip="add-city"><button class="btn" data-act="add-city">+ Add a city</button></div>';
-  }else if(ui.tab==='saved'){
-    const ls=loose();
-    h+='<p class="note" style="padding:0">Places you want to keep in mind but haven\'t put on a day. They show on the map as dashed diamonds when viewing all days.</p>';
-    if(ls.length){
-      S.tags.forEach(t=>{const g=ls.filter(p=>p.tag===t.id);if(!g.length)return;
-        h+='<div class="sub-h">'+esc(t.icon)+' '+esc(t.name)+'</div><ul class="plain">'+g.map(p=>rowExtra(p,true)).join('')+'</ul>'});
-      const orphan=ls.filter(p=>!S.tags.some(t=>t.id===p.tag));
-      if(orphan.length)h+='<div class="sub-h">Untagged</div><ul class="plain">'+orphan.map(p=>rowExtra(p,true)).join('')+'</ul>';
-    }else h+='<p class="empty">Nothing saved. Everything is on a day.</p>';
-  }else{
-    h+='<div><button class="btn" data-act="new-tag">+ New tag</button></div><ul class="plain">'+S.tags.map(t=>{
-      const c=S.places.filter(p=>p.tag===t.id).length;
-      return '<li class="row tagrow" style="--tc:'+esc(t.color)+'"><i class="sw"></i><button class="row-main" data-act="edit-tag" data-tag="'+t.id+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+esc(t.name)+'</span><span class="tg">'+c+' place'+(c===1?'':'s')+'</span></button><span class="acts"><button class="ib" data-act="edit-tag" data-tag="'+t.id+'" aria-label="Edit tag '+esc(t.name)+'">'+SVG.edit+'</button></span></li>'}).join('')+'</ul>';
-    h+='<div class="note">Your trip is saved in this browser only.<div><button class="btn small danger'+(ui.armed==='reset'?' armed':'')+'" data-act="reset">'+(ui.armed==='reset'?'Click again to reset':'Reset to sample trip')+'</button></div></div>';
-  }
+  }else h+=summaryHtml();
   flipRender($('panel'),h);
   const el=$('panel');
   if(ui.anim.tab&&!reduced){el.classList.remove('stagger');void el.offsetWidth;Array.from(el.children).forEach((c,i)=>c.style.setProperty('--i',Math.min(i,10)));el.classList.add('stagger')}
@@ -1776,7 +2018,7 @@ function openPlace(p,preset){
     '<div class="field"><span>How important</span><div class="kind" id="f-kind">'+
       '<button type="button" data-act="pick-kind" data-kind="main" aria-pressed="'+ui.form.main+'"><i class="k-c"></i><span>Itinerary stop<small>Numbered, on the route</small></span></button>'+
       '<button type="button" data-act="pick-kind" data-kind="extra" aria-pressed="'+!ui.form.main+'"><i class="k-d"></i><span>Extra<small>On the map, off the route</small></span></button></div></div>'+
-    '<div class="field"><label for="f-day">Day</label><select class="inp" id="f-day"><option value="">Not scheduled</option>'+S.days.map((d,i)=>'<option value="'+d.id+'"'+(day===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label for="f-day">Day</label><select class="inp" id="f-day"><option value="">Not on a day (keep in Saved places)</option>'+S.days.map((d,i)=>'<option value="'+d.id+'"'+(day===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</option>').join('')+'</select></div>'+
     '<div class="field" id="f-modefield"></div>'+
     '<div class="field"><label for="f-stay">Time here</label><select class="inp" id="f-stay">'+stayOpts(p?(p.stay||60):60)+'</select></div>'+
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp" id="f-notes" placeholder="Hours, tickets, what to order">'+esc(p?p.notes:'')+'</textarea></div>'+
@@ -1816,9 +2058,10 @@ function saveStay(){
   S.places.forEach(p=>{if(p.stayRef===st.id)p.name=st.name});
   closeDlg();commit();
 }
-function insertDayAt(k,day){
+// extend: the new day continues the city before it, so a hotel checking out that morning stays one more night
+function insertDayAt(k,day,extend){
   S.days.splice(k,0,day);
-  S.stays.forEach(st=>{if(st.ci>=k)st.ci++;if(st.co>=k)st.co++});
+  S.stays.forEach(st=>{if(st.ci>=k)st.ci++;if(st.co>k||(st.co===k&&extend))st.co++});
 }
 function removeDayAt(k){
   if(k<0)return;S.days.splice(k,1);
@@ -1829,6 +2072,7 @@ function openCity(c){
   ui.dlg='city';ui.form={id:c?c.id:null};
   openDlg('<h2>'+(c?'Edit city':'Add a city')+'</h2>'+
     '<div class="field"><label for="f-cname">City name</label><input class="inp" id="f-cname" value="'+esc(c?c.name:'')+'" placeholder="e.g. Seville" autocomplete="off"></div>'+
+    '<div class="field"><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':((S.cities[S.cities.length-1]||{}).country||''))+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
     (c?'':'<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+[1,2,3,4,5,6,7].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">Added after your last city. You can add more days later.</div></div>')+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
@@ -1836,9 +2080,9 @@ function openCity(c){
 function saveCity(){
   const name=$('f-cname').value.trim();
   if(!name){$('f-err').textContent='Give the city a name.';$('f-err').hidden=false;return}
-  let c=S.cities.find(x=>x.id===ui.form.id);
-  if(c){c.name=name}
-  else{c={id:uid('c'),name};S.cities.push(c);const n=+$('f-cdays').value||1;for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'})}
+  let c=S.cities.find(x=>x.id===ui.form.id);const country=$('f-ccountry').value.trim()||guessCountry(name);
+  if(c){c.name=name;c.country=country}
+  else{c={id:uid('c'),name,country};S.cities.push(c);const n=+$('f-cdays').value||1;for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'},j>0)}
   closeDlg();commit();
 }
 function ensureHotelTag(){let t=S.tags.find(x=>x.name.toLowerCase()==='hotel');if(!t){t={id:uid('t'),name:'Hotel',icon:'🛏️',color:'#334155'};S.tags.push(t)}return t.id}
@@ -1865,12 +2109,22 @@ function renderModeField(){
   box.innerHTML='<span>How you’ll get here</span><div class="modes" style="--dc:'+(day?dayColor(day):'var(--accent)')+'">'+MODE_KEYS.map(m=>'<button type="button" data-act="pick-mode" data-mode="'+m+'" aria-pressed="'+(f.mode===m)+'"><span class="mi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="mt">'+(prev?dur(minsFor(m,legs[m].km)):'&nbsp;')+'</span></button>').join('')+'</div>'+
     '<div class="modehint">'+(prev?'From '+esc(prev.name)+' · '+fmtKm(legs[f.mode].km):day?'First stop of the day. This applies if another stop comes before it.':'Pick a day to see travel times.')+'</div>';
 }
+function nearestCity(lat,lng){
+  let near=null,bd=Infinity;S.places.filter(p=>p.day).forEach(q=>{const d=Math.hypot(q.lat-lat,q.lng-lng);if(d<bd){bd=d;near=q}});
+  if(!near||bd>1.5)return null;const dd=S.days.find(d=>d.id===near.day);return dd?S.cities.find(c=>c.id===dd.city):null;
+}
 function savePlace(){
   const f=ui.form,name=$('f-name').value.trim(),day=$('f-day').value||null,notes=$('f-notes').value.trim();
   const err=m=>{$('f-err').textContent=m;$('f-err').hidden=false};
   if(!name)return err('Give the place a name.');
   if(f.main&&!day)return err('Pick a day to put this on the itinerary, or make it an extra.');
   let p=S.places.find(x=>x.id===f.id);
+  if(!day){
+    const near=nearestCity(f.lat,f.lng);
+    STORE.library.push({id:uid('l'),name,lat:f.lat,lng:f.lng,tag:f.tag,notes,country:near?near.country||'':'',city:near?near.name:''});
+    if(p){S.places=S.places.filter(x=>x!==p);if(p.day)renumber(p.day)}
+    closeDlg();commit();gtoast('Saved '+name+' to Saved places');return;
+  }
   const prevDay=p?p.day:null,prevMain=p?p.main:false;
   if(!p){p={id:uid('p'),lat:f.lat,lng:f.lng,order:0};S.places.push(p)}
   Object.assign(p,{name,tag:f.tag,day,notes,main:f.main,stay:+$('f-stay').value||60});
@@ -1951,16 +2205,11 @@ document.addEventListener('click',e=>{
   const a=b.dataset.act,id=b.dataset.id,p=id&&S.places.find(x=>x.id===id);
   if(a!=='reset'&&ui.armed==='reset'){ui.armed=null}
   switch(a){
-    case 'tab':if(ui.tab!==b.dataset.tab){ui.tab=b.dataset.tab;ui.anim.tab=true;renderHead();renderPanel()}break;
+    case 'tab':if(ui.tab!==b.dataset.tab){ui.tab=b.dataset.tab;SET.panelTab=ui.tab;saveSet();ui.anim.tab=true;renderHead();renderPanel();$('panel').scrollTop=0}break;
+    case 'open-day':{ui.tab='plan';SET.panelTab='plan';saveSet();ui.anim.tab=true;renderHead();renderPanel();const id=b.dataset.day;if(S.view.day!==id)setMapView(id);else syncDayFocus(true);break}
     case 'set-day':{
-      const nd=(S.view.day===b.dataset.day&&(b.classList.contains('day-h')||b.classList.contains('city-h')))?'all':b.dataset.day;
-      if(nd===S.view.day)break;
-      S.view.day=nd;save();renderBar();syncDayFocus(true);
-      map.closePopup();
-      ui.routeHold=true;ui.enterDelay=reduced?0:300;renderMap();ui.enterDelay=0;
-      const seq=ui.daySeq=(ui.daySeq||0)+1;
-      fitVisible(true,()=>{if(ui.daySeq!==seq)return;ui.routeHold=false;renderRoutes()});
-      break}
+      const nd=(S.view.day===b.dataset.day&&(b.classList.contains('day-h')||b.classList.contains('city-h')||b.classList.contains('sm-dmain')||b.classList.contains('sm-ch')))?'all':b.dataset.day;
+      setMapView(nd);break}
     case 'basemap':setBasemap(b.dataset.kind);renderPanel();renderMap();break;
     case 'open':if(p)selectStop(p,false);break;
     case 'collapse':{
@@ -1997,9 +2246,9 @@ document.addEventListener('click',e=>{
     case 'focus':if(p)focusPlace(p);break;
     case 'edit':if(p)openPlace(p);break;
     case 'add-place':setPlacing(!ui.placing);if(ui.placing&&window.matchMedia('(max-width:820px)').matches)document.querySelector('.mapwrap').scrollIntoView({behavior:'smooth',block:'center'});break;
-    case 'cancel-place':setPlacing(false);break;
+    case 'cancel-place':{const k=ui.placeKind;setPlacing(false);if(k==='lib'&&ui.libReturn!=='plan'){setView('saved');openLib(ui.libDraft||{})}break}
     case 'add-day':{const cid=b.dataset.city||S.cities[S.cities.length-1].id,ds=cityDays(cid),k=ds.length?dayIdx(ds[ds.length-1].id)+1:S.days.length;
-      insertDayAt(k,{id:uid('d'),city:cid,start:'09:00'});S.view.ccol=(S.view.ccol||[]).filter(x=>x!==cid);commit();break}
+      insertDayAt(k,{id:uid('d'),city:cid,start:'09:00'},true);S.view.ccol=(S.view.ccol||[]).filter(x=>x!==cid);commit();break}
     case 'add-city':openCity(null);break;
     case 'edit-city':{const c=S.cities.find(x=>x.id===b.dataset.city);if(c)openCity(c);break}
     case 'save-city':saveCity();break;
@@ -2016,9 +2265,6 @@ document.addEventListener('click',e=>{
       S.view.ccol=now?c.concat(id):c.filter(x=>x!==id);save();
       const sec=b.closest('.city');if(sec)sec.classList.toggle('ccol',now);b.setAttribute('aria-expanded',!now);break}
     case 'remove-day':{const d=b.dataset.day;removeDayAt(dayIdx(d));if(S.view.day===d)S.view.day='all';commit();break}
-    case 'reset':
-      if(ui.armed!=='reset'){ui.armed='reset';renderPanel();break}
-      ui.armed=null;{const id=S.id;S=normalize(sampleExtras(sample()));S.id=id;STORE.trips[id]=S}ui.tab='plan';ui.open=null;ui.anim.tab=true;$('panel').classList.remove('hide-travel');commit();fitVisible(true);break;
     case 'new-tag':openTag(null);break;
     case 'edit-tag':openTag(S.tags.find(t=>t.id===b.dataset.tag));break;
     case 'new-tag-from-place':{const back={form:Object.assign({},ui.form),name:$('f-name').value,notes:$('f-notes').value,day:$('f-day').value||null,stay:$('f-stay').value};openTag(null,back);break}
@@ -2038,8 +2284,9 @@ document.addEventListener('click',e=>{
       const t=S.tags.find(x=>x.id===ui.form.id),others=S.tags.filter(x=>x!==t);
       if(!others.length){$('f-err').textContent='Keep at least one tag.';$('f-err').hidden=false;break}
       if(!arm('del',b,'Click again: places move to '+others[0].name))break;
-      S.places.forEach(p=>{if(p.tag===t.id)p.tag=others[0].id});
-      S.tags=others;S.view.hidden=S.view.hidden.filter(x=>x!==t.id);closeDlg();commit();break}
+      Object.values(STORE.trips).forEach(T=>{T.places.forEach(p=>{if(p.tag===t.id)p.tag=others[0].id});if(T.view&&T.view.hidden)T.view.hidden=T.view.hidden.filter(x=>x!==t.id)});
+      STORE.library.forEach(l=>{if(l.tag===t.id)l.tag=others[0].id});
+      TAGS.splice(TAGS.indexOf(t),1);closeDlg();commit();break}
   }
 });
 document.addEventListener('change',e=>{
@@ -2052,6 +2299,8 @@ document.addEventListener('change',e=>{
   if(s.dataset&&s.dataset.act==='schedule'&&s.value){const p=S.places.find(x=>x.id===s.dataset.id);if(p){p.day=s.value;p.main=false;commit()}}
 });
 document.addEventListener('input',e=>{
+  if(e.target.id==='f-cname'){const cc=$('f-ccountry'),g=guessCountry(e.target.value);if(cc&&g&&(!cc.value||cc.dataset.auto==='1')){cc.value=g}}
+  if(e.target.id==='f-ccountry')e.target.dataset.auto='';
   if(e.target.id==='f-ticon'){const v=e.target.value.trim();if(v){ui.form.icon=Array.from(v).slice(0,2).join('');updateTagPreview()}}
   if(e.target.id==='f-tcolor'){ui.form.color=e.target.value;updateTagPreview()}
 });
@@ -2150,6 +2399,7 @@ function endDrag(cancel){
   st.ghost.animate([{top:st.ghost.style.top,scale:'1.03'},{top:t.top+'px',left:t.left+'px',scale:'1'}],{duration:190,easing:EASE,fill:'forwards'}).onfinish=finish;
 }
 $('panel').addEventListener('scroll',()=>{if(qm.el)closeQuick()},{passive:true});
+$('page').addEventListener('scroll',()=>{if(qm.el)closeQuick()},{passive:true});
 document.addEventListener('pointerdown',e=>{
   if(drag.st||e.button>0)return;
   const row=e.target.closest&&e.target.closest('#panel .row[data-drag], #panel .hrow[data-hdrag]');if(!row)return;
@@ -2220,12 +2470,14 @@ function renderRail(){
 function railInd(){
   const rail=$('rail'),on=rail.querySelector('[aria-current="page"]');let ind=rail.querySelector('.rail-ind');
   if(!ind){ind=document.createElement('span');ind.className='rail-ind';rail.prepend(ind)}
-  if(!on){ind.style.opacity='0';return}
+  if(!on||!on.offsetWidth){ind.style.opacity='0';ui.railPos=null;return}
   const r=on.getBoundingClientRect(),rr=rail.getBoundingClientRect(),to={x:r.left-rr.left+rail.scrollLeft,y:r.top-rr.top+rail.scrollTop,w:r.width,h:r.height},from=ui.railPos||to;
+  ind.style.transition='none';
   ind.style.opacity='1';ind.style.width=from.w+'px';ind.style.height=from.h+'px';ind.style.transform='translate('+from.x+'px,'+from.y+'px)';
+  void ind.offsetWidth;ind.style.transition='';
   ui.railPos=to;
-  if(from===to||reduced)return;
-  requestAnimationFrame(()=>requestAnimationFrame(()=>{ind.style.width=to.w+'px';ind.style.height=to.h+'px';ind.style.transform='translate('+to.x+'px,'+to.y+'px)'}));
+  if(from===to||reduced||(from.x===to.x&&from.y===to.y))return;
+  requestAnimationFrame(()=>{ind.style.width=to.w+'px';ind.style.height=to.h+'px';ind.style.transform='translate('+to.x+'px,'+to.y+'px)'});
 }
 function setView(v){
   if(!VIEWS.some(x=>x.id===v))v='plan';
@@ -2235,33 +2487,119 @@ function setView(v){
   $('app').classList.toggle('is-page',page);$('page').hidden=!page;
   renderRail();
   if(page){renderPage(true);$('page').scrollTop=0}
-  else if(was!=='plan'){setTimeout(()=>{map.invalidateSize();renderRoutes()},0);ui.anim.tab=true;renderAll()}
+  else if(was!=='plan'){setTimeout(()=>{map.invalidateSize();renderRoutes();if(ui.needFit){ui.needFit=false;fitVisible(false)}},0);ui.anim.tab=true;renderAll()}
 }
 
 /* ---------- pages ---------- */
-function pageHead(title,sub,actions,eyebrow){
-  return '<header class="pg-head"><div class="pg-titles"><div class="eyebrow">'+(eyebrow||esc(S.trip.name))+'</div><h1>'+title+'</h1>'+(sub?'<p class="pg-sub">'+sub+'</p>':'')+'</div>'+(actions?'<div class="pg-actions">'+actions+'</div>':'')+'</header>';
+const TSW_CHEV='<svg class="tsw-chev" viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+function pageHead(title,sub,actions,eyebrow,switchTitle){
+  const eb=eyebrow?'<div class="eyebrow">'+eyebrow+'</div>':'<button class="tsw tsw-eb" data-act="trip-menu" aria-haspopup="menu" aria-expanded="false" title="Switch trip"><span class="eyebrow">'+esc(S.trip.name)+'</span>'+TSW_CHEV+'</button>';
+  const h1=switchTitle?'<button class="tsw tsw-h1" data-act="trip-menu" aria-haspopup="menu" aria-expanded="false" title="Switch trip"><span class="tsw-row"><h1>'+title+'</h1>'+TSW_CHEV+'</span></button>':'<h1>'+title+'</h1>';
+  return '<header class="pg-head"><div class="pg-titles">'+eb+h1+(sub?'<p class="pg-sub">'+sub+'</p>':'')+'</div>'+(actions?'<div class="pg-actions">'+actions+'</div>':'')+'</header>';
 }
 function renderPage(anim){
-  const v=SET.view,el=$('page'),f={overview:pgOverview,bookings:pgBookings,budget:pgBudget,packing:pgPacking,notes:pgNotes,trips:pgTrips,settings:pgSettings}[v];
+  const v=SET.view,el=$('page'),f={overview:pgOverview,saved:pgSaved,bookings:pgBookings,budget:pgBudget,packing:pgPacking,notes:pgNotes,trips:pgTrips,settings:pgSettings}[v];
   if(!f)return;
   const st=el.scrollTop,ae=document.activeElement,aid=ae&&ae.id;
+  const bars=new Map();if(!anim&&!reduced)el.querySelectorAll('[data-k]').forEach(n=>bars.set(n.dataset.k,{w:n.offsetWidth,l:n.offsetLeft,abs:n.parentElement&&n.parentElement.classList.contains('bbar-track')}));
   el.innerHTML='<div class="pg'+(anim&&!reduced?' pg-in':'')+'">'+f()+'</div>';
   if(anim&&!reduced)Array.from(el.firstChild.children).forEach((c,i)=>c.style.setProperty('--i',Math.min(i,8)));
   if(!anim)el.scrollTop=st;
+  // bars glide from their old size to the new one
+  if(bars.size){el.querySelectorAll('[data-k]').forEach(n=>{const o=bars.get(n.dataset.k);if(!o)return;
+    n.style.transition='none';n.style.width=o.w+'px';if(o.abs)n.style.left=o.l+'px';void n.offsetWidth;
+    n.style.transition='width .5s '+EASE+',left .5s '+EASE;n.style.width='';if(o.abs)n.style.left=''})}
   if(aid&&!anim){const n=$(aid);if(n&&n.focus){n.focus({preventScroll:true});if(n.setSelectionRange&&typeof n.value==='string'){try{const L=n.value.length;n.setSelectionRange(L,L)}catch(e){}}}}
 }
 
+function libTrips(id){const out=[];Object.values(STORE.trips).forEach(T=>{const ps=T.places.filter(p=>p.libRef===id);if(ps.length)out.push({T,p:ps[0]})});return out}
+function pgSaved(){
+  const L=STORE.library,q=(ui.libQ||'').trim().toLowerCase(),tf=ui.libTags||[];
+  const match=l=>{if(tf.length&&!tf.includes(l.tag))return false;if(!q)return true;const t=TAGS.find(x=>x.id===l.tag);return [l.name,l.city,l.country,l.notes,t&&t.name].some(x=>String(x||'').toLowerCase().includes(q))};
+  const list=L.filter(match),countries=[...new Set(L.map(l=>l.country||'Somewhere'))];
+  let h=pageHead('Saved places',L.length+' place'+(L.length===1?'':'s')+' in '+countries.length+' countr'+(countries.length===1?'y':'ies')+'. Add any of them to a trip.','<button class="btn primary" data-act="lib-add">+ Add place</button>','All trips');
+  h+='<section class="libbar"><label class="libsearch">'+ico('<circle cx="9" cy="9" r="5.5"/><path d="M13.2 13.2 17 17"/>')+'<input class="inp" id="lib-q" placeholder="Search places, cities, notes" value="'+esc(ui.libQ||'')+'" autocomplete="off" aria-label="Search saved places"></label>'+
+    '<div class="chips libtags">'+TAGS.filter(t=>L.some(l=>l.tag===t.id)).map(t=>'<button class="chip" style="--tc:'+esc(t.color)+'" data-act="lib-tag" data-tag="'+t.id+'" aria-pressed="'+(!tf.length||tf.includes(t.id))+'">'+esc(t.icon)+' '+esc(t.name)+'</button>').join('')+(tf.length?'<button class="linkbtn" data-act="lib-tag-all">Show all</button>':'')+'</div></section>';
+  if(!list.length)return h+'<section class="card"><p class="empty">'+(L.length?'Nothing matches. Try another search or tag.':'Save places you want to remember. Add them here, or pick "Not on a day" when adding a place on the map.')+'</p></section>';
+  const byC={};list.forEach(l=>{const c=l.country||'Somewhere',ct=l.city||'Other';(byC[c]=byC[c]||{})[ct]=(byC[c][ct]||[]).concat(l)});
+  const col=SET.libCol||[];
+  Object.keys(byC).sort((a,b)=>a.localeCompare(b)).forEach(c=>{
+    const cities=byC[c],n=Object.values(cities).reduce((a,x)=>a+x.length,0),cc=col.includes(c)&&!q;
+    h+='<section class="card libc'+(cc?' ccol':'')+'" data-flip="lc-'+esc(c)+'"><div class="libc-h"><button class="libc-t" data-act="lib-col" data-c="'+esc(c)+'" aria-expanded="'+!cc+'"><span class="chevw">'+SVG.down+'</span><h2>'+esc(c)+'</h2><span class="libc-n">'+n+' place'+(n===1?'':'s')+' · '+Object.keys(cities).length+' cit'+(Object.keys(cities).length===1?'y':'ies')+'</span></button>'+
+      '<button class="libc-add" data-act="lib-add" data-country="'+esc(c==='Somewhere'?'':c)+'" aria-label="Add a place in '+esc(c)+'" title="Add a place in '+esc(c)+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg></button></div>'+
+      '<div class="city-body"><div class="city-inner">'+Object.keys(cities).sort((a,b)=>a.localeCompare(b)).map(ct=>'<div class="libcity"><h3>'+esc(ct)+'<span>'+cities[ct].length+'</span><button class="lcity-add" data-act="lib-add" data-country="'+esc(c==='Somewhere'?'':c)+'" data-city="'+esc(ct==='Other'?'':ct)+'" aria-label="Add a place in '+esc(ct)+'" title="Add a place in '+esc(ct)+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg></button></h3><div class="liblist">'+cities[ct].sort((a,b)=>a.name.localeCompare(b.name)).map(l=>{
+        const t=TAGS.find(x=>x.id===l.tag)||{icon:'📍',name:'Untagged',color:'#64748B'},inT=libTrips(l.id);
+        return '<div class="lib"><span class="bico" style="--bc:'+esc(t.color)+'">'+esc(t.icon)+'</span><button class="lib-main" data-act="lib-edit" data-id="'+l.id+'"><b>'+esc(l.name)+'</b><small>'+esc(t.name)+(l.notes?' · '+esc(l.notes):'')+'</small>'+
+          (inT.length?'<span class="lib-in">'+inT.map(x=>'<i>In '+esc(x.T.trip.name)+(x.p.day&&x.T.days.find(d=>d.id===x.p.day)?', Day '+(x.T.days.findIndex(d=>d.id===x.p.day)+1):'')+'</i>').join('')+'</span>':'')+
+          (l.lat==null?'<span class="lib-in"><i class="warn">No location yet</i></span>':'')+'</button>'+
+          '<button class="btn small" data-act="lib-to-trip" data-id="'+l.id+'">Add to trip</button></div>'}).join('')+'</div></div>').join('')+'</div></div></section>';
+  });
+  return h;
+}
+const blankLib=()=>({name:'',country:'',city:'',tag:(TAGS[0]||{}).id,notes:'',lat:null,lng:null});
+function openLib(draft){
+  const d=Object.assign(blankLib(),draft||{}),isNew=!d.id;ui.dlg='lib';ui.form={id:d.id||null,tag:d.tag,lat:d.lat,lng:d.lng};ui.libDraft=d;
+  const countries=[...new Set(STORE.library.map(l=>l.country).concat(...Object.values(STORE.trips).map(T=>T.cities.map(c=>c.country))).filter(Boolean))].sort();
+  const cities=[...new Set(STORE.library.map(l=>l.city).concat(...Object.values(STORE.trips).map(T=>T.cities.map(c=>c.name))).filter(Boolean))].sort();
+  openDlg('<h2>'+(isNew?'Save a place':'Edit saved place')+'</h2>'+
+    '<div class="field"><label for="f-ln">Name</label><input class="inp" id="f-ln" value="'+esc(d.name)+'" placeholder="e.g. Pastéis de Belém" autocomplete="off"></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-lct">City</label><input class="inp" id="f-lct" list="f-lctl" value="'+esc(d.city)+'" placeholder="e.g. Lisbon" autocomplete="off"><datalist id="f-lctl">'+cities.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
+    '<div class="field"><label for="f-lco">Country</label><input class="inp" id="f-lco" list="f-lcol" value="'+esc(d.country)+'" placeholder="e.g. Portugal" autocomplete="off"'+(d.country?'':' data-auto="1"')+'><datalist id="f-lcol">'+countries.map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div></div>'+
+    '<div class="field"><span>Tag</span><div class="pick" id="f-ltags">'+TAGS.map(t=>'<button type="button" class="chip" style="--tc:'+esc(t.color)+'" data-act="lib-pick-tag" data-tag="'+t.id+'" aria-pressed="'+(ui.form.tag===t.id)+'">'+esc(t.icon)+' '+esc(t.name)+'</button>').join('')+'</div></div>'+
+    '<div class="field"><label for="f-lno">Notes</label><textarea class="inp" id="f-lno" placeholder="Why you saved it, hours, what to order">'+esc(d.notes)+'</textarea></div>'+
+    '<div class="field"><span>Location</span><div class="inline"><span class="coords" style="flex:1;align-self:center">'+(d.lat!=null?(+d.lat).toFixed(4)+', '+(+d.lng).toFixed(4):'Not set. It\\u2019ll be placed near that day\\u2019s stops when you add it to a trip.')+'</span><button type="button" class="btn" data-act="lib-pick">'+(d.lat!=null?'Change on map':'Pick on map')+'</button></div></div>'+
+    '<p class="err" id="f-err" hidden></p>'+
+    '<div class="dlg-acts">'+(isNew?'':'<button class="btn danger" data-act="lib-del">Delete</button>')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="lib-save">'+(isNew?'Save place':'Save')+'</button></div>');
+}
+function readLibForm(){const d=ui.libDraft||{};d.name=$('f-ln').value.trim();d.city=$('f-lct').value.trim();d.country=$('f-lco').value.trim()||guessCountry(d.city);d.notes=$('f-lno').value.trim();d.tag=ui.form.tag;return d}
+function saveLib(){
+  const d=readLibForm();if(!d.name){$('f-err').textContent='Give the place a name.';$('f-err').hidden=false;return}
+  let l=d.id&&STORE.library.find(x=>x.id===d.id);if(!l){l={id:uid('l')};STORE.library.push(l)}
+  Object.assign(l,{name:d.name,city:d.city,country:d.country,notes:d.notes,tag:d.tag,lat:d.lat,lng:d.lng});delete l.draft;
+  Object.values(STORE.trips).forEach(T=>T.places.forEach(p=>{if(p.libRef===l.id){p.name=l.name;p.tag=l.tag}}));
+  ui.libDraft=null;closeDlg();commit();gtoast(SET.view==='plan'?'Saved '+l.name+' to Saved places. Add it to a day from there.':'Saved '+l.name);
+}
+function tripDayOptions(T,sel){return T.cities.map(c=>'<optgroup label="'+esc(c.name)+'">'+T.days.filter(d=>d.city===c.id).map(d=>{const i=T.days.indexOf(d),dt=new Date(T.trip.start+'T12:00:00');dt.setDate(dt.getDate()+i);return '<option value="'+d.id+'"'+(sel===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dt,{weekday:'short',month:'short',day:'numeric'})+'</option>'}).join('')+'</optgroup>').join('')}
+function bestDay(T,l){const c=T.cities.find(c=>c.name.toLowerCase()===String(l.city||'').toLowerCase());const d=c&&T.days.find(d=>d.city===c.id);return (d||T.days[0]||{}).id}
+function openAddToTrip(l){
+  ui.dlg='addtrip';ui.form={id:l.id,main:false,trip:S.id};
+  const ids=Object.keys(STORE.trips),T=S;
+  openDlg('<h2>Add to a trip</h2><p class="modehint" style="margin:-8px 0 0">'+esc(l.name)+(l.city?' · '+esc(l.city):'')+'</p>'+
+    '<div class="field"><label for="f-att">Trip</label><select class="inp" id="f-att">'+ids.map(id=>'<option value="'+id+'"'+(id===S.id?' selected':'')+'>'+esc(STORE.trips[id].trip.name)+'</option>').join('')+'</select></div>'+
+    '<div class="field"><label for="f-atd">Day</label><select class="inp" id="f-atd">'+tripDayOptions(T,bestDay(T,l))+'</select><div class="modehint" id="f-athint"></div></div>'+
+    '<div class="field"><span>Add it as</span><div class="kind" id="f-atk"><button type="button" data-act="at-kind" data-kind="main" aria-pressed="false"><i class="k-c"></i><span>Itinerary stop<small>Numbered, on the route</small></span></button><button type="button" data-act="at-kind" data-kind="extra" aria-pressed="true"><i class="k-d"></i><span>Extra<small>On the map, off the route</small></span></button></div></div>'+
+    '<p class="err" id="f-err" hidden></p><div class="dlg-acts"><span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="at-save">Add to trip</button></div>');
+  atHint();
+}
+function atHint(){
+  const l=STORE.library.find(x=>x.id===ui.form.id),T=STORE.trips[$('f-att').value],d=T&&T.days.find(x=>x.id===$('f-atd').value),c=d&&T.cities.find(x=>x.id===d.city),el=$('f-athint');if(!el)return;
+  const msg=[];if(l&&l.city&&c&&c.name.toLowerCase()!==l.city.toLowerCase())msg.push('Heads up: this place is in '+esc(l.city)+', but that day is in '+esc(c.name)+'.');
+  if(l&&l.lat==null)msg.push('It has no location yet, so it\\u2019ll go near that day\\u2019s stops. Drag the pin to the right spot.');
+  el.innerHTML=msg.join(' ');
+}
+function addToTrip(){
+  const l=STORE.library.find(x=>x.id===ui.form.id),T=STORE.trips[$('f-att').value],day=$('f-atd').value;
+  if(!l||!T||!day){$('f-err').textContent='Pick a trip and a day.';$('f-err').hidden=false;return}
+  let lat=l.lat,lng=l.lng;
+  if(lat==null){const di=T.days.findIndex(d=>d.id===day),cid=(T.days[di]||{}).city;
+    let pts=T.places.filter(p=>p.day===day);if(!pts.length)pts=T.places.filter(p=>T.days.some(d=>d.id===p.day&&d.city===cid));if(!pts.length)pts=T.stays;
+    if(pts.length){lat=pts.reduce((a,p)=>a+p.lat,0)/pts.length+.0012;lng=pts.reduce((a,p)=>a+p.lng,0)/pts.length+.0012}else{const c=map.getCenter();lat=c.lat;lng=c.lng}}
+  const main=ui.form.main,order=main?T.places.filter(p=>p.day===day&&p.main).reduce((a,p)=>Math.max(a,p.order||0),0)+1:0;
+  T.places.push({id:uid('p'),name:l.name,lat:+(+lat).toFixed(6),lng:+(+lng).toFixed(6),tag:l.tag,day,main,order,stay:60,notes:l.notes||'',libRef:l.id});
+  const di=T.days.findIndex(d=>d.id===day);closeDlg();
+  if(T===S){ui.needFit=true;commit()}else{save();renderPage(false)}
+  gtoast('Added '+l.name+' to Day '+(di+1)+' of '+T.trip.name);
+}
 function pgOverview(){
   const cd=countdown(),ts=tripStats(),bs=budgetStats(),stops=S.places.filter(p=>p.main&&!p.stayRef).length,extrasN=S.places.filter(p=>!p.main).length;
   const packed=S.packing.filter(k=>k.done).length;
   const n=S.days.length,o={month:'short',day:'numeric'};
   let h=pageHead(esc(S.trip.name),fmt(dayDate(0),o)+' to '+fmt(dayDate(n-1),{month:'short',day:'numeric',year:'numeric'})+' <span class="cd '+cd.cls+'">'+cd.txt+'</span>',
-    '<button class="btn primary" data-act="view" data-view="plan">Open itinerary</button>','Trip overview');
+    '<button class="btn primary" data-act="view" data-view="plan">Open itinerary</button>','Dashboard',true);
   const modes=Object.keys(ts.byMode).sort((a,b)=>ts.byMode[b]-ts.byMode[a]).slice(0,2).map(m=>MODES[m].icon+' '+fmtKm(ts.byMode[m])).join(' · ');
   h+='<section class="stats">'+
     stat('Days',n,S.cities.length+' cit'+(S.cities.length===1?'y':'ies'))+
-    stat('Stops',stops,extrasN+' extra'+(extrasN===1?'':'s')+' saved')+
+    stat('Stops',stops,extrasN+' extra'+(extrasN===1?'':'s')+' if there\u2019s time')+
     stat('Distance',fmtKm(ts.km),modes||'No travel yet')+
     stat('Getting around',dur(Math.round(ts.min)),'about '+dur(Math.round(ts.min/Math.max(1,n)))+' a day')+
     '</section>';
@@ -2282,7 +2620,7 @@ function pgOverview(){
     (next.length?'<ul class="mini">'+next.map(x=>'<li><span class="bico" style="--bc:'+x.color+'">'+x.icon+'</span><span class="mini-t"><b>'+esc(x.title)+'</b><small>'+esc(dayLabel(x.day))+(x.time?' · '+clock24(x.time):'')+'</small></span></li>').join('')+'</ul>':'<p class="empty">No bookings yet.</p>')+'</section>'+
     '<section class="card"><div class="card-h"><h2>Budget</h2><button class="linkbtn" data-act="view" data-view="budget">Details</button></div>'+budgetBar(bs,true)+
     '<div class="card-h" style="margin-top:18px"><h2>Packing</h2><button class="linkbtn" data-act="view" data-view="packing">Checklist</button></div>'+
-    '<div class="prog"><div class="prog-bar"><i style="--w:'+(S.packing.length?packed/S.packing.length*100:0)+'%"></i></div><span class="prog-t">'+packed+' of '+S.packing.length+' packed</span></div></section></div>';
+    '<div class="prog"><div class="prog-bar"><i data-k="pack" style="--w:'+(S.packing.length?packed/S.packing.length*100:0)+'%"></i></div><span class="prog-t">'+packed+' of '+S.packing.length+' packed</span></div></section></div>';
   // day by day
   h+='<section class="card"><div class="card-h"><h2>Day by day</h2></div><div class="dtable">';
   S.days.forEach((d,i)=>{const pl=dayPlan(d.id),c=cityOf(d.id),tr=pl.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+[pl.tin,pl.tout,pl.morning,pl.evening].reduce((a,x)=>a+(x?x.min:0),0);
@@ -2295,7 +2633,7 @@ function pgOverview(){
 const stat=(l,v,s)=>'<div class="stat"><span class="stat-l">'+l+'</span><b class="stat-v">'+v+'</b><span class="stat-s">'+s+'</span></div>';
 function budgetBar(bs,compact){
   const max=Math.max(bs.budget,bs.total,1),pw=bs.paid/max*100,lw=bs.planned/max*100,over=bs.budget>0&&bs.total>bs.budget;
-  return '<div class="bbar'+(over?' over':'')+'"><div class="bbar-track"><i class="paid" style="--w:'+pw+'%"></i><i class="plan" style="--w:'+lw+'%;--l:'+pw+'%"></i>'+(bs.budget>0&&bs.total>bs.budget?'<i class="cap" style="--l:'+(bs.budget/max*100)+'%"></i>':'')+'</div>'+
+  return '<div class="bbar'+(over?' over':'')+'"><div class="bbar-track"><i class="paid" data-k="bpaid" style="--w:'+pw+'%"></i><i class="plan" data-k="bplan" style="--w:'+lw+'%;--l:'+pw+'%"></i>'+(bs.budget>0&&bs.total>bs.budget?'<i class="cap" style="--l:'+(bs.budget/max*100)+'%"></i>':'')+'</div>'+
     '<div class="bbar-legend"><span><i class="sw paid"></i>Paid '+money(bs.paid)+'</span><span><i class="sw plan"></i>Planned '+money(bs.planned)+'</span>'+(bs.budget>0?'<span class="'+(over?'bad':'good')+'">'+(over?money(bs.total-bs.budget)+' over budget':money(bs.budget-bs.total)+' left of '+money(bs.budget))+'</span>':(compact?'<span>No budget set</span>':''))+'</div></div>';
 }
 
@@ -2330,8 +2668,8 @@ function pgBudget(){
   const cityTot={};S.expenses.forEach(e=>{const k=!e.day?'Whole trip':(e.day==='before'||e.day==='after')?'Getting there and back':(cityOf(e.day)||{name:'Other'}).name;cityTot[k]=(cityTot[k]||0)+(+e.amount||0)});
   const byCity=Object.keys(cityTot).map(k=>({k,v:cityTot[k]})).sort((a,b)=>b.v-a.v);
   const maxC=Math.max(1,...byCat.map(x=>x.v)),maxT=Math.max(1,...byCity.map(x=>x.v));
-  h+='<div class="cols"><section class="card"><div class="card-h"><h2>By category</h2></div>'+(byCat.length?'<div class="hbars">'+byCat.map(x=>'<div class="hb"><span class="hb-l">'+x.c.icon+' '+x.c.label+'</span><span class="hb-t"><i style="--w:'+(x.v/maxC*100)+'%;--bc:'+x.c.color+'"></i></span><span class="hb-v">'+money(x.v)+'</span></div>').join('')+'</div>':'<p class="empty">No expenses yet.</p>')+'</section>'+
-    '<section class="card"><div class="card-h"><h2>By city</h2></div>'+(byCity.length?'<div class="hbars">'+byCity.map(x=>'<div class="hb"><span class="hb-l">'+esc(x.k)+'</span><span class="hb-t"><i style="--w:'+(x.v/maxT*100)+'%;--bc:var(--accent)"></i></span><span class="hb-v">'+money(x.v)+'</span></div>').join('')+'</div>':'<p class="empty">No expenses yet.</p>')+'</section></div>';
+  h+='<div class="cols"><section class="card"><div class="card-h"><h2>By category</h2></div>'+(byCat.length?'<div class="hbars">'+byCat.map(x=>'<div class="hb"><span class="hb-l">'+x.c.icon+' '+x.c.label+'</span><span class="hb-t"><i data-k="hc-'+x.c.id+'" style="--w:'+(x.v/maxC*100)+'%;--bc:'+x.c.color+'"></i></span><span class="hb-v">'+money(x.v)+'</span></div>').join('')+'</div>':'<p class="empty">No expenses yet.</p>')+'</section>'+
+    '<section class="card"><div class="card-h"><h2>By city</h2></div>'+(byCity.length?'<div class="hbars">'+byCity.map(x=>'<div class="hb"><span class="hb-l">'+esc(x.k)+'</span><span class="hb-t"><i data-k="ht-'+esc(x.k)+'" style="--w:'+(x.v/maxT*100)+'%;--bc:var(--accent)"></i></span><span class="hb-v">'+money(x.v)+'</span></div>').join('')+'</div>':'<p class="empty">No expenses yet.</p>')+'</section></div>';
   // list
   const ex=S.expenses.slice().sort((a,b)=>dayOrder(a.day)-dayOrder(b.day));
   h+='<section class="card"><div class="card-h"><h2>Expenses</h2><span class="muted">Tap Paid or Planned to switch</span></div>'+(ex.length?'<div class="xlist">'+ex.map(e=>{const c=catOf(e.cat);
@@ -2343,7 +2681,7 @@ function pgBudget(){
 function pgPacking(){
   const done=S.packing.filter(k=>k.done).length,tot=S.packing.length;
   let h=pageHead('Packing',done+' of '+tot+' packed',(done?'<button class="btn" data-act="pack-reset">Uncheck all</button>':''));
-  h+='<section class="card"><div class="prog big"><div class="prog-bar"><i style="--w:'+(tot?done/tot*100:0)+'%"></i></div><span class="prog-t">'+(tot&&done===tot?'All packed. Have a great trip!':Math.round(tot?done/tot*100:0)+'% packed')+'</span></div></section>';
+  h+='<section class="card"><div class="prog big"><div class="prog-bar"><i data-k="pack" style="--w:'+(tot?done/tot*100:0)+'%"></i></div><span class="prog-t">'+(tot&&done===tot?'All packed. Have a great trip!':Math.round(tot?done/tot*100:0)+'% packed')+'</span></div></section>';
   const cats=[...new Set(S.packing.map(k=>k.cat).concat(Object.keys(PACK_TEMPLATE)))];
   h+='<div class="packgrid">'+cats.map((cat,ci)=>{const items=S.packing.filter(k=>k.cat===cat),d=items.filter(k=>k.done).length;
     return '<section class="card pack"><div class="card-h"><h2>'+esc(cat)+'</h2><span class="muted mono">'+d+'/'+items.length+'</span></div><ul class="checks">'+items.map(k=>
@@ -2369,36 +2707,71 @@ function pgTrips(){
       '<p class="tc-d">'+tripRange(t)+'</p><p class="tc-c">'+(cities.length?esc(cities.join(' · ')):'No cities yet')+'</p>'+
       '<p class="tc-s">'+t.days.length+' day'+(t.days.length===1?'':'s')+' · '+stops+' stop'+(stops===1?'':'s')+(spend?' · '+money(spend):'')+'</p>'+
       '<div class="tc-acts">'+(cur?'<button class="btn small" data-act="view" data-view="plan">Go to itinerary</button>':'<button class="btn small primary" data-act="open-trip" data-trip="'+id+'">Open</button>')+
-      '<button class="btn small" data-act="dup-trip" data-trip="'+id+'">Duplicate</button>'+(ids.length>1?'<button class="btn small danger" data-act="del-trip" data-trip="'+id+'">Delete</button>':'')+'</div></div></article>'}).join('')+
+      '<button class="btn small" data-act="trip-settings" data-trip="'+id+'">'+ico('<path d="M10 12.5a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5z"/><path d="M16.2 12.2l.9 1.5-1.6 2.7-1.7-.1a6 6 0 0 1-1.5.9L11.5 18.6h-3l-.8-1.6a6 6 0 0 1-1.5-.9l-1.7.1-1.6-2.7.9-1.5a6 6 0 0 1 0-1.8l-.9-1.5 1.6-2.7 1.7.1a6 6 0 0 1 1.5-.9L8.5 1.4h3l.8 1.6a6 6 0 0 1 1.5.9l1.7-.1 1.6 2.7-.9 1.5a6 6 0 0 1 0 1.8z"/>')+'Settings</button>'+
+      '<button class="btn small" data-act="dup-trip" data-trip="'+id+'">Duplicate</button></div></div></article>'}).join('')+
     '<button class="tcard tnew" data-act="new-trip"><span class="tnew-plus">+</span><span>Plan a new trip</span></button></div>';
   return h;
 }
 
 function pgSettings(){
   const seg=(act,cur,opts)=>'<div class="sseg">'+opts.map(([v,l])=>'<button data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'">'+l+'</button>').join('')+'</div>';
-  let h=pageHead('Settings','');
-  h+='<section class="card set"><div class="card-h"><h2>This trip</h2></div>'+
-    '<div class="srow"><label for="set-name">Trip name</label><input class="inp" id="set-name" value="'+esc(S.trip.name)+'"></div>'+
-    '<div class="srow"><label for="set-start">First day</label><input class="inp" type="date" id="set-start" value="'+esc(S.trip.start)+'"></div></section>';
-  h+='<section class="card set"><div class="card-h"><h2>Display</h2></div>'+
-    '<div class="srow"><span>Theme</span>'+seg('set-theme',SET.theme,[['system','System'],['light','Light'],['dark','Dark']])+'</div>'+
-    '<div class="srow"><span>Distances</span>'+seg('set-units',SET.units,[['km','Kilometres'],['mi','Miles']])+'</div>'+
-    '<div class="srow"><span>Time</span>'+seg('set-clock',SET.clock,[['12','9:30 pm'],['24','21:30']])+'</div>'+
-    '<div class="srow"><span>Map style</span>'+seg('set-map',S.view.basemap==='street'?'street':'illustrated',[['illustrated','Illustrated'],['street','Street']])+'</div>'+
-    '<div class="srow"><label for="set-cur">Currency</label><select class="inp" id="set-cur">'+['EUR','USD','CAD','GBP','AUD','JPY','MXN'].map(c=>'<option'+(SET.currency===c?' selected':'')+'>'+c+'</option>').join('')+'</select></div></section>';
-  h+='<section class="card set"><div class="card-h"><h2>Your data</h2></div><p class="muted">Trips are saved in this browser only. Copy a trip to back it up or move it to another device, then paste it into Import there.</p>'+
-    '<div class="srow col"><span>Export this trip</span><div class="inline"><button class="btn" data-act="export-trip">Copy trip data</button></div></div>'+
-    '<div class="srow col"><label for="imp-txt">Import a trip</label><textarea class="inp" id="imp-txt" placeholder="Paste trip data here"></textarea><div class="inline"><button class="btn" data-act="import-trip">Import as a new trip</button></div><p class="err" id="imp-err" hidden></p></div>'+
-    '<div class="srow col"><span>Sample trip</span><div class="inline"><button class="btn danger'+(ui.armed==='reset2'?' armed':'')+'" data-act="reset-sample">'+(ui.armed==='reset2'?'Click again to replace this trip':'Replace this trip with the sample')+'</button></div></div></section>';
+  const row=(label,hint,ctrl)=>'<div class="srow"><div class="slab"><span>'+label+'</span>'+(hint?'<small>'+hint+'</small>':'')+'</div>'+ctrl+'</div>';
+  const ids=Object.keys(STORE.trips),kb=Math.max(1,Math.round(((()=>{try{return (localStorage.getItem(TKEY)||'').length}catch(e){return 0}})())/1024));
+  let h=pageHead('Settings','These apply to the whole app. Each trip has its own settings too.','<button class="btn" data-act="trip-settings">'+ico('<path d="M5.5 3h6.5l3.5 3.5v9A1.5 1.5 0 0 1 14 17H5.5A1.5 1.5 0 0 1 4 15.5v-11A1.5 1.5 0 0 1 5.5 3z"/>')+'Settings for '+esc(S.trip.name)+'</button>','Waypoint');
+  h+='<section class="card set"><div class="card-h"><h2>Appearance</h2></div>'+
+    row('Theme','',seg('set-theme',SET.theme,[['system','System'],['light','Light'],['dark','Dark']]))+
+    row('Motion','Turn off animations if they feel too busy',seg('set-motion',SET.motion,[['system','Full'],['reduce','Reduced']]))+'</section>';
+  h+='<section class="card set"><div class="card-h"><h2>Units and formats</h2></div>'+
+    row('Distances','',seg('set-units',SET.units,[['km','Kilometres'],['mi','Miles']]))+
+    row('Time','',seg('set-clock',SET.clock,[['12','9:30 pm'],['24','21:30']]))+'</section>';
+  const tagUse=id=>Object.values(STORE.trips).reduce((n,T)=>n+T.places.filter(p=>p.tag===id).length,0)+STORE.library.filter(l=>l.tag===id).length;
+  h+='<section class="card set"><div class="card-h"><h2>Tags</h2><button class="btn small" data-act="new-tag">+ New tag</button></div><p class="muted">Tags give places their map icon and color. They\u2019re shared by all your trips and Saved places.</p>'+
+    '<div class="tagset">'+TAGS.map(t=>{const n=tagUse(t.id);return '<button class="tagcard" data-act="edit-tag" data-tag="'+t.id+'" style="--tc:'+esc(t.color)+'"><span class="tg-ico">'+esc(t.icon)+'</span><span class="tg-t"><b>'+esc(t.name)+'</b><small>'+n+' place'+(n===1?'':'s')+'</small></span>'+SVG.edit+'</button>'}).join('')+'</div></section>';
+  h+='<section class="card set"><div class="card-h"><h2>Starting up</h2></div>'+
+    row('Open to','What you see when you open the app',seg('set-start',SET.start,[['last','Where I left off'],['overview','Dashboard'],['plan','Itinerary']]))+
+    row('Currency for new trips','Each trip can use its own currency',curSelect('set-cur',SET.currency))+
+    row('Map for new trips','You can switch any time on the map',seg('set-map',SET.map==='street'?'street':'illustrated',[['illustrated','Illustrated'],['street','Street']]))+'</section>';
+  h+='<section class="card set"><div class="card-h"><h2>Backup and restore</h2></div><p class="muted">Everything is saved in this browser only ('+ids.length+' trip'+(ids.length===1?'':'s')+', about '+kb+' KB). Copy a backup to keep it safe or move it to another device, then paste it below on that device.</p>'+
+    '<div class="srow col"><div class="slab"><span>Back up all trips</span></div><div class="inline"><button class="btn" data-act="backup-all">Copy backup</button></div></div>'+
+    '<div class="srow col"><div class="slab"><label for="imp-txt">Restore or import</label><small>Paste a full backup or a single trip. Trips are added alongside the ones you have.</small></div><textarea class="inp" id="imp-txt" placeholder="Paste here"></textarea><div class="inline"><button class="btn" data-act="import-trip">Import</button></div><p class="err" id="imp-err" hidden></p></div>'+
+    '<div class="srow col"><div class="slab"><span>Erase everything</span><small>Deletes every trip and setting in this browser and starts over with the sample trip.</small></div><div class="inline"><button class="btn danger'+(ui.armed==='wipe'?' armed':'')+'" data-act="wipe-all">'+(ui.armed==='wipe'?'Click again to erase all '+ids.length+' trip'+(ids.length===1?'':'s'):'Erase all data')+'</button></div></div></section>';
+  h+='<section class="card set about"><div class="card-h"><h2>About</h2></div><p class="muted">Waypoint Planner, version 1.0. Maps use Leaflet with OpenStreetMap and CARTO data, and street routes come from the FOSSGIS routing service. Travel times are estimates.</p></section>';
   return h;
 }
+const CURRENCIES=['EUR','USD','CAD','GBP','AUD','NZD','JPY','CHF','MXN','SEK','NOK','DKK','THB','KRW','SGD'];
+const curSelect=(id,sel)=>'<select class="inp" id="'+id+'">'+CURRENCIES.map(c=>'<option'+(sel===c?' selected':'')+'>'+c+'</option>').join('')+'</select>';
 
+/* ---------- trip settings (dialog) ---------- */
+function openTripSettings(id){
+  const T=STORE.trips[id]||S,cur=T.id===S.id,n=Object.keys(STORE.trips).length;
+  ui.dlg='tripset';ui.form={id:T.id};ui.armed=null;
+  const end=new Date(T.trip.start+'T12:00:00');end.setDate(end.getDate()+T.days.length-1);
+  openDlg('<h2>Trip settings</h2><p class="modehint" style="margin:-8px 0 0">'+esc(T.trip.name)+(cur?' · open now':'')+'</p>'+
+    '<div class="field"><label for="f-trn">Trip name</label><input class="inp" id="f-trn" value="'+esc(T.trip.name)+'" autocomplete="off"></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-trs">First day</label><input class="inp" type="date" id="f-trs" value="'+esc(T.trip.start)+'"></div>'+
+    '<div class="field"><label for="f-trc">Budget currency</label>'+curSelect('f-trc',curOf(T))+'</div></div>'+
+    '<p class="modehint" id="f-trend">'+T.days.length+' day'+(T.days.length===1?'':'s')+', ending '+fmt(end,{weekday:'short',month:'short',day:'numeric',year:'numeric'})+'. Add or remove days in the itinerary.</p>'+
+    '<div class="field"><span>Export</span><div class="inline"><button type="button" class="btn" data-act="export-trip" data-trip="'+T.id+'">Copy trip data</button></div><div class="modehint">Paste it into Settings > Restore on another device to move this trip.</div></div>'+
+    '<div class="field dz"><span>Danger zone</span><div class="inline wrap">'+
+      '<button type="button" class="btn danger" data-act="ts-sample">Replace with the sample trip</button>'+
+      (n>1?'<button type="button" class="btn danger" data-act="ts-delete">Delete this trip</button>':'')+'</div></div>'+
+    '<p class="err" id="f-err" hidden></p>'+
+    '<div class="dlg-acts"><span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-tripset">Save</button></div>');
+}
+function saveTripSettings(){
+  const T=STORE.trips[ui.form.id];if(!T){closeDlg();return}
+  const name=$('f-trn').value.trim(),start=$('f-trs').value;
+  if(!name){$('f-err').textContent='Give the trip a name.';$('f-err').hidden=false;return}
+  if(!start){$('f-err').textContent='Pick the first day.';$('f-err').hidden=false;return}
+  T.trip.name=name;T.trip.start=start;T.currency=$('f-trc').value;
+  closeDlg();commit();gtoast('Saved '+name);
+}
 /* ---------- dialogs: expense, booking, new trip ---------- */
 function openExpense(e){
   ui.dlg='expense';ui.form={id:e?e.id:null,cat:e?e.cat:'food',paid:e?!!e.paid:false};
   openDlg('<h2>'+(e?'Edit expense':'Add expense')+'</h2>'+
     '<div class="field"><label for="f-xt">What for</label><input class="inp" id="f-xt" value="'+esc(e?e.title:'')+'" placeholder="e.g. Dinner at Time Out Market" autocomplete="off"></div>'+
-    '<div class="dt-grid2"><div class="field"><label for="f-xa">Amount ('+esc(SET.currency)+')</label><input class="inp" id="f-xa" inputmode="decimal" value="'+(e?e.amount:'')+'" placeholder="0"></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-xa">Amount ('+esc(curOf(S))+')</label><input class="inp" id="f-xa" inputmode="decimal" value="'+(e?e.amount:'')+'" placeholder="0"></div>'+
     '<div class="field"><label for="f-xd">When</label><select class="inp" id="f-xd">'+dayOptions(e?e.day:(S.view.day&&dayIdx(S.view.day)>=0?S.view.day:''),true)+'</select></div></div>'+
     '<div class="field"><span>Category</span><div class="pick" id="f-xc">'+CATS.map(c=>'<button type="button" class="chip" style="--tc:'+c.color+'" data-act="pick-xcat" data-cat="'+c.id+'" aria-pressed="'+(ui.form.cat===c.id)+'">'+c.icon+' '+c.label+'</button>').join('')+'</div></div>'+
     '<div class="field"><span>Status</span><div class="sseg" id="f-xp"><button type="button" data-act="pick-xpaid" data-v="0" aria-pressed="'+!ui.form.paid+'">Planned</button><button type="button" data-act="pick-xpaid" data-v="1" aria-pressed="'+ui.form.paid+'">Paid</button></div></div>'+
@@ -2442,8 +2815,8 @@ function saveNewTrip(){
   const name=$('f-tn').value.trim(),city=$('f-tc').value.trim(),start=$('f-ts').value,n=+$('f-td').value||3;
   const err=m=>{$('f-err').textContent=m;$('f-err').hidden=false};
   if(!name)return err('Give the trip a name.');if(!city)return err('Add the first city.');if(!start)return err('Pick the first day.');
-  const cid=uid('c'),t={id:uid('trip'),trip:{name,start},cities:[{id:cid,name:city}],days:[],tags:JSON.parse(JSON.stringify(S.tags)),places:[],stays:[],
-    view:{day:'all',mainOnly:false,hidden:[],basemap:SET.map||'illustrated',collapsed:[]}};
+  const cid=uid('c'),t={id:uid('trip'),trip:{name,start},cities:[{id:cid,name:city,country:guessCountry(city)}],days:[],tags:TAGS,places:[],stays:[],
+    view:{day:'all',mainOnly:false,hidden:[],basemap:SET.map||'illustrated',collapsed:[]},currency:SET.currency||'EUR'};
   for(let i=0;i<n;i++)t.days.push({id:uid('d'),city:cid,start:'09:00'});
   normalize(t);STORE.trips[t.id]=t;closeDlg();openTrip(t.id,'plan');gtoast('Created '+name);
 }
@@ -2452,7 +2825,7 @@ function openTrip(id,view){
   save();S=STORE.trips[id];normalize(S);STORE.current=id;ui.open=null;ui.armed=null;ui.prevLegs=new Set();
   if(!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
   save();setBasemap(S.view.basemap==='street'?'street':'illustrated');$('panel').classList.toggle('hide-travel',!!S.view.hideTravel);
-  ui.anim.tab=true;renderAll();fitVisible(false);
+  ui.anim.tab=true;renderAll();fitVisible(false);ui.needFit=true;
   setView(view||SET.view);
 }
 
@@ -2468,7 +2841,25 @@ document.addEventListener('click',e=>{
   const b=e.target.closest&&e.target.closest('[data-act]');if(!b)return;
   const a=b.dataset.act;
   switch(a){
-    case 'view':setView(b.dataset.view);break;
+    case 'view':if(qm.el)closeQuick(true);setView(b.dataset.view);break;
+    case 'trip-menu':openTripMenu(b);break;
+    case 'lib-add':ui.libReturn='saved';openLib({country:b.dataset.country||'',city:b.dataset.city||''});break;
+    case 'add-location':{
+      const v=S.view.day,cid=isCity(v)?v:(S.days.find(d=>d.id===v)||{}).city,c=cid&&S.cities.find(x=>x.id===cid);
+      ui.libDraft=Object.assign(blankLib(),{city:c?c.name:'',country:c?c.country||'':''});ui.libReturn='plan';setPlacing(true,'lib');break}
+    case 'lib-edit':{const l=STORE.library.find(x=>x.id===b.dataset.id);if(l)openLib(Object.assign({},l));break}
+    case 'lib-save':saveLib();break;
+    case 'lib-pick':{const d=readLibForm();ui.libDraft=d;ui.libReturn=SET.view==='plan'?'plan':'saved';closeDlg();setView('plan');setTimeout(()=>setPlacing(true,'lib'),60);break}
+    case 'lib-pick-tag':ui.form.tag=b.dataset.tag;document.querySelectorAll('#f-ltags [data-tag]').forEach(c=>c.setAttribute('aria-pressed',c.dataset.tag===ui.form.tag));break;
+    case 'lib-del':{if(!arm('del',b,'Click again to delete'))break;const id=ui.form.id;STORE.library=STORE.library.filter(x=>x.id!==id);Object.values(STORE.trips).forEach(T=>T.places.forEach(p=>{if(p.libRef===id)delete p.libRef}));ui.libDraft=null;closeDlg();commit();break}
+    case 'lib-to-trip':{const l=STORE.library.find(x=>x.id===b.dataset.id);if(l)openAddToTrip(l);break}
+    case 'at-kind':ui.form.main=b.dataset.kind==='main';document.querySelectorAll('#f-atk [data-kind]').forEach(c=>c.setAttribute('aria-pressed',(c.dataset.kind==='main')===ui.form.main));break;
+    case 'at-save':addToTrip();break;
+    case 'lib-tag':{const id=b.dataset.tag,all=TAGS.filter(t=>STORE.library.some(l=>l.tag===t.id)).map(t=>t.id);let f=ui.libTags&&ui.libTags.length?ui.libTags.slice():[];
+      if(!f.length)f=[id];else if(f.includes(id))f=f.filter(x=>x!==id);else f.push(id);if(f.length===all.length)f=[];ui.libTags=f;renderPage(false);break}
+    case 'lib-tag-all':ui.libTags=[];renderPage(false);break;
+    case 'lib-col':{const c=b.dataset.c,cl=SET.libCol||(SET.libCol=[]),now=!cl.includes(c);SET.libCol=now?cl.concat(c):cl.filter(x=>x!==c);saveSet();const sec=b.closest('.libc');if(sec)sec.classList.toggle('ccol',now);b.setAttribute('aria-expanded',!now);break}
+    case 'switch-trip':{const id=b.dataset.trip;closeQuick();if(id===S.id)break;openTrip(id,SET.view);gtoast('Switched to '+S.trip.name);break}
     case 'goto-day':S.view.day=b.dataset.day;save();setView('plan');renderBar();renderMap();syncDayFocus(true);setTimeout(()=>fitVisible(true),40);break;
     case 'goto-city':S.view.day=b.dataset.city;save();setView('plan');renderBar();renderMap();syncDayFocus(true);setTimeout(()=>fitVisible(true),40);break;
     case 'copy-code':copyText(b.dataset.code,'Copied '+b.dataset.code);break;
@@ -2486,10 +2877,12 @@ document.addEventListener('click',e=>{
     case 'toggle-paid':{const x=S.expenses.find(y=>y.id===b.dataset.id);if(x){x.paid=!x.paid;commit()}break}
     case 'pack-toggle':{const k=S.packing.find(y=>y.id===b.dataset.id);if(!k)break;k.done=!k.done;save();
       const row=b.closest('.ckrow');if(row){row.classList.toggle('done',k.done);b.setAttribute('aria-checked',k.done)}
+      {const dn=S.packing.filter(x=>x.done).length,tt=S.packing.length;document.querySelectorAll('[data-k=pack]').forEach(i=>{i.style.width='';i.style.setProperty('--w',(tt?dn/tt*100:0)+'%')});
+       const sub=document.querySelector('.pg-sub');if(sub)sub.textContent=dn+' of '+tt+' packed'}
       clearTimeout(ui.packT);ui.packT=setTimeout(()=>renderPage(false),420);break}
     case 'pack-del':S.packing=S.packing.filter(y=>y.id!==b.dataset.id);commit();break;
     case 'pack-reset':S.packing.forEach(k=>{k.done=false});commit();break;
-    case 'new-trip':openNewTrip();break;
+    case 'new-trip':if(qm.el)closeQuick(true);openNewTrip();break;
     case 'save-trip':saveNewTrip();break;
     case 'open-trip':openTrip(b.dataset.trip,'overview');gtoast('Opened '+S.trip.name);break;
     case 'dup-trip':{const src=b.dataset.trip===S.id?S:STORE.trips[b.dataset.trip],t=JSON.parse(JSON.stringify(src));t.id=uid('trip');t.trip.name='Copy of '+src.trip.name;STORE.trips[t.id]=t;save();renderPage(false);gtoast('Duplicated '+src.trip.name);break}
@@ -2498,22 +2891,48 @@ document.addEventListener('click',e=>{
     case 'set-theme':SET.theme=b.dataset.v;saveSet();applyTheme();renderPage(false);break;
     case 'set-units':SET.units=b.dataset.v;saveSet();renderAll();renderPage(false);break;
     case 'set-clock':SET.clock=b.dataset.v;saveSet();renderAll();renderPage(false);break;
-    case 'set-map':SET.map=b.dataset.v;saveSet();setBasemap(b.dataset.v);renderPage(false);break;
-    case 'export-trip':copyText(JSON.stringify(S),'Trip data copied');break;
-    case 'import-trip':{const er=$('imp-err');try{const t=JSON.parse($('imp-txt').value);if(!t||!Array.isArray(t.days)||!Array.isArray(t.places)||!t.trip)throw 0;t.id=uid('trip');normalize(t);STORE.trips[t.id]=t;openTrip(t.id,'overview');gtoast('Imported '+t.trip.name)}
-      catch(x){er.textContent='That doesn’t look like trip data. Copy it again with "Copy trip data" and paste the whole thing.';er.hidden=false}break}
-    case 'reset-sample':{if(ui.armed!=='reset2'){ui.armed='reset2';renderPage(false);break}ui.armed=null;const id=S.id;const t=normalize(sampleExtras(sample()));t.id=id;STORE.trips[id]=t;S=t;openTrip(id,'overview');gtoast('Sample trip restored');break}
+    case 'set-map':SET.map=b.dataset.v;saveSet();renderPage(false);break;
+    case 'set-motion':SET.motion=b.dataset.v;saveSet();applyMotion();renderPage(false);break;
+    case 'set-start':SET.start=b.dataset.v;saveSet();renderPage(false);break;
+    case 'trip-settings':openTripSettings(b.dataset.trip||S.id);break;
+    case 'save-tripset':saveTripSettings();break;
+    case 'backup-all':save();copyText(JSON.stringify({waypointBackup:1,trips:STORE.trips,tags:TAGS,library:STORE.library}),'Backup copied');break;
+    case 'wipe-all':{if(ui.armed!=='wipe'){ui.armed='wipe';renderPage(false);break}ui.armed=null;
+      try{[KEY,TKEY,SKEY,RKEY].forEach(k=>localStorage.removeItem(k))}catch(x){}
+      SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'settings',map:'illustrated',motion:'system',start:'last'};saveSet();applyTheme();applyMotion();
+      STORE={current:null,trips:{}};TAGS=null;const t=normalize(sampleExtras(sample()));STORE={current:t.id,trips:{[t.id]:t}};initStore();S=t;openTrip(t.id,'overview');gtoast('Everything was erased. Here\u2019s the sample trip.');break}
+    case 'ts-sample':{if(ui.armed!=='ts-sample'){ui.armed='ts-sample';b.classList.add('armed');b.textContent='Click again to replace';break}
+      ui.armed=null;const id=ui.form.id,t=normalize(sampleExtras(sample()));t.id=id;STORE.trips[id]=t;closeDlg();
+      if(id===S.id){S=t;openTrip(id,SET.view)}else{save();renderPage(false)}gtoast('Replaced with the sample trip');break}
+    case 'ts-delete':{if(ui.armed!=='ts-delete'){ui.armed='ts-delete';b.classList.add('armed');b.textContent='Click again to delete';break}
+      ui.armed=null;const id=ui.form.id,name=STORE.trips[id].trip.name;delete STORE.trips[id];closeDlg();
+      if(id===S.id)openTrip(Object.keys(STORE.trips)[0],'trips');else{save();renderPage(false)}gtoast('Deleted '+name);break}
+    case 'export-trip':{const T=STORE.trips[b.dataset.trip]||S;if(T===S)save();copyText(JSON.stringify(T),'Trip data copied');break}
+    case 'import-trip':{const er=$('imp-err');try{
+        const d=JSON.parse($('imp-txt').value);let list=[];
+        if(d&&Array.isArray(d.tags))d.tags.forEach(x=>{if(x&&!TAGS.some(y=>y.id===x.id))TAGS.push(x)});
+        if(d&&Array.isArray(d.library))d.library.forEach(l=>{if(l&&l.name&&!STORE.library.some(y=>y.id===l.id))STORE.library.push(l)});
+        if(d&&d.trips&&typeof d.trips==='object')list=Object.values(d.trips);else list=[d];
+        list=list.filter(t=>t&&Array.isArray(t.days)&&Array.isArray(t.places)&&t.trip);if(!list.length)throw 0;
+        let last;list.forEach(t=>{t.id=uid('trip');normalize(t);STORE.trips[t.id]=t;last=t});
+        openTrip(last.id,list.length>1?'trips':'overview');gtoast(list.length>1?'Imported '+list.length+' trips':'Imported '+last.trip.name)}
+      catch(x){er.textContent='That doesn\u2019t look like a backup or trip. Copy it again and paste the whole thing.';er.hidden=false}break}
+
   }
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if(t.id==='f-att'){const T=STORE.trips[t.value],l=STORE.library.find(x=>x.id===ui.form.id);if(T&&l){$('f-atd').innerHTML=tripDayOptions(T,bestDay(T,l));atHint()}return}
+  if(t.id==='f-atd'){atHint();return}
   if(t.id==='budget-in'){const v=parseFloat(String(t.value).replace(/[^\d.]/g,''));S.budget=v>0?Math.round(v):0;commit()}
-  else if(t.id==='set-name'){const v=t.value.trim();if(v){S.trip.name=v;commit()}}
-  else if(t.id==='set-start'){if(t.value){S.trip.start=t.value;commit()}}
-  else if(t.id==='set-cur'){SET.currency=t.value;saveSet();renderPage(false)}
+  else if(t.id==='set-cur'){SET.currency=t.value;saveSet()}
+  else if(t.id==='f-trs'&&ui.dlg==='tripset'){const T=STORE.trips[ui.form.id],e=new Date(t.value+'T12:00:00');if(T&&t.value){e.setDate(e.getDate()+T.days.length-1);$('f-trend').textContent=T.days.length+' day'+(T.days.length===1?'':'s')+', ending '+fmt(e,{weekday:'short',month:'short',day:'numeric',year:'numeric'})+'. Add or remove days in the itinerary.'}}
 });
 document.addEventListener('input',e=>{
   const t=e.target;
+  if(t.id==='lib-q'){ui.libQ=t.value;clearTimeout(ui.libT);ui.libT=setTimeout(()=>renderPage(false),120);return}
+  if(t.id==='f-lct'){const cc=$('f-lco'),g=guessCountry(t.value);if(cc&&g&&(!cc.value||cc.dataset.auto==='1'))cc.value=g}
+  if(t.id==='f-lco')t.dataset.auto='';
   if(t.id==='note-main'||t.id==='note-info'){
     if(t.id==='note-main')S.notes=t.value;else S.info=t.value;
     clearTimeout(ui.noteT);ui.noteT=setTimeout(()=>{save();const s=$('note-saved');if(s){s.hidden=false;s.classList.remove('pop');void s.offsetWidth;s.classList.add('pop')}},450);
@@ -2527,7 +2946,7 @@ document.addEventListener('keydown',e=>{
   }
   if(e.key==='Enter'&&t.id==='budget-in'){t.blur()}
   if(e.key==='Enter'&&!$('dlg').hidden&&t.tagName==='INPUT'){
-    if(ui.dlg==='expense'){e.preventDefault();saveExpense()}else if(ui.dlg==='booking'){e.preventDefault();saveBooking()}else if(ui.dlg==='trip'){e.preventDefault();saveNewTrip()}
+    if(ui.dlg==='lib'){e.preventDefault();saveLib()}else if(ui.dlg==='addtrip'){e.preventDefault();addToTrip()}else if(ui.dlg==='tripset'){e.preventDefault();saveTripSettings()}else if(ui.dlg==='expense'){e.preventDefault();saveExpense()}else if(ui.dlg==='booking'){e.preventDefault();saveBooking()}else if(ui.dlg==='trip'){e.preventDefault();saveNewTrip()}
   }
 });
 window.addEventListener('resize',()=>{clearTimeout(ui.railT);ui.railT=setTimeout(()=>{ui.railPos=null;railInd()},120)});
@@ -2536,7 +2955,7 @@ if(!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
 setBasemap(S.view.basemap==='street'?'street':'illustrated');
 $('panel').classList.toggle('hide-travel',!!S.view.hideTravel);
 renderAll();fitVisible();
-applyTheme();renderRail();setView(SET.view);
+applyTheme();applyMotion();renderRail();setView(SET.start==='last'?SET.view:SET.start);
 })();
 </script>
 
