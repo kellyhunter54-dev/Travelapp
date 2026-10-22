@@ -1094,6 +1094,33 @@ path.rt-transit{stroke:var(--transit)}
 .lg-home{width:15px;height:15px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--fg);color:var(--fg);display:grid;place-items:center}
 .lg-home svg{width:9px;height:9px}
 .dt-grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.jr-grid{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px 10px;margin-top:4px}
+.jf{display:grid;gap:4px;min-width:0}
+.jf.w{grid-column:1/-1}
+.jf>span{font-size:12px;font-weight:600;color:var(--muted)}
+.jf .inp{min-width:0;width:100%}
+.jr-sub{display:block;font-family:var(--f-mono);font-size:11px;font-weight:400;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:1px}
+.jr-sub.bad{color:#DC2626}
+.jr-leg .legmode{font-weight:600;color:var(--fg)}
+.dt-warn{margin:8px 0 0;font-size:12.5px;color:#DC2626}
+.jr-add{margin-top:8px}
+.jr-card{margin-top:10px;border-radius:12px;background:var(--surface-2);padding:10px 12px;display:grid;gap:8px}
+.jr-h{display:flex;align-items:center;gap:8px;min-width:0}
+.jr-h b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13.5px}
+.jr-h .code{margin-left:auto}
+.jr-i{width:26px;height:26px;border-radius:8px;display:grid;place-items:center;flex:none;background:color-mix(in srgb,var(--jc) 16%,transparent);font-size:14px}
+.jr-route{display:grid;grid-template-columns:minmax(0,auto) 1fr minmax(0,auto);align-items:center;gap:10px}
+.jr-route>div{display:grid;min-width:0}
+.jr-route .r{text-align:right}
+.jr-t{font-family:var(--f-mono);font-size:15px;font-weight:600}
+.jr-t sup{font-size:10px;color:var(--muted);margin-left:2px}
+.jr-p{font-size:12px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr-line{height:1.5px;background:repeating-linear-gradient(90deg,var(--line) 0 4px,transparent 4px 7px);position:relative;min-width:24px}
+.jr-line i{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);font-style:normal;font-size:12px;background:var(--surface-2);padding:0 4px}
+.jr-kv{display:flex;flex-wrap:wrap;gap:6px 16px;margin:0}
+.jr-kv div{display:grid}
+.jr-kv dt{font-size:11px;color:var(--muted)}
+.jr-kv dd{margin:0;font-size:13px;font-weight:600}
 .inline{display:flex;gap:8px}
 .inline .inp{flex:1;min-width:0}
 .xto{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;color:var(--muted)}
@@ -1940,9 +1967,9 @@ function migrateLoose(t){
 function initStore(){
   if(!Array.isArray(STORE.tags))STORE.tags=[];
   TAGS=STORE.tags;
+  if(!Array.isArray(STORE.library)){STORE.library=sampleLibrary();STORE.libv=2;sample().tags.forEach(x=>{if(!TAGS.some(y=>y.id===x.id))TAGS.push(x)})}
   // v2: a "Travel hub" tag for airports, train and bus stations and ferry terminals (added once, so deleting it sticks)
   if(STORE.tagv!==2){if(!TAGS.some(x=>/travel hub|airport|station|transport/i.test(x.name)))TAGS.push({id:TAGS.some(x=>x.id==='t11')?'t'+Math.random().toString(36).slice(2,8):'t11',name:'Travel hub',icon:'🚉',color:'#4F46E5'});STORE.tagv=2}
-  if(!Array.isArray(STORE.library)){STORE.library=sampleLibrary();STORE.libv=2;sample().tags.forEach(x=>{if(!TAGS.some(y=>y.id===x.id))TAGS.push(x)})}
   // v2: the sample library only has places in Portugal and Spain, so it matches the sample trip
   if(STORE.libv!==2){
     const OLD={l12:'Pantheon',l13:'Da Enzo al 29',l14:'Giolitti',l15:'Piazzale Michelangelo',l16:'Fushimi Inari Taisha',l17:'Arashiyama Bamboo Grove',l18:'Tsukiji Outer Market',l19:'Shibuya Sky'};
@@ -2409,8 +2436,12 @@ function dayPlan(dayId){
   if(out.morning)t+=out.morning.min;
   mains(dayId).forEach((p,i,ms)=>{
     let leg=null;
-    if(i>0){const a=ms[i-1],mode=legMode(a,p),r=legRoute(a,p,mode);leg={from:a,mode,auto:!p.mode,km:r.km,min:minsFor(mode,r.km),path:r.path,live:r.live};t+=leg.min}
-    const stay=p.stay||60;out.push({p,leg,arrive:t,leave:t+stay});t+=stay;
+    if(i>0){const a=ms[i-1];
+      if(jrTimed(a)){const mode=JK[a.jr.kind].mode,r=legRoute(a,p,mode),at=jrArrMin(a.jr);leg={from:a,mode,auto:false,km:r.km,min:Math.max(0,at-t),path:r.path,live:r.live,jr:a.jr};t=Math.max(t,at)}
+      else{const mode=legMode(a,p),r=legRoute(a,p,mode);leg={from:a,mode,auto:!p.mode,km:r.km,min:minsFor(mode,r.km),path:r.path,live:r.live};t+=leg.min}}
+    const stay=p.stay||60;let leave=t+stay,dep=null,late=false;
+    if(p.jr&&p.jr.dep){dep=toMin(p.jr.dep);if(dep>=t)leave=dep;else{late=true;leave=t}}
+    out.push({p,leg,arrive:t,leave,dep,late});t=leave;
   });
   const lx=out[out.length-1],tn=stayForNight(di);
   if(lx&&tn&&lx.p.stayRef===tn.id&&!out.tout){out.end=lx.arrive;out.endsHome=true;return out}
@@ -2866,9 +2897,26 @@ function detailHtml(x,open){
     else if(pl.tin&&pl[0]&&pl[0].p===p){const xi=pl.tin;s+='<div class="dt-leg"><span class="dt-mi">'+MODES[xi.mode].icon+'</span><div><b>'+MODES[xi.mode].label+' from '+esc(xi.from.name)+' (Day '+(dayIdx(xi.prevDay)+1)+')</b><span class="mono">'+dur(xi.min)+' · '+fmtKm(xi.km)+'</span></div></div>'}
     else s+='<div class="dt-sub">First stop of the day.</div>'}
   s+='<div class="dt-grid"><div><span class="lab">Arrive</span><b>'+clock(x.arrive)+'</b></div><div><span class="lab">Leave</span><b>'+clock(x.leave)+'</b></div>'+
-    '<div><label class="lab" for="st-'+p.id+'">Time here</label><select class="sel" id="st-'+p.id+'" data-act="stay" data-id="'+p.id+'">'+stayOpts(p.stay||60)+'</select></div></div>';
+    (x.dep!=null?'<div><span class="lab">'+(p.jr.kind==='car'?'Pick-up':'Departs')+'</span><b>'+clock(x.dep)+'</b></div></div>':
+    '<div><label class="lab" for="st-'+p.id+'">Time here</label><select class="sel" id="st-'+p.id+'" data-act="stay" data-id="'+p.id+'">'+stayOpts(p.stay||60)+'</select></div></div>');
+  if(x.late)s+='<p class="dt-warn">You\u2019d get here after '+(p.jr.kind==='car'?'pick-up':'departure')+'. Start the day earlier or move this stop up.</p>';
+  if(p.jr)s+=jrCard(p);else if(isHub(p))s+='<button class="linkbtn sm jr-add" data-act="edit" data-id="'+p.id+'">+ Add flight, train or bus details</button>';
   if(p.notes)s+='<p class="dt-notes">'+esc(p.notes)+'</p>';
   return s+'<div class="dt-acts"><button class="btn small" data-act="focus" data-id="'+p.id+'">Show on map</button><button class="btn small" data-act="edit" data-id="'+p.id+'">Edit place</button></div></div></div></li>';
+}
+function jrCard(p){
+  const j=p.jr,k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1];
+  const plus=j.kind!=='car'&&+j.arrDay?'<sup>+'+j.arrDay+'</sup>':'';
+  let h='<div class="jr-card" style="--jc:'+k.color+'"><div class="jr-h"><span class="jr-i">'+k.icon+'</span><b>'+esc([j.carrier,j.num].filter(Boolean).join(' ')||k.label)+'</b>'+
+    (j.code?'<button class="code" data-act="copy-code" data-code="'+esc(j.code)+'" title="Copy confirmation code"><span class="mono">'+esc(j.code)+'</span>'+ico('<rect x="7" y="7" width="9" height="9" rx="1.5"/><path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7"/>')+'</button>':'')+'</div>';
+  if(j.from||j.to||j.dep||j.arr){
+    const rd=j.kind==='car'&&j.retDay&&S.days.find(d=>d.id===j.retDay);
+    h+='<div class="jr-route"><div><span class="jr-t">'+(j.dep?clock24(j.dep):'\u2013')+'</span><span class="jr-p">'+esc(j.from||lab('dep'))+'</span></div><span class="jr-line"><i>'+k.icon+'</i></span>'+
+      '<div class="r"><span class="jr-t">'+(j.arr?clock24(j.arr)+plus:'\u2013')+'</span><span class="jr-p">'+esc(j.to||lab('arr'))+(rd?' · Day '+(dayIdx(rd.id)+1):'')+'</span></div></div>';
+  }
+  const kv=['board','t1','t2','seat','bags'].filter(key=>lab(key)&&j[key]).map(key=>'<div><dt>'+lab(key)+'</dt><dd>'+esc(/^\d\d:\d\d$/.test(j[key])?clock24(j[key]):j[key])+'</dd></div>').join('');
+  if(kv)h+='<dl class="jr-kv">'+kv+'</dl>';
+  return h+'</div>';
 }
 const CHEV='<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 const linkedStop=(st,dayId)=>S.places.some(p=>p.stayRef===st.id&&p.main&&p.day===dayId);
@@ -2948,8 +2996,9 @@ function renderPanel(){
         if(plan.tin&&!trX)h+=xferRow(plan.tin,'in');
         plan.forEach((x,k)=>{
           const p=x.p,t=tagOf(p),open=ui.open===p.id;
-          if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
-          h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+'</span><span class="stime">'+clock(x.arrive)+'</span></button></li>';
+          if(x.leg&&x.leg.jr){const jk=JK[x.leg.jr.kind];h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow jr-leg" data-act="edit" data-id="'+x.leg.from.id+'" aria-label="'+esc(jk.label+' details')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+jk.icon+' '+esc(jk.label+(x.leg.jr.num?' '+x.leg.jr.num:''))+'</span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>'}
+          else if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
+          h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+(p.jr?'<small class="jr-sub'+(x.late?' bad':'')+'">'+JK[p.jr.kind].icon+' '+esc([p.jr.num||JK[p.jr.kind].label,p.jr.dep?(p.jr.kind==='car'?'pick-up ':'departs ')+clock24(p.jr.dep):'',p.jr.seat?'seat '+p.jr.seat:''].filter(Boolean).join(' · '))+'</small>':'')+'</span><span class="stime">'+clock(x.arrive)+'</span></button></li>';
           if(open)h+=detailHtml(x,true);
         });
         if(plan.tout&&!nextNew)h+=xferRow(plan.tout,'out');
@@ -3000,6 +3049,7 @@ function openPlace(p,preset){
   ui.dlg='place';
   ui.form={id:p?p.id:null,tag:p?p.tag:(preset.tag||guessTag(preset.name)||(S.tags[0]||{}).id),main:p?p.main:!!preset.main,lat:p?p.lat:preset.lat,lng:p?p.lng:preset.lng,mode:p&&p.mode&&MODES[p.mode]?p.mode:(preset.mode||null),libRef:p?null:(preset.libRef||null)};
   const day=p?p.day:(preset.day||null);
+  ui.form.jr=p&&p.jr?Object.assign({},p.jr):{kind:guessJk(p?p.name:preset.name)};
   openDlg('<h2>'+(isNew?'New place':'Edit place')+'</h2>'+
     '<div class="field"><label for="f-name">Name</label><input class="inp" id="f-name" value="'+esc(p?p.name:(preset.name||''))+'" placeholder="e.g. Miradouro da Graça" autocomplete="off"></div>'+
     '<div class="field"><span>Tag</span><div class="pick" id="f-tags">'+S.tags.map(t=>'<button type="button" class="chip" style="--tc:'+esc(t.color)+'" data-act="pick-tag" data-tag="'+t.id+'" aria-pressed="'+(ui.form.tag===t.id)+'">'+esc(t.icon)+' '+esc(t.name)+'</button>').join('')+'<button type="button" class="linkbtn" data-act="new-tag-from-place">+ New tag</button></div></div>'+
@@ -3009,6 +3059,7 @@ function openPlace(p,preset){
     '<div class="field"><label for="f-day">Day</label><select class="inp" id="f-day"><option value="">Not on a day (keep in Saved places)</option>'+S.days.map((d,i)=>'<option value="'+d.id+'"'+(day===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</option>').join('')+'</select></div>'+
     '<div class="field" id="f-modefield"></div>'+
     '<div class="field"><label for="f-stay">Time here</label><select class="inp" id="f-stay">'+stayOpts(p?(p.stay||60):60)+'</select></div>'+
+    jrBlock()+
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp" id="f-notes" placeholder="Hours, tickets, what to order">'+esc(p?p.notes:'')+'</textarea></div>'+
     '<div class="coords">'+(+ui.form.lat).toFixed(5)+', '+(+ui.form.lng).toFixed(5)+(isNew?'':' · drag the pin on the map to move it')+'</div>'+
     '<p class="err" id="f-err" hidden></p>'+
@@ -3062,6 +3113,29 @@ function workingCountry(){const v=S.view.day,cid=isCity(v)?v:(S.days.find(d=>d.i
 const OSM_TAG={aerodrome:'travel hub',terminal:'travel hub',station:'travel hub',halt:'travel hub',bus_station:'travel hub',ferry_terminal:'travel hub',restaurant:'food',fast_food:'food',food_court:'food',cafe:'treats',bakery:'treats',ice_cream:'treats',confectionery:'treats',pastry:'treats',museum:'museum',gallery:'museum',arts_centre:'museum',viewpoint:'viewpoint',park:'green space',garden:'green space',nature_reserve:'green space',beach:'green space',bar:'nightlife',pub:'nightlife',nightclub:'nightlife',biergarten:'nightlife',wine_bar:'nightlife',hotel:'hotel',hostel:'hotel',guest_house:'hotel',motel:'hotel',apartment:'hotel',attraction:'must-see',monument:'must-see',castle:'must-see',cathedral:'must-see',church:'must-see',memorial:'must-see',palace:'must-see',ruins:'must-see',tower:'must-see',theatre:'must-see',marketplace:'food'};
 function tagForOsm(key,val,name){const want=key==='shop'?'shopping':OSM_TAG[val];if(!want)return name?guessTag(name):null;const t=TAGS.find(x=>normTxt(x.name)===want);return t?t.id:null}
 const HUB_RX=/\b(airport|aeroporto|aeropuerto|a[eé]roport|flughafen|aeroporto|station|esta[cç][aã]o|estaci[oó]n|gare|bahnhof|stazione|terminal|ferry)\b/i;
+// Travel details on a Travel hub stop: a flight, train, bus, ferry or car booked from there
+const JK={
+  flight:{label:'Flight',icon:'✈️',color:'#0EA5E9',mode:'plane',f:[['carrier','Airline','e.g. TAP Air Portugal'],['num','Flight number','e.g. TP 1946'],['from','From','e.g. OPO, Porto'],['to','To','e.g. MAD, Madrid'],['dep','Departs','','time'],['arr','Lands','','time'],['arrDay','Lands on','','arrday'],['board','Boarding','','time'],['t1','Terminal','e.g. 1'],['t2','Gate','e.g. B12'],['seat','Seats','e.g. 14A, 14B'],['bags','Baggage','e.g. 1 checked bag each'],['code','Confirmation code','e.g. IB7HZ4QA','code']]},
+  train:{label:'Train',icon:'🚆',color:'#14B8A6',mode:'transit',f:[['carrier','Operator','e.g. CP Alfa Pendular'],['num','Train number','e.g. AP 123'],['from','From','e.g. Santa Apolónia'],['to','To','e.g. Porto Campanhã'],['dep','Departs','','time'],['arr','Arrives','','time'],['arrDay','Arrives on','','arrday'],['t1','Platform','e.g. 4'],['t2','Car or coach','e.g. 3'],['seat','Seats','e.g. 41, 42'],['code','Confirmation code','e.g. CP3XW7D','code']]},
+  bus:{label:'Bus',icon:'🚌',color:'#F59E0B',mode:'transit',f:[['carrier','Company','e.g. FlixBus'],['num','Bus or route','e.g. N702'],['from','From','e.g. Sete Rios'],['to','To','e.g. Faro'],['dep','Departs','','time'],['arr','Arrives','','time'],['arrDay','Arrives on','','arrday'],['t1','Bay or stop','e.g. 12'],['seat','Seats','e.g. 7, 8'],['bags','Luggage','e.g. 1 large bag each'],['code','Confirmation code','','code']]},
+  ferry:{label:'Ferry',icon:'⛴️',color:'#2563EB',mode:'transit',f:[['carrier','Operator','e.g. Balearia'],['num','Sailing','e.g. 08:00 fast ferry'],['from','From','e.g. Barcelona'],['to','To','e.g. Palma'],['dep','Departs','','time'],['arr','Arrives','','time'],['arrDay','Arrives on','','arrday'],['t1','Check-in closes','','time'],['t2','Cabin or deck','e.g. Deck 6'],['seat','Seats','e.g. 112'],['code','Confirmation code','','code']]},
+  car:{label:'Car',icon:'🚗',color:'#64748B',mode:'car',f:[['carrier','Company','e.g. Europcar'],['num','Car','e.g. VW Golf or similar'],['dep','Pick-up','','time'],['from','Pick up at','e.g. Terminal 1 car park'],['retDay','Return day','','retday'],['arr','Return by','','time'],['to','Return to','e.g. Same place'],['bags','Extras','e.g. Full insurance, child seat'],['code','Confirmation code','','code']]}
+};
+const JK_KEYS=Object.keys(JK);
+const hubTagId=()=>{const t=TAGS.find(x=>normTxt(x.name)==='travel hub');return t?t.id:null};
+const isHub=p=>!!p&&(!!p.jr||(p.tag&&p.tag===hubTagId()));
+function guessJk(name){const n=normTxt(name);return /airport|aeroport|aeropuerto|flughafen/.test(n)?'flight':/\bbus\b|coach/.test(n)?'bus':/ferry|\bport\b|harbou?r/.test(n)?'ferry':/rental|rent a car|car hire/.test(n)?'car':/station|estacao|estacion|gare|bahnhof|stazione/.test(n)?'train':'flight'}
+const jrTimed=p=>!!(p&&p.jr&&p.jr.kind!=='car'&&p.jr.arr&&p.jr.dep);
+const jrArrMin=j=>toMin(j.arr)+1440*(+j.arrDay||0);
+function jrTitle(p){const j=p.jr,k=JK[j.kind]||JK.flight,a=[k.label+(j.num?' '+j.num:'')];
+  if(j.kind==='car'){if(j.carrier)a.push(j.carrier)}else if(j.from&&j.to)a.push(j.from+' to '+j.to);else if(j.carrier)a.push(j.carrier);
+  return a.join(', ')}
+function jrBits(j){const k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1],out=[];
+  if(j.arr)out.push(lab('arr')+' '+clock24(j.arr)+(j.kind!=='car'&&+j.arrDay?' (+'+j.arrDay+')':''));
+  if(j.kind==='car'&&j.retDay){const d=S.days.find(x=>x.id===j.retDay);if(d)out.push('Day '+(dayIdx(d.id)+1))}
+  if(j.kind!=='car'&&j.carrier)out.push(j.carrier);
+  ['board','t1','t2','seat','bags'].forEach(key=>{const l=lab(key);if(l&&j[key])out.push(l+' '+(/^\d\d:\d\d$/.test(j[key])?clock24(j[key]):j[key]))});
+  return out}
 function guessTag(name){if(!HUB_RX.test(name||''))return null;const t=TAGS.find(x=>normTxt(x.name)==='travel hub');return t?t.id:null}
 const SRCH_TITLE={place:'Add a place',lib:'Save a location',city:'Add a city',stay:'Add a hotel'};
 const SRCH_PH={place:'Search for a place, landmark or address',lib:'Search for a place, landmark or address',city:'Search for a city',stay:'Search for your hotel'};
@@ -3233,6 +3307,10 @@ function savePlace(){
   Object.assign(p,{name,tag:f.tag,day,notes,main:f.main,stay:+$('f-stay').value||60});
   if(f.main&&f.mode)p.mode=f.mode;
   if(f.libRef&&!p.libRef)p.libRef=f.libRef;
+  readJr();const jb=$('f-jr');
+  if(jb&&!jb.hidden&&f.jr){const k=f.jr.kind,o={kind:k};JK[k].f.forEach(([key])=>{if(f.jr[key]&&!(key==='arrDay'&&f.jr[key]==='0'))o[key]=f.jr[key]});
+    if(Object.keys(o).length>1)p.jr=o;else delete p.jr}
+  else delete p.jr;
   if(p.main&&(!prevMain||prevDay!==day))p.order=9999;
   if(!p.main)p.order=0;
   if(prevDay)renumber(prevDay);if(day)renumber(day);
@@ -3278,7 +3356,29 @@ function reopenPlace(back){
   $('f-name').value=back.name;$('f-notes').value=back.notes;$('f-day').value=back.day||'';if(back.stay)$('f-stay').value=back.stay;
   syncPlaceForm();renderModeField();
 }
+function jrInput(j,[k,label,ph,type]){
+  const id='f-j-'+k,v=j[k]||'',wide=k==='bags'||k==='code';
+  let ctl;
+  if(type==='time')ctl='<input class="inp" type="time" id="'+id+'" value="'+esc(v)+'">';
+  else if(type==='arrday')ctl='<select class="inp" id="'+id+'">'+[['0','Same day'],['1','Next day'],['2','2 days later']].map(o=>'<option value="'+o[0]+'"'+(String(v||'0')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>';
+  else if(type==='retday')ctl='<select class="inp" id="'+id+'"><option value="">Not set</option>'+S.days.map((d,i)=>'<option value="'+d.id+'"'+(v===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),DAYFMT)+'</option>').join('')+'</select>';
+  else ctl='<input class="inp'+(type==='code'?' mono':'')+'" id="'+id+'" value="'+esc(v)+'" placeholder="'+esc(ph||'')+'" autocomplete="off">';
+  return '<label class="jf'+(wide?' w':'')+'" for="'+id+'"><span>'+label+'</span>'+ctl+'</label>';
+}
+function jrBlock(){
+  const f=ui.form,j=f.jr,show=f.tag===hubTagId()||!!(S.places.find(x=>x.id===f.id)||{}).jr;
+  return '<div class="field jr" id="f-jr"'+(show?'':' hidden')+'><span>Travel details</span>'+
+    '<div class="pick" id="f-jk">'+JK_KEYS.map(k=>'<button type="button" class="chip" style="--tc:'+JK[k].color+'" data-act="pick-jkind" data-jk="'+k+'" aria-pressed="'+(j.kind===k)+'">'+JK[k].icon+' '+JK[k].label+'</button>').join('')+'</div>'+
+    '<div class="jr-grid" id="f-jrf">'+JK[j.kind].f.map(x=>jrInput(j,x)).join('')+'</div>'+
+    '<div class="modehint">Fill in what you have, it all shows in Bookings too. The departure time sets when you leave this stop'+(j.kind==='car'?'':', and the arrival time when you get to the next one')+'.</div></div>';
+}
+function readJr(){const j=ui.form&&ui.form.jr;if(!j)return;JK[j.kind].f.forEach(([k])=>{const el=$('f-j-'+k);if(el)j[k]=el.value.trim()})}
+function pickJkind(k){readJr();ui.form.jr.kind=k;const box=$('f-jr');if(!box)return;const keep=box.querySelector('.modehint');
+  const tmp=document.createElement('div');tmp.innerHTML=jrBlock();box.replaceWith(tmp.firstChild);
+  const nb=$('f-jrf');if(nb&&!reduced)nb.animate([{opacity:.3},{opacity:1}],{duration:160,easing:'ease-out'})}
 function syncPlaceForm(){
+  const jb=$('f-jr');if(jb){const show=ui.form.tag===hubTagId()||!!(S.places.find(x=>x.id===ui.form.id)||{}).jr;
+    if(show&&jb.hidden&&!reduced){jb.hidden=false;jb.animate([{opacity:0,transform:'translateY(-4px)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'})}else jb.hidden=!show}
   document.querySelectorAll('#f-tags [data-tag]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tag===ui.form.tag));
   document.querySelectorAll('#f-kind [data-kind]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.kind==='main')===ui.form.main));
 }
@@ -3384,6 +3484,7 @@ document.addEventListener('click',e=>{
     case 'new-tag':openTag(null);break;
     case 'edit-tag':openTag(S.tags.find(t=>t.id===b.dataset.tag));break;
     case 'new-tag-from-place':{const back={form:Object.assign({},ui.form),name:$('f-name').value,notes:$('f-notes').value,day:$('f-day').value||null,stay:$('f-stay').value};openTag(null,back);break}
+    case 'pick-jkind':pickJkind(b.dataset.jk);break;
     case 'pick-tag':ui.form.tag=b.dataset.tag;syncPlaceForm();break;
     case 'pick-kind':ui.form.main=b.dataset.kind==='main';syncPlaceForm();renderModeField();break;
     case 'pick-mode':ui.form.mode=b.dataset.mode;renderModeField();break;
@@ -3829,6 +3930,8 @@ function budgetBar(bs,compact){
 
 function allBookings(){
   const out=S.bookings.map(b=>{const t=btOf(b.type);return {kind:'b',id:b.id,title:b.title,day:b.day,time:b.time,code:b.code,notes:b.notes,icon:t.icon,color:t.color,label:t.label,ord:dayOrder(b.day)*10000+(b.time?+b.time.replace(':',''):0)}});
+  S.places.forEach(p=>{if(!p.jr||!p.day)return;const k=JK[p.jr.kind]||JK.flight,day=p.day;
+    out.push({kind:'j',id:p.id,title:jrTitle(p),day,time:p.jr.dep||'',code:p.jr.code||'',notes:jrBits(p.jr).join(' · '),icon:k.icon,color:k.color,label:k.label,ord:dayOrder(day)*10000+(p.jr.dep?+p.jr.dep.replace(':',''):0)})});
   S.stays.forEach(st=>{const day=st.ci<0?'before':S.days[st.ci]?S.days[st.ci].id:'after';out.push({kind:'s',id:st.id,title:st.name,day,time:'15:00',code:'',notes:nightsText(st)+(st.notes?'. '+st.notes:''),icon:'🛏️',color:'#6366F1',label:'Hotel',ord:dayOrder(day)*10000+1500})});
   return out.sort((a,b)=>a.ord-b.ord);
 }
@@ -3841,9 +3944,9 @@ function pgBookings(){
     const dc=g.k&&g.k!=='before'&&g.k!=='after'?dayColor(g.k):'var(--muted)';
     h+='<section class="bgroup" style="--dc:'+dc+'"><h3 class="bg-h"><i class="dot"></i>'+esc(dayLabel(g.k))+'</h3><div class="blist">'+g.items.map(x=>
       '<div class="bk"><span class="bico" style="--bc:'+x.color+'">'+x.icon+'</span><div class="bk-main"><div class="bk-top"><b>'+esc(x.title)+'</b><span class="bk-type">'+esc(x.label)+'</span></div>'+
-      '<div class="bk-meta">'+(x.time?'<span class="mono">'+(x.kind==='s'?'Check-in ':'')+clock24(x.time)+'</span>':'')+(x.notes?'<span>'+esc(x.notes)+'</span>':'')+'</div></div>'+
+      '<div class="bk-meta">'+(x.time?'<span class="mono">'+(x.kind==='s'?'Check-in ':x.kind==='j'?'Departs ':'')+clock24(x.time)+'</span>':'')+(x.notes?'<span>'+esc(x.notes)+'</span>':'')+'</div></div>'+
       (x.code?'<button class="code" data-act="copy-code" data-code="'+esc(x.code)+'" title="Copy confirmation code"><span class="mono">'+esc(x.code)+'</span>'+ico('<rect x="7" y="7" width="9" height="9" rx="1.5"/><path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7"/>')+'</button>':'')+
-      '<button class="ib" data-act="'+(x.kind==='s'?'edit-stay" data-stay="':'edit-booking" data-id="')+x.id+'" aria-label="Edit '+esc(x.title)+'">'+SVG.edit+'</button></div>').join('')+'</div></section>';
+      '<button class="ib" data-act="'+(x.kind==='s'?'edit-stay" data-stay="':x.kind==='j'?'edit" data-id="':'edit-booking" data-id="')+x.id+'" aria-label="Edit '+esc(x.title)+'">'+SVG.edit+'</button></div>').join('')+'</div></section>';
   });
   return h;
 }
