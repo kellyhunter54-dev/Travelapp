@@ -928,6 +928,21 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .trans-rail i{width:0;border-left:3px solid var(--transit);border-radius:2px;height:100%;opacity:.85}
 .trans-body{display:grid;gap:4px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--transit) 9%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--transit) 22%,transparent)}
 .trans-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.trans-body{gap:0;padding:0}
+.trans-head{display:grid;grid-template-columns:minmax(0,1fr) auto 10px;align-items:center;column-gap:10px;row-gap:3px;width:100%;border:0;background:none;padding:10px 12px;text-align:left;border-radius:12px;min-width:0}
+.trans-head .trans-cities{flex:0 1 auto;min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.trans-how{grid-column:1/-1;max-height:20px;transition:opacity .2s ease,max-height .28s cubic-bezier(.2,.8,.2,1),margin .28s cubic-bezier(.2,.8,.2,1);font-size:13px;font-weight:600;color:var(--fg);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trans-dur{font-weight:400;color:var(--muted)}
+.trans-head>svg{width:10px;height:6px;flex:none;color:var(--muted);transition:rotate .25s var(--ease,ease)}
+.trans.open .trans-head>svg{rotate:180deg}
+.trans.open .trans-how{opacity:0;max-height:0;margin-top:-3px}
+.trans-more{display:grid;grid-template-rows:0fr;transition:grid-template-rows .28s cubic-bezier(.2,.8,.2,1)}
+.trans.open .trans-more{grid-template-rows:1fr}
+.trans-in{overflow:hidden;min-height:0;display:grid;gap:6px;padding:0 12px;transition:padding .28s cubic-bezier(.2,.8,.2,1)}
+.trans.open .trans-in{padding:0 12px 12px}
+.trans-in .jr-card{margin-top:2px;background:var(--surface)}
+.trans-acts{display:flex}
+
 .trans-cities{display:flex;align-items:center;gap:7px;font-family:var(--f-display);font-weight:700;font-size:15px;color:var(--transit)}
 .trans-cities svg{width:15px;height:10px;opacity:.8}
 .trans-date{font-size:12px;color:var(--muted);white-space:nowrap}
@@ -1008,7 +1023,39 @@ path.rt-transit{stroke:var(--transit)}
 .tpick:hover{background:color-mix(in srgb,var(--dc) 20%,transparent)}
 .tpick:focus-within{outline:2px solid var(--accent);outline-offset:2px}
 .tpick svg{width:9px;height:6px;opacity:.75}
-.tpick input{position:absolute;inset:0;width:100%;height:100%;opacity:0;border:0;padding:0;margin:0;cursor:pointer;font-size:16px}
+.tpick{border:0}
+.tfield{position:relative;display:block;min-width:0}
+.tfield .tinp{padding-right:40px;font-variant-numeric:tabular-nums}
+.tinp.bad,.dial-in.bad{border-color:#DC2626;box-shadow:0 0 0 1px #DC2626}
+.tclock{position:absolute;right:4px;top:50%;translate:0 -50%;width:32px;height:32px;border:0;border-radius:8px;background:none;color:var(--muted);display:grid;place-items:center}
+.tclock:hover{background:var(--line);color:var(--fg)}
+.tclock svg{width:18px;height:18px}
+.dtrow{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,1fr);gap:8px}
+.jdur{display:block;margin-top:5px;font-size:12px;color:var(--muted)}
+.jdur.bad{color:#DC2626}
+.jr-d{font-size:11px;color:var(--muted);font-family:var(--f-mono)}
+.jr-line em{position:absolute;left:50%;top:9px;translate:-50% 0;font-style:normal;font-size:10.5px;color:var(--muted);white-space:nowrap;font-family:var(--f-mono)}
+.dial{position:fixed;z-index:3000;background:var(--surface);border-radius:18px;box-shadow:0 18px 50px rgba(0,0,0,.28),0 0 0 1px var(--line);padding:14px;display:grid;gap:12px}
+.dial-top{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.dial-read{display:flex;align-items:center;gap:2px;font-family:var(--f-mono);font-size:30px;font-weight:600;color:var(--muted)}
+.dial-read button{border:0;background:none;font:inherit;color:inherit;padding:2px 8px;border-radius:10px;transition:background-color .15s ease,color .15s ease}
+.dial-read button.on{color:var(--accent);background:color-mix(in srgb,var(--accent) 12%,transparent)}
+.dial-ap{display:grid;gap:3px}
+.dial-ap button{border:0;background:var(--surface-2);color:var(--muted);font-weight:700;font-size:12px;padding:5px 10px;border-radius:8px;transition:background-color .15s ease,color .15s ease}
+.dial-ap button.on{background:var(--accent);color:#fff}
+.dial-face{position:relative;aspect-ratio:1;border-radius:50%;background:var(--surface-2);touch-action:none;cursor:pointer;user-select:none;-webkit-user-select:none}
+.dial-nums span{position:absolute;translate:-50% -50%;width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:600;font-size:14px;font-variant-numeric:tabular-nums;pointer-events:none;transition:background-color .15s ease,color .15s ease}
+.dial-nums span.sm{width:28px;height:28px;font-size:11.5px;color:var(--muted)}
+.dial-nums span.on{background:var(--accent);color:#fff}
+.dial-hand{position:absolute;left:50%;top:50%;width:2px;height:var(--l,40%);background:var(--accent);transform-origin:50% 100%;translate:-50% -100%;rotate:var(--a,0deg);transition:rotate .22s cubic-bezier(.2,.8,.2,1),height .22s cubic-bezier(.2,.8,.2,1);pointer-events:none}
+.dial.dragging .dial-hand{transition:none}
+.dial-nums span.on{transition:none}
+.dial-hand i{position:absolute;left:50%;bottom:-4px;width:8px;height:8px;border-radius:50%;background:var(--accent);translate:-50% 0}
+.dial-dot{position:absolute;width:8px;height:8px;border-radius:50%;background:#fff;translate:-50% -50%;pointer-events:none;box-shadow:0 0 0 6px var(--accent)}
+.dial-foot{display:grid;gap:10px}
+.dial-in{height:38px;font-size:14px}
+.dial-acts{display:flex;justify-content:flex-end;gap:8px}
+@media (prefers-reduced-motion:reduce){.dial-hand{transition:none}}
 .row.open{background:var(--surface-2)}
 .leg{display:flex}
 .legrow{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:0;background:none;text-align:left;color:var(--muted);font-size:12.5px;padding:0 6px 0 4px;border-radius:8px}
@@ -1103,6 +1150,14 @@ path.rt-transit{stroke:var(--transit)}
 .jr-sub.bad{color:#DC2626}
 .jr-leg .legmode{font-weight:600;color:var(--fg)}
 .dt-warn{margin:8px 0 0;font-size:12.5px;color:#DC2626}
+.dt-set{border:0;background:none;padding:4px 6px;margin:-4px -6px;border-radius:8px;text-align:left;display:grid;font:inherit;color:inherit;cursor:pointer;transition:background-color .15s ease}
+.dt-set:hover{background:color-mix(in srgb,var(--dc) 12%,transparent)}
+.dt-set b{display:inline-flex;align-items:center;gap:5px;color:color-mix(in srgb,var(--dc) 80%,var(--fg))}
+.dt-set b svg{width:8px;height:5px;opacity:.6}
+.dt-fixed{margin:8px 0 0;font-size:12.5px}
+.dt-fixed .bad{color:#DC2626}
+.stime.fixed{font-weight:700}
+.stime.fixed::before{content:"";display:inline-block;width:5px;height:5px;border-radius:50%;background:currentColor;margin-right:5px;vertical-align:2px}
 .jr-add{margin-top:8px}
 .jr-card{margin-top:10px;border-radius:12px;background:var(--surface-2);padding:10px 12px;display:grid;gap:8px}
 .jr-h{display:flex;align-items:center;gap:8px;min-width:0}
@@ -1214,6 +1269,10 @@ path.rt-transit{stroke:var(--transit)}
 .pin-num{position:absolute;top:-7px;right:-8px;min-width:17px;height:17px;padding:0 4px;border-radius:9px;background:#14201C;color:#fff;font:500 10px/17px var(--f-mono);text-align:center;border:1.5px solid #fff}
 .pin-extra{width:24px;height:24px;transform:rotate(45deg);border-radius:6px;background:#fff;border:2.5px solid var(--c);box-shadow:0 1px 5px rgba(0,0,0,.3);font-size:13px}
 .pin-extra.loose{border-style:dashed;opacity:.88}
+.pin-ico{display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif;line-height:1;font-style:normal;text-align:center}
+.pin-ico i{display:block;font-style:normal;line-height:1;height:1em;white-space:nowrap}
+.pin-hb{position:absolute;left:-8px;bottom:-6px;width:17px;height:17px;border-radius:50%;background:#fff;color:#14201C;display:grid;place-items:center;box-shadow:0 1px 3px rgba(0,0,0,.35)}
+.pin-hb svg{width:11px;height:11px}
 .pin-extra .pin-ico{transform:rotate(-45deg)}
 .sk-label{font-family:var(--f-display);font-weight:500;font-size:12px;color:var(--label);letter-spacing:.06em;text-transform:uppercase;white-space:nowrap;pointer-events:none;width:auto!important;height:auto!important;transform-origin:center}
 .sk-label.water{color:var(--water-label);font-style:italic;text-transform:none;letter-spacing:.02em;font-size:14px}
@@ -1291,9 +1350,14 @@ textarea.inp{min-height:70px;resize:vertical}
 .icons button{border:1px solid var(--line);background:var(--surface);border-radius:8px;height:38px;font-size:18px}
 .icons button[aria-pressed="true"]{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent);background:var(--accent-soft)}
 .swatches{display:flex;flex-wrap:wrap;gap:6px;align-items:center}
+.tagfind{height:38px;font-size:14px}
+.tagpick{max-height:156px;overflow-y:auto;padding:2px;margin:-2px;overscroll-behavior:contain}
+.tagpick [hidden]{display:none!important}
 .swatches button{width:28px;height:28px;border-radius:50%;border:2px solid var(--surface);background:var(--sc);box-shadow:0 0 0 1px var(--line)}
 .swatches button[aria-pressed="true"]{box-shadow:0 0 0 2px var(--fg)}
-.swatches input[type=color]{width:34px;height:30px;border:1px solid var(--line);border-radius:8px;background:var(--surface);padding:2px}
+.addcolor{position:relative;width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1.5px var(--line);display:grid;place-items:center;color:var(--muted);font-size:18px;line-height:1;cursor:pointer;transition:box-shadow .15s ease,color .15s ease}
+.addcolor:hover{box-shadow:inset 0 0 0 1.5px var(--fg);color:var(--fg)}
+.addcolor input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer;border:0;padding:0}
 .preview{display:flex;align-items:center;gap:22px;padding:12px 14px;border-radius:10px;background:var(--surface-2);font-size:12px;color:var(--muted)}
 .preview>div{display:flex;align-items:center;gap:10px}
 
@@ -1784,8 +1848,12 @@ const MODES={
 };
 const MODE_KEYS=['walk','bike','transit','car','plane'];
 const STAYS=[15,30,45,60,90,120,180,240,300];
-const ICONS=['⭐','🍽️','☕','🍰','🌅','🏛️','🛍️','📸','🌳','🍷','🎶','⛪','🏰','🏖️','🚋','🎨','🥾','🍺','🛏️','🎟️','🧭','❤️','🐟','🍦'];
-const COLORS=['#D97706','#DC2626','#92400E','#7C3AED','#2563EB','#DB2777','#0891B2','#9F1239','#15803D','#475569'];
+const ICONS=['🏰','🏺','🍴','🏞️','🌲','🥾','🦁','🗽','🛒','🍸','🎡','🎬','🌷','✈️','📍','🛠️','🚆','🛕','⛩️','🎢','🐱','🐠','📮','🏝️','🏬','💱','⛴️','🚉','🚌','🎭','⭐','🍽️','☕','🍰','🌅','🏛️','🛍️','📸','🌳','🍷','🎶','⛪','🏰','🏖️','🚋','🎨','🥾','🍺','🛏️','🎟️','🧭','❤️','🐟','🍦'];
+const COLORS=['#D97706','#F59E0B','#CA8A04','#EA580C','#DC2626','#E11D48','#9F1239','#DB2777','#C026D3','#9333EA','#7C3AED','#4F46E5','#2563EB','#0284C7','#0891B2','#0D9488','#059669','#15803D','#65A30D','#92400E','#78350F','#57534E','#475569','#111827'];
+// Ready-made tags (added for everyone once; edit or delete any of them in Settings > Tags)
+const PRESET_TAGS=[['Castle','🏰','#7C3AED'],['Historic Site','🏺','#78350F'],['Restaurant','🍴','#EA580C'],['Cafe','☕','#92400E'],['Scenic Spot','🏞️','#4F46E5'],['Park','🌲','#15803D'],['Beach','🏖️','#CA8A04'],['Hiking','🥾','#57534E'],['Church','⛪','#111827'],['Zoo','🦁','#059669'],['Monument','🗽','#0284C7'],['Shop','🛒','#F59E0B'],['Bar','🍸','#C026D3'],['Attraction','🎡','#9333EA'],['Cinema','🎬','#475569'],['Garden','🌷','#65A30D'],['Airport','✈️','#0F172A'],['Point of Interest','📍','#E11D48'],['Workshop','🛠️','#1D4ED8'],['Train Station','🚆','#334155'],['Buddhist Temple','🛕','#9A3412'],['Shinto Shrine','⛩️','#B91C1C'],['Theme Park','🎢','#A21CAF'],['Animal Cafe','🐱','#0D9488'],['Aquarium','🐠','#0891B2'],['Post Office','📮','#BE123C'],['Island','🏝️','#0E7490'],['Mall','🏬','#D97706'],['Currency Exchange','💱','#3F3F46'],['Ferry','⛴️','#1E40AF']];
+const HUB_TAGS=['travel hub','airport','train station','ferry','bus station'];
+const isHubTag=id=>{const t=TAGS.find(x=>x.id===id);return !!t&&HUB_TAGS.includes(normTxt(t.name))};
 
 function P(id,name,lat,lng,tag,day,main,order,notes){return {id,name,lat,lng,tag,day,main,order,notes:notes||''}}
 function withMeta(pl){
@@ -1969,7 +2037,8 @@ function initStore(){
   TAGS=STORE.tags;
   if(!Array.isArray(STORE.library)){STORE.library=sampleLibrary();STORE.libv=2;sample().tags.forEach(x=>{if(!TAGS.some(y=>y.id===x.id))TAGS.push(x)})}
   // v2: a "Travel hub" tag for airports, train and bus stations and ferry terminals (added once, so deleting it sticks)
-  if(STORE.tagv!==2){if(!TAGS.some(x=>/travel hub|airport|station|transport/i.test(x.name)))TAGS.push({id:TAGS.some(x=>x.id==='t11')?'t'+Math.random().toString(36).slice(2,8):'t11',name:'Travel hub',icon:'🚉',color:'#4F46E5'});STORE.tagv=2}
+  if(!(STORE.tagv>=2)){if(!TAGS.some(x=>/travel hub|airport|station|transport/i.test(x.name)))TAGS.push({id:TAGS.some(x=>x.id==='t11')?'t'+Math.random().toString(36).slice(2,8):'t11',name:'Travel hub',icon:'🚉',color:'#4F46E5'});STORE.tagv=2}
+  if(STORE.tagv<3){PRESET_TAGS.forEach(([name,icon,color])=>{if(!TAGS.some(x=>normTxt(x.name)===normTxt(name)))TAGS.push({id:'t'+Math.random().toString(36).slice(2,8),name,icon,color})});STORE.tagv=3}
   // v2: the sample library only has places in Portugal and Spain, so it matches the sample trip
   if(STORE.libv!==2){
     const OLD={l12:'Pantheon',l13:'Da Enzo al 29',l14:'Giolitti',l15:'Piazzale Michelangelo',l16:'Fushimi Inari Taisha',l17:'Arashiyama Bamboo Grove',l18:'Tsukiji Outer Market',l19:'Shibuya Sky'};
@@ -2060,7 +2129,7 @@ initStore();
 let S=STORE.trips[STORE.current]||STORE.trips[Object.keys(STORE.trips)[0]];
 normalize(S);
 function save(){try{STORE.trips[S.id]=S;STORE.current=S.id;localStorage.setItem(TKEY,JSON.stringify(STORE))}catch(e){}}
-const ui={open:null,tab:SET.panelTab==='sum'?'sum':'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
+const ui={ctrOpen:new Set(),open:null,tab:SET.panelTab==='sum'?'sum':'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
 const sysReduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
 let reduced=sysReduced||SET.motion==='reduce';
 function applyMotion(){reduced=sysReduced||SET.motion==='reduce';document.documentElement.classList.toggle('no-motion',SET.motion==='reduce')}
@@ -2298,16 +2367,29 @@ let routeLayer=L.layerGroup().addTo(map);
 const markerLayer=L.layerGroup().addTo(map);
 let markers={};
 
+// Emoji fonts sit their pictures off-center by different amounts; measure each one and nudge it to the true middle
+const emoCache={};let emoCtx=null;
+function emo(icon,px){
+  const k=icon+'|'+px;if(emoCache[k]==null){let dx=0,dy=0;
+    try{emoCtx=emoCtx||document.createElement('canvas').getContext('2d');emoCtx.font=px+'px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif';emoCtx.textBaseline='alphabetic';
+      const m=emoCtx.measureText(icon);if(m.fontBoundingBoxAscent!=null&&m.actualBoundingBoxAscent!=null){
+        const fA=m.fontBoundingBoxAscent,fD=m.fontBoundingBoxDescent,base=(px-(fA+fD))/2+fA;
+        dy=px/2-(base-(m.actualBoundingBoxAscent-m.actualBoundingBoxDescent)/2);
+        dx=m.width/2-(m.actualBoundingBoxRight-m.actualBoundingBoxLeft)/2;
+        if(Math.abs(dx)>px*.3||Math.abs(dy)>px*.3){dx=0;dy=0}}}catch(e){}
+    emoCache[k]=(Math.abs(dx)<.25&&Math.abs(dy)<.25)?'':' style="translate:'+dx.toFixed(2)+'px '+dy.toFixed(2)+'px"'}
+  return '<span class="pin-ico" style="font-size:'+px+'px"><i'+emoCache[k]+'>'+esc(icon)+'</i></span>';
+}
 function iconFor(p,anim){
   const cls=(ui.open===p.id?' sel':'')+(anim!=null?' in':''),dl=anim!=null?';--d:'+anim+'ms':'';
   const t=tagOf(p);
   if(p.main){
     const n=p.order;
     return L.divIcon({className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-14],
-      html:'<div class="pin pin-main'+cls+'" style="--c:'+dayColor(p.day)+dl+'"><span class="pin-ico">'+esc(t.icon)+'</span><span class="pin-num">'+n+'</span></div>'});
+      html:'<div class="pin pin-main'+cls+'" style="--c:'+dayColor(p.day)+dl+'">'+emo(t.icon,16)+'<span class="pin-num">'+n+'</span>'+(atHotel(p)?'<span class="pin-hb" title="Your hotel">'+SVG.home+'</span>':'')+'</div>'});
   }
   return L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12],
-    html:'<div class="pin pin-extra'+(p.day?'':' loose')+cls+'" style="--c:'+esc(t.color)+dl+'"><span class="pin-ico">'+esc(t.icon)+'</span></div>'});
+    html:'<div class="pin pin-extra'+(p.day?'':' loose')+cls+'" style="--c:'+esc(t.color)+dl+'">'+emo(t.icon,13)+'</div>'});
 }
 /* ---------- Routing ---------- */
 function km(a,b){const R=6371,r=Math.PI/180,dLat=(b[0]-a[0])*r,x=(b[1]-a[1])*r*Math.cos((a[0]+b[0])/2*r);return R*Math.sqrt(dLat*dLat+x*x)}
@@ -2428,7 +2510,7 @@ function transferOf(i){
 }
 function dayPlan(dayId){
   const d=S.days.find(x=>x.id===dayId);if(!d)return [];
-  const di=dayIdx(dayId),tin=transferOf(di),nx=transferOf(di+1);
+  const di=dayIdx(dayId),tin=transferOf(di),nx=transferOf(di+1),base=isoOf(dayDate(di));
   let t=toMin(d.start);const out=[];
   out.tin=tin&&tin.when==='start'?tin:null;out.tout=nx&&nx.when==='end'?nx:null;
   out.morning=hotelLeg(dayId,'m');out.evening=hotelLeg(dayId,'e');
@@ -2437,11 +2519,13 @@ function dayPlan(dayId){
   mains(dayId).forEach((p,i,ms)=>{
     let leg=null;
     if(i>0){const a=ms[i-1];
-      if(jrTimed(a)){const mode=JK[a.jr.kind].mode,r=legRoute(a,p,mode),at=jrArrMin(a.jr);leg={from:a,mode,auto:false,km:r.km,min:Math.max(0,at-t),path:r.path,live:r.live,jr:a.jr};t=Math.max(t,at)}
+      if(jrTimed(a)){const mode=JK[a.jr.kind].mode,r=legRoute(a,p,mode),at=jrArrMin(a.jr,base);leg={from:a,mode,auto:false,km:r.km,min:Math.max(0,at-t),path:r.path,live:r.live,jr:a.jr};t=Math.max(t,at)}
       else{const mode=legMode(a,p),r=legRoute(a,p,mode);leg={from:a,mode,auto:!p.mode,km:r.km,min:minsFor(mode,r.km),path:r.path,live:r.live};t+=leg.min}}
+    let fixed=false,early=false;
+    if(p.at){const want=toMin(p.at);early=want<t;t=want;fixed=true}
     const stay=p.stay||60;let leave=t+stay,dep=null,late=false;
-    if(p.jr&&p.jr.dep){dep=toMin(p.jr.dep);if(dep>=t)leave=dep;else{late=true;leave=t}}
-    out.push({p,leg,arrive:t,leave,dep,late});t=leave;
+    if(p.jr&&p.jr.dep){dep=jrDepMin(p.jr,base);if(dep>=t)leave=dep;else{late=true;leave=t}}
+    out.push({p,leg,arrive:t,leave,dep,late,fixed,early});t=leave;
   });
   const lx=out[out.length-1],tn=stayForNight(di);
   if(lx&&tn&&lx.p.stayRef===tn.id&&!out.tout){out.end=lx.arrive;out.endsHome=true;return out}
@@ -2492,13 +2576,32 @@ function cityTransition(dayId){
 }
 function transitionCard(t,fromC,toC){
   const lg=t.lg,act=t.kind==='h'?'hleg-menu" data-part="m':t.kind==='x'?'xfer-menu':'ctr-menu',mode=lg?lg.mode:t.mode;
-  const head='<div class="trans" data-flip="tr-'+t.day+'"><div class="trans-rail"><i></i></div><div class="trans-body">'+
-    '<div class="trans-top"><span class="trans-cities">'+esc(fromC.name)+'<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1 5h13M10 1.5 14 5l-4 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+esc(toC.name)+'</span>'+
-    '<span class="trans-date">'+fmt(dayDate(t.date),{weekday:'short',month:'short',day:'numeric'})+'</span></div>'+
-    '<button class="legrow trans-mode" data-act="'+act+'" data-day="'+t.day+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc((mode?MODES[mode].label:'Choose how you travel')+' from '+fromC.name+' to '+toC.name)+'"><span class="legmode">'+(mode?MODES[mode].icon+' '+MODES[mode].label:'Choose how you travel')+CHEV+'</span>'+(lg?'<span class="legt">'+dur(lg.min)+' · '+fmtKm(lg.km)+'</span>':'')+'</button>';
-  if(!lg)return head+'<div class="trans-times"><span>Add a stop or hotel in '+esc(t.need)+' to see the distance and travel time.</span></div></div></div>';
-  return head+'<div class="trans-times"><span><b>'+clock(t.leave)+'</b> leave '+esc(t.fromName)+'</span><span><b>'+clock(t.leave+lg.min)+'</b> arrive '+esc(t.toName)+'</span></div></div></div>';
+  const d=S.days.find(x=>x.id===t.day),j=d&&d.cjr,jk=j&&JK[j.kind],open=ui.ctrOpen.has(t.day),base=isoOf(dayDate(t.date));
+  const how=jk?jk.icon+' '+jk.label+(j.num?' '+esc(j.num):''):(mode?MODES[mode].icon+' '+MODES[mode].label:'How you travel');
+  const date=j&&j.depDate?fmtIso(j.depDate):fmt(dayDate(t.date),DAYFMT);
+  let h='<div class="trans'+(open?' open':'')+'" data-flip="tr-'+t.day+'"><div class="trans-rail"><i></i></div><div class="trans-body">'+
+    '<button type="button" class="trans-head" data-act="ctr-toggle" data-day="'+t.day+'" aria-expanded="'+open+'">'+
+      '<span class="trans-cities">'+esc(fromC.name)+'<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1 5h13M10 1.5 14 5l-4 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+esc(toC.name)+'</span>'+
+      '<span class="trans-date">'+date+'</span>'+CHEV+'<span class="trans-how">'+how+(lg&&!(j&&j.dep&&j.arr)?'<span class="trans-dur"> · '+dur(lg.min)+'</span>':j&&jrSpan(j,base)>0?'<span class="trans-dur"> · '+durLong(jrSpan(j,base))+'</span>':'')+'</span></button>'+
+    '<div class="trans-more"><div class="trans-in">'+
+    '<button class="legrow trans-mode" data-act="'+act+'" data-day="'+t.day+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc((mode?MODES[mode].label:'Choose how you travel')+' from '+fromC.name+' to '+toC.name+'. Change')+'"><span class="legmode">'+(jk?jk.icon+' '+jk.label:mode?MODES[mode].icon+' '+MODES[mode].label:'Choose how you travel')+CHEV+'</span>'+(lg?'<span class="legt">'+(j&&jrSpan(j,base)>0?'':dur(lg.min)+' · ')+fmtKm(lg.km)+'</span>':'')+'</button>';
+  if(j&&j.dep&&j.arr){/* the ticket card below has the times */}
+  else if(lg)h+='<div class="trans-times"><span><b>'+clock(t.leave)+'</b> leave '+esc(t.fromName)+'</span><span><b>'+clock(t.leave+lg.min)+'</b> arrive '+esc(t.toName)+'</span></div>';
+  else h+='<div class="trans-times"><span>Add a stop or hotel in '+esc(t.need)+' to see the distance and travel time.</span></div>';
+  if(j)h+=jrCardJ(j,base);
+  h+='<div class="trans-acts"><button type="button" class="linkbtn sm" data-act="ctr-edit" data-day="'+t.day+'">'+(j?'Edit travel details':'+ Add travel details')+'</button></div>';
+  return h+'</div></div></div></div>';
 }
+function openCtr(dayId){
+  const d=S.days.find(x=>x.id===dayId);if(!d)return;const t=cityTransition(dayId);
+  const m=d.tmode||(t&&t.lg?t.lg.mode:null),guess=m==='plane'?'flight':m==='car'?'car':'train';
+  ui.dlg='ctr';ui.form={ctr:dayId,jr:d.cjr?Object.assign({},d.cjr):{kind:guess},jrBase:isoOf(dayDate(t?t.date:dayIdx(dayId)))};
+  openDlg('<h2>'+esc(cityPair(dayId))+'</h2><p class="modehint" style="margin:-6px 0 4px">Travel between cities</p>'+jrBlock(true)+
+    '<p class="err" id="f-err" hidden></p><div class="dlg-acts">'+(d.cjr?'<button class="btn danger" data-act="remove-ctr">Remove details</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-ctr">Save</button></div>');
+  updJdur();
+}
+function saveCtr(){const d=S.days.find(x=>x.id===ui.form.ctr);if(!d)return;const o=jrCollect();
+  if(o){d.cjr=o;d.tmode=d.mmode=JK[o.kind].mode}else delete d.cjr;ui.ctrOpen.add(d.id);closeDlg();commit()}
 function ctrOptions(dayId,attr){
   const di=dayIdx(dayId),t=cityTransition(dayId);if(!t)return '';
   const ends=t.lg?{from:t.lg.from,to:t.lg.to}:cityEnds(di),cur=t.lg?t.lg.mode:t.mode;
@@ -2755,7 +2858,7 @@ function renderRoutes(){
     drawLeg(x,isT?'var(--transit)':dayColor(x.owner),x.to,!reduced&&!ui.prevLegs.has(key),false,at=>openXferPopup(x.day,at),MODES[x.mode].label+' from Day '+i+' to Day '+(i+1),isT?'rt-transit':'');
     if(v!=='all'&&!(inView(x.day)&&inView(x.prevDay))){const g=inView(x.day)?x.from:x.to,gd=inView(x.day)?x.prevDay:x.day,t=tagOf(g);
       L.marker([g.lat,g.lng],{keyboard:false,title:g.name+' (Day '+(dayIdx(gd)+1)+')',zIndexOffset:300,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],
-        html:'<div class="pin pin-ghost" style="--c:'+dayColor(gd)+'"><span class="pin-ico">'+esc(t.icon)+'</span></div>'})})
+        html:'<div class="pin pin-ghost" style="--c:'+dayColor(gd)+'">'+emo(t.icon,13)+'</div>'})})
         .on('click',()=>{const btn=document.querySelector('.seg [data-day="'+gd+'"]');if(btn)btn.click()}).addTo(routeLayer)}
   }
   // city-to-city trips worked out from whatever places each city has so far
@@ -2776,6 +2879,8 @@ function renderRoutes(){
     [stayForNight(i-1),stayForNight(i)].forEach(st=>{if(st)shownStays.add(st)});
   });
   if(vd==='all')S.stays.forEach(st=>shownStays.add(st));
+  // a visible stop at the hotel already marks it (with a small house badge), so skip the second pin underneath
+  S.places.filter(p=>visible(p)&&p.main).forEach(p=>shownStays.forEach(st=>{if(p.stayRef===st.id||hav([p.lat,p.lng],[st.lat,st.lng])<.04)shownStays.delete(st)}));
   shownStays.forEach(st=>{
     const m=L.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:L.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
     m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">Edit</button></div></div>',{maxWidth:260});
@@ -2800,7 +2905,8 @@ function popupHtml(p){
            :'<button class="btn small" data-pact="promote" data-id="'+p.id+'">Add to itinerary</button>')+
     '</div></div>';
 }
-function iconKey(p){const t=tagOf(p);return [p.main,p.order,p.day,dayColor(p.day),t.icon,t.color,ui.open===p.id].join('|')}
+function atHotel(p){return !!p.main&&S.stays.some(st=>p.stayRef===st.id||hav([p.lat,p.lng],[st.lat,st.lng])<.04)}
+function iconKey(p){const t=tagOf(p);return [atHotel(p),p.main,p.order,p.day,dayColor(p.day),t.icon,t.color,ui.open===p.id].join('|')}
 function leaveMarker(m){
   const el=m.getElement&&m.getElement(),pin=el&&el.querySelector('.pin');
   if(!pin||reduced){markerLayer.removeLayer(m);return}
@@ -2896,23 +3002,28 @@ function detailHtml(x,open){
     if(pl.morning&&pl[0]&&pl[0].p===p){const xi=pl.morning;s+='<div class="dt-leg"><span class="dt-mi">'+MODES[xi.mode].icon+'</span><div><b>'+MODES[xi.mode].label+' from '+esc(xi.stay.name)+'</b><span class="mono">'+dur(xi.min)+' · '+fmtKm(xi.km)+'</span></div></div>'}
     else if(pl.tin&&pl[0]&&pl[0].p===p){const xi=pl.tin;s+='<div class="dt-leg"><span class="dt-mi">'+MODES[xi.mode].icon+'</span><div><b>'+MODES[xi.mode].label+' from '+esc(xi.from.name)+' (Day '+(dayIdx(xi.prevDay)+1)+')</b><span class="mono">'+dur(xi.min)+' · '+fmtKm(xi.km)+'</span></div></div>'}
     else s+='<div class="dt-sub">First stop of the day.</div>'}
-  s+='<div class="dt-grid"><div><span class="lab">Arrive</span><b>'+clock(x.arrive)+'</b></div><div><span class="lab">Leave</span><b>'+clock(x.leave)+'</b></div>'+
+  s+='<div class="dt-grid"><button type="button" class="dt-set" data-act="set-arrive" data-id="'+p.id+'" title="Set your own arrival time"><span class="lab">Arrive'+(x.fixed?' · yours':'')+'</span><b>'+clock(x.arrive)+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></b></button><div><span class="lab">Leave</span><b>'+clock(x.leave)+'</b></div>'+
     (x.dep!=null?'<div><span class="lab">'+(p.jr.kind==='car'?'Pick-up':'Departs')+'</span><b>'+clock(x.dep)+'</b></div></div>':
     '<div><label class="lab" for="st-'+p.id+'">Time here</label><select class="sel" id="st-'+p.id+'" data-act="stay" data-id="'+p.id+'">'+stayOpts(p.stay||60)+'</select></div></div>');
+  if(x.fixed)s+='<p class="dt-sub dt-fixed">'+(x.early?'<span class="bad">That\u2019s earlier than travel allows. </span>':'')+'The rest of the day follows this time. <button type="button" class="linkbtn sm" data-act="auto-arrive" data-id="'+p.id+'">Use travel time instead</button></p>';
   if(x.late)s+='<p class="dt-warn">You\u2019d get here after '+(p.jr.kind==='car'?'pick-up':'departure')+'. Start the day earlier or move this stop up.</p>';
   if(p.jr)s+=jrCard(p);else if(isHub(p))s+='<button class="linkbtn sm jr-add" data-act="edit" data-id="'+p.id+'">+ Add flight, train or bus details</button>';
   if(p.notes)s+='<p class="dt-notes">'+esc(p.notes)+'</p>';
   return s+'<div class="dt-acts"><button class="btn small" data-act="focus" data-id="'+p.id+'">Show on map</button><button class="btn small" data-act="edit" data-id="'+p.id+'">Edit place</button></div></div></div></li>';
 }
-function jrCard(p){
-  const j=p.jr,k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1];
-  const plus=j.kind!=='car'&&+j.arrDay?'<sup>+'+j.arrDay+'</sup>':'';
+function jrCard(p,base){return jrCardJ(p.jr,base||(p.day?isoOf(dayDate(dayIdx(p.day))):null))}
+function jrCardJ(j,base){
+  const k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1];
+  base=base||jDepDate(j,isoOf(new Date()));
+  const dd=jDepDate(j,base),ad=jArrDate(j,base),n=isoDiff(ad,dd);
+  const plus=j.kind!=='car'&&n>0?'<sup>+'+n+'</sup>':'';
   let h='<div class="jr-card" style="--jc:'+k.color+'"><div class="jr-h"><span class="jr-i">'+k.icon+'</span><b>'+esc([j.carrier,j.num].filter(Boolean).join(' ')||k.label)+'</b>'+
     (j.code?'<button class="code" data-act="copy-code" data-code="'+esc(j.code)+'" title="Copy confirmation code"><span class="mono">'+esc(j.code)+'</span>'+ico('<rect x="7" y="7" width="9" height="9" rx="1.5"/><path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7"/>')+'</button>':'')+'</div>';
   if(j.from||j.to||j.dep||j.arr){
-    const rd=j.kind==='car'&&j.retDay&&S.days.find(d=>d.id===j.retDay);
-    h+='<div class="jr-route"><div><span class="jr-t">'+(j.dep?clock24(j.dep):'\u2013')+'</span><span class="jr-p">'+esc(j.from||lab('dep'))+'</span></div><span class="jr-line"><i>'+k.icon+'</i></span>'+
-      '<div class="r"><span class="jr-t">'+(j.arr?clock24(j.arr)+plus:'\u2013')+'</span><span class="jr-p">'+esc(j.to||lab('arr'))+(rd?' · Day '+(dayIdx(rd.id)+1):'')+'</span></div></div>';
+    const sp=jrSpan(j,base);
+    h+='<div class="jr-route"><div><span class="jr-t">'+(j.dep?clock24(j.dep):'\u2013')+'</span><span class="jr-p">'+esc(j.from||lab('dep'))+'</span><span class="jr-d">'+fmtIso(dd)+'</span></div>'+
+      '<span class="jr-line"><i>'+k.icon+'</i>'+(sp!=null&&sp>0?'<em>'+durLong(sp)+'</em>':'')+'</span>'+
+      '<div class="r"><span class="jr-t">'+(j.arr?clock24(j.arr)+plus:'\u2013')+'</span><span class="jr-p">'+esc(j.to||lab('arr'))+'</span><span class="jr-d">'+fmtIso(ad)+'</span></div></div>';
   }
   const kv=['board','t1','t2','seat','bags'].filter(key=>lab(key)&&j[key]).map(key=>'<div><dt>'+lab(key)+'</dt><dd>'+esc(/^\d\d:\d\d$/.test(j[key])?clock24(j[key]):j[key])+'</dd></div>').join('');
   if(kv)h+='<dl class="jr-kv">'+kv+'</dl>';
@@ -2986,7 +3097,7 @@ function renderPanel(){
       h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'&&!inView(d.id)?' dim':'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span><span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+ms.length+' stop'+(ms.length===1?'':'s')+'</span>'+
         (cityDays(d.city).length>1&&!ms.length&&!xs.length?'<button class="ib" data-act="remove-day" data-day="'+d.id+'" aria-label="Remove this day">✕</button>':'')+'</div>';
       h+='<div class="day-body"><div class="day-inner">';
-      h+='<div class="day-sum" data-flip="ds-'+d.id+'"><span>Starts</span><label class="tpick" title="Change start time"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><input type="time" id="ds-'+d.id+'" data-act="day-start" data-day="'+d.id+'" value="'+esc(d.start||'09:00')+'" aria-label="Day '+(i+1)+' start time"></label>'+
+      h+='<div class="day-sum" data-flip="ds-'+d.id+'"><span>Starts</span><button type="button" class="tpick" data-act="day-start" data-day="'+d.id+'" title="Change start time" aria-label="Day '+(i+1)+' starts at '+clock(toMin(d.start))+'. Change"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
         (plan.length?'<span>· ends about '+clock(plan.end)+'</span>'+(travel?'<span>· '+dur(travel)+' getting around</span>':''):'')+'</div>';
       h+='<ol class="stops" data-day="'+d.id+'">';
       const trH=tr&&tr.kind==='h',trX=tr&&tr.kind==='x',nextNew=i<S.days.length-1&&S.days[i+1].city!==d.city;
@@ -2998,16 +3109,15 @@ function renderPanel(){
           const p=x.p,t=tagOf(p),open=ui.open===p.id;
           if(x.leg&&x.leg.jr){const jk=JK[x.leg.jr.kind];h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow jr-leg" data-act="edit" data-id="'+x.leg.from.id+'" aria-label="'+esc(jk.label+' details')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+jk.icon+' '+esc(jk.label+(x.leg.jr.num?' '+x.leg.jr.num:''))+'</span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>'}
           else if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
-          h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+(p.jr?'<small class="jr-sub'+(x.late?' bad':'')+'">'+JK[p.jr.kind].icon+' '+esc([p.jr.num||JK[p.jr.kind].label,p.jr.dep?(p.jr.kind==='car'?'pick-up ':'departs ')+clock24(p.jr.dep):'',p.jr.seat?'seat '+p.jr.seat:''].filter(Boolean).join(' · '))+'</small>':'')+'</span><span class="stime">'+clock(x.arrive)+'</span></button></li>';
+          h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+(p.jr?'<small class="jr-sub'+(x.late?' bad':'')+'">'+JK[p.jr.kind].icon+' '+esc([p.jr.num||JK[p.jr.kind].label,p.jr.dep?(p.jr.kind==='car'?'pick-up ':'departs ')+clock24(p.jr.dep):'',p.jr.seat?'seat '+p.jr.seat:''].filter(Boolean).join(' · '))+'</small>':'')+'</span><span class="stime'+(x.fixed?' fixed':'')+'">'+clock(x.arrive)+'</span></button></li>';
           if(open)h+=detailHtml(x,true);
         });
         if(plan.tout&&!nextNew)h+=xferRow(plan.tout,'out');
         if(plan.evening)h+=hlegRow(plan.evening);
       }
       if(est&&!plan.endsHome)h+=hotelRow(est,'e',i,plan.length?clock(plan.end):'');
-      const qh=quickHotel(d.id,i),qhb=qh?'<button class="add-hotel" data-act="add-hotel-stop" data-day="'+d.id+'" data-stay="'+qh.id+'" title="Add '+esc(qh.name)+' as the next stop"><span aria-hidden="true">🛏️</span><span class="ah-n">'+esc(qh.name)+'</span></button>':'';
-      h+='<li class="empty-li"><span class="add-btns"><button class="add-first" data-act="add-stop" data-day="'+d.id+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>Add a stop</button>'+qhb+'</span><span>or drag one here from another day</span></li></ol>';
-      if(plan.length)h+='<div class="addstop" data-flip="ast-'+d.id+'"><button class="add-row" data-act="add-stop" data-day="'+d.id+'"><span class="add-dot"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg></span>Add a stop</button>'+qhb+'</div>';
+      h+='<li class="empty-li"><span class="add-btns"><button class="add-first" data-act="add-stop" data-day="'+d.id+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>Add a stop</button></span><span>or drag one here from another day</span></li></ol>';
+      if(plan.length)h+='<div class="addstop" data-flip="ast-'+d.id+'"><button class="add-row" data-act="add-stop" data-day="'+d.id+'"><span class="add-dot"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg></span>Add a stop</button></div>';
       if(xs.length){const xc=(S.view.xcol||[]).includes(d.id);
         h+='<div class="xwrap'+(xc?' xcol':'')+'" data-flip="sh-'+d.id+'"><button class="sub-h xtoggle" data-act="toggle-extras" data-day="'+d.id+'" aria-expanded="'+!xc+'">'+CHEV+'<span>Extras if there is time</span><span class="xcount">'+xs.length+'</span></button>'+
           '<div class="xbody"><div class="xinner"><ul class="extras">'+xs.map(p=>rowExtra(p,false)).join('')+'</ul></div></div></div>'}
@@ -3028,7 +3138,7 @@ function renderBar(){
       cityDays(c.id).map(d=>'<button class="seg-day" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(v.day===d.id)+'" aria-label="Day '+(dayIdx(d.id)+1)+'"><span class="dot" style="--dc:'+dayColor(d.id)+'"></span>'+(dayIdx(d.id)+1)+'</button>').join('')).join('');
   pill($('dayseg'),'[aria-pressed="true"]','seg');
   $('mainonly').setAttribute('aria-pressed',v.mainOnly);
-  $('chips').innerHTML=S.tags.map(t=>{const c=S.places.filter(p=>p.tag===t.id&&(!v.mainOnly||p.main)&&(v.day==='all'||(p.day&&inView(p.day)))).length;
+  $('chips').innerHTML=S.tags.filter(t=>v.hidden.includes(t.id)||S.places.some(p=>p.tag===t.id)).map(t=>{const c=S.places.filter(p=>p.tag===t.id&&(!v.mainOnly||p.main)&&(v.day==='all'||(p.day&&inView(p.day)))).length;
     return '<button class="chip" style="--tc:'+esc(t.color)+'" data-act="toggle-tag" data-tag="'+t.id+'" aria-pressed="'+!v.hidden.includes(t.id)+'">'+esc(t.icon)+' '+esc(t.name)+' <span class="c">'+c+'</span></button>'}).join('')+
     (v.hidden.length?'<button class="linkbtn" data-act="show-all-tags">Show all tags</button>':'');
 }
@@ -3037,7 +3147,104 @@ function commit(){if(qm&&qm.el)closeQuick(true);save();renderAll();if(SET.view!=
 
 /* ---------- Dialogs ---------- */
 function openDlg(html){ui.dlgSeq++;$('dlg').classList.remove('closing');$('dlg-card').innerHTML=html;$('dlg').hidden=false;const f=$('dlg-card').querySelector('input,textarea');if(f)setTimeout(()=>f.focus(),30)}
+/* ---------- Time: type it, or pick it on a clock dial ---------- */
+function parseTime(str){
+  let x=String(str||'').trim().toLowerCase().replace(/\s+/g,'');if(!x)return '';
+  let ap=null;const m0=x.match(/([ap])\.?m?\.?$/);if(m0){ap=m0[1];x=x.slice(0,m0.index)}
+  x=x.replace(/[h.]/g,':');let h,m;
+  if(x.includes(':')){const q=x.split(':');if(q.length>2||!/^\d{1,2}$/.test(q[0])||!/^\d{0,2}$/.test(q[1]))return null;h=+q[0];m=q[1]===''?0:+q[1]}
+  else if(/^\d{1,2}$/.test(x)){h=+x;m=0}
+  else if(/^\d{3,4}$/.test(x)){h=+x.slice(0,-2);m=+x.slice(-2)}
+  else return null;
+  if(m>59)return null;
+  if(ap){if(h<1||h>12)return null;if(ap==='p'&&h<12)h+=12;if(ap==='a'&&h===12)h=0}
+  else if(h===24&&m===0)h=0;else if(h>23)return null;
+  return String(h).padStart(2,'0')+':'+String(m).padStart(2,'0');
+}
+const tShow=v=>v?clock(toMin(v)):'';
+const tval=id=>{const el=$(id);return el?parseTime(el.value)||'':''};
+const CLOCK_ICO='<svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" aria-hidden="true"><circle cx="10" cy="10" r="7"/><path d="M10 6v4l2.5 2"/></svg>';
+function tfield(id,val,label){
+  return '<span class="tfield"><input class="inp tinp" id="'+id+'" value="'+esc(tShow(val))+'" placeholder="'+(SET.clock==='24'?'e.g. 09:30':'e.g. 9:30 am')+'" autocomplete="off" spellcheck="false" aria-label="'+esc(label||'Time')+'">'+
+    '<button type="button" class="tclock" data-act="time-dial" data-for="'+id+'" aria-label="Pick '+esc((label||'time').toLowerCase())+' on a clock" title="Pick on a clock">'+CLOCK_ICO+'</button></span>';
+}
+document.addEventListener('focusout',e=>{const el=e.target;if(!el.classList||!el.classList.contains('tinp'))return;
+  const v=parseTime(el.value);if(v===null){el.classList.add('bad');return}el.classList.remove('bad');el.value=tShow(v)});
+const dial={el:null,cb:null,h:9,m:0,mode:'h',drag:false,moved:false,ang:null,built:null};
+const is24=()=>SET.clock==='24';
+function openDial(anchor,value,cb,title){
+  closeDial(true);
+  const v=parseTime(value)||'09:00';dial.h=+v.slice(0,2);dial.m=+v.slice(3,5);dial.mode='h';dial.cb=cb;dial.ang=null;dial.built=null;
+  const el=document.createElement('div');el.className='dial';el.setAttribute('role','dialog');el.setAttribute('aria-label',title||'Pick a time');
+  el.innerHTML='<div class="dial-top"><div class="dial-read"><button type="button" data-dm="h" class="dial-hh"></button><span>:</span><button type="button" data-dm="m" class="dial-mm"></button></div>'+
+    (is24()?'':'<div class="dial-ap"><button type="button" data-ap="a">AM</button><button type="button" data-ap="p">PM</button></div>')+'</div>'+
+    '<div class="dial-face" aria-hidden="true"><div class="dial-hand"><i></i></div><div class="dial-nums"></div><b class="dial-dot"></b></div>'+
+    '<div class="dial-foot"><input class="inp dial-in" placeholder="Or type it, e.g. '+(is24()?'07:45':'7:45 pm')+'" aria-label="Type a time" autocomplete="off" spellcheck="false">'+
+    '<div class="dial-acts"><button type="button" class="btn" data-d="cancel">Cancel</button><button type="button" class="btn primary" data-d="ok">Set</button></div></div>';
+  document.body.appendChild(el);dial.el=el;
+  const face=el.querySelector('.dial-face');
+  const pick=(e,end)=>{const r=face.getBoundingClientRect(),dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);
+    let a=Math.atan2(dx,-dy)*180/Math.PI;if(a<0)a+=360;const dist=Math.hypot(dx,dy)/(r.width/2);
+    if(dial.mode==='h'){const idx=Math.round(a/30)%12;
+      if(is24())dial.h=dist<.62?(idx===0?0:idx+12):(idx===0?12:idx);
+      else{const pm=dial.h>=12;dial.h=(idx===0?12:idx)%12+(pm?12:0)}}
+    else{dial.m=Math.round(a/6)%60;if(!dial.moved)dial.m=Math.round(dial.m/5)*5%60}
+    drawDial()};
+  let sx=0,sy=0;
+  face.addEventListener('pointerdown',e=>{e.preventDefault();dial.drag=true;dial.moved=false;sx=e.clientX;sy=e.clientY;face.setPointerCapture(e.pointerId);pick(e)});
+  face.addEventListener('pointermove',e=>{if(!dial.drag)return;if(!dial.moved&&Math.hypot(e.clientX-sx,e.clientY-sy)>4){dial.moved=true;el.classList.add('dragging')}if(dial.moved)pick(e)});
+  const lift=e=>{if(!dial.drag)return;dial.drag=false;el.classList.remove('dragging');if(dial.moved)pick(e,true);if(dial.mode==='h'){clearTimeout(dial.sw);dial.sw=setTimeout(()=>{if(dial.el===el&&!dial.drag&&dial.mode==='h'){dial.mode='m';drawDial(true)}},140)}};
+  face.addEventListener('pointerup',lift);face.addEventListener('pointercancel',lift);
+  el.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)return;e.stopPropagation();
+    if(b.dataset.dm){clearTimeout(dial.sw);dial.mode=b.dataset.dm;drawDial(true)}
+    else if(b.dataset.ap){const pm=b.dataset.ap==='p';if(pm&&dial.h<12)dial.h+=12;if(!pm&&dial.h>=12)dial.h-=12;drawDial()}
+    else if(b.dataset.d==='cancel')closeDial();
+    else if(b.dataset.d==='ok')dialOk()});
+  const tin=el.querySelector('.dial-in');
+  tin.addEventListener('input',()=>{const t=parseTime(tin.value);tin.classList.toggle('bad',t===null);if(t){dial.h=+t.slice(0,2);dial.m=+t.slice(3,5);drawDial()}});
+  el.addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();dialOk()}if(e.key==='Escape'){e.preventDefault();e.stopPropagation();closeDial()}});
+  drawDial();placeDial(anchor);
+  if(!reduced)el.animate([{opacity:0,transform:'translateY(-4px) scale(.97)'},{opacity:1,transform:'none'}],{duration:170,easing:'cubic-bezier(.2,.8,.2,1)'});
+  setTimeout(()=>{const f=el.querySelector('.dial-hh');if(f)f.focus({preventScroll:true})},20);
+}
+function drawDial(swap){
+  const el=dial.el;if(!el)return;const H=dial.h,M=dial.m,h12=H%12||12;
+  el.querySelector('.dial-hh').textContent=is24()?String(H).padStart(2,'0'):h12;
+  el.querySelector('.dial-mm').textContent=String(M).padStart(2,'0');
+  el.querySelectorAll('[data-dm]').forEach(b=>b.classList.toggle('on',b.dataset.dm===dial.mode));
+  el.querySelectorAll('[data-ap]').forEach(b=>b.classList.toggle('on',(b.dataset.ap==='p')===(H>=12)));
+  const nums=el.querySelector('.dial-nums');
+  const put=(label,v,a,r,small)=>{const x=50+r*Math.sin(a*Math.PI/180),y=50-r*Math.cos(a*Math.PI/180);return '<span data-v="'+v+'" class="'+(small?'sm':'')+'" style="left:'+x+'%;top:'+y+'%">'+label+'</span>'};
+  // numbers are built once per face, then only their highlight changes
+  if(dial.built!==dial.mode){let html='';
+    if(dial.mode==='h'){for(let i=0;i<12;i++){const hv=i===0?12:i;html+=put(hv,hv,i*30,40)}
+      if(is24())for(let i=0;i<12;i++){const hv=i===0?0:i+12;html+=put(String(hv).padStart(2,'0'),hv,i*30,26,true)}}
+    else for(let i=0;i<12;i++)html+=put(String(i*5).padStart(2,'0'),i*5,i*30,40);
+    nums.innerHTML=html;dial.built=dial.mode;
+    if(swap&&!reduced)nums.animate([{opacity:0},{opacity:1}],{duration:150,easing:'ease-out'})}
+  const cur=dial.mode==='h'?(is24()?H:h12):M;
+  nums.querySelectorAll('span').forEach(x=>x.classList.toggle('on',+x.dataset.v===cur));
+  const target=dial.mode==='h'?(H%12)*30:M*6,len=dial.mode==='h'&&is24()&&(H===0||H>12)?26:40;
+  // turn the hand the short way round instead of spinning back past 12
+  dial.ang=dial.ang==null?target:dial.ang+((target-dial.ang)%360+540)%360-180;
+  const hand=el.querySelector('.dial-hand');hand.style.setProperty('--a',dial.ang+'deg');hand.style.setProperty('--l',len+'%');
+  const dot=el.querySelector('.dial-dot');dot.hidden=!(dial.mode==='m'&&M%5);
+  dot.style.cssText='left:'+(50+40*Math.sin(target*Math.PI/180))+'%;top:'+(50-40*Math.cos(target*Math.PI/180))+'%';
+}
+function placeDial(anchor){
+  const el=dial.el,w=Math.min(288,innerWidth-24),r=anchor.getBoundingClientRect();el.style.width=w+'px';
+  const hgt=el.offsetHeight;let left=Math.min(Math.max(12,r.left+r.width/2-w/2),innerWidth-w-12),top=r.bottom+8;
+  if(top+hgt>innerHeight-12)top=Math.max(12,r.top-hgt-8);
+  el.style.left=left+'px';el.style.top=top+'px';
+}
+function dialOk(){const v=String(dial.h).padStart(2,'0')+':'+String(dial.m).padStart(2,'0'),cb=dial.cb;closeDial();if(cb)cb(v)}
+function closeDial(now){const el=dial.el;if(!el)return;dial.el=null;dial.cb=null;
+  if(now||reduced){el.remove();return}el.animate([{opacity:1},{opacity:0,transform:'translateY(-3px) scale(.98)'}],{duration:120,easing:'ease-in'}).onfinish=()=>el.remove()}
+document.addEventListener('pointerdown',e=>{if(dial.el&&!dial.el.contains(e.target)&&!e.target.closest('[data-act="time-dial"],[data-act="day-start"]'))closeDial()},true);
+document.addEventListener('keydown',e=>{if(dial.el&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeDial()}},true);
+addEventListener('resize',()=>closeDial(true));
 function closeDlg(){
+  closeDial(true);
   ui.dlg=null;ui.form=null;ui.armed=null;const dl=$('dlg'),seq=++ui.dlgSeq;
   if(reduced||dl.hidden){dl.hidden=true;return}
   dl.classList.add('closing');setTimeout(()=>{if(ui.dlgSeq===seq){dl.hidden=true;dl.classList.remove('closing')}},170);
@@ -3049,10 +3256,10 @@ function openPlace(p,preset){
   ui.dlg='place';
   ui.form={id:p?p.id:null,tag:p?p.tag:(preset.tag||guessTag(preset.name)||(S.tags[0]||{}).id),main:p?p.main:!!preset.main,lat:p?p.lat:preset.lat,lng:p?p.lng:preset.lng,mode:p&&p.mode&&MODES[p.mode]?p.mode:(preset.mode||null),libRef:p?null:(preset.libRef||null)};
   const day=p?p.day:(preset.day||null);
-  ui.form.jr=p&&p.jr?Object.assign({},p.jr):{kind:guessJk(p?p.name:preset.name)};
+  ui.form.jr=p&&p.jr?Object.assign({},p.jr):{kind:guessJk(p?p.name:preset.name)};ui.form.jrBase=day?isoOf(dayDate(dayIdx(day))):null;
   openDlg('<h2>'+(isNew?'New place':'Edit place')+'</h2>'+
     '<div class="field"><label for="f-name">Name</label><input class="inp" id="f-name" value="'+esc(p?p.name:(preset.name||''))+'" placeholder="e.g. Miradouro da Graça" autocomplete="off"></div>'+
-    '<div class="field"><span>Tag</span><div class="pick" id="f-tags">'+S.tags.map(t=>'<button type="button" class="chip" style="--tc:'+esc(t.color)+'" data-act="pick-tag" data-tag="'+t.id+'" aria-pressed="'+(ui.form.tag===t.id)+'">'+esc(t.icon)+' '+esc(t.name)+'</button>').join('')+'<button type="button" class="linkbtn" data-act="new-tag-from-place">+ New tag</button></div></div>'+
+    '<div class="field"><span>Tag</span><input class="inp tagfind" id="f-tagq" placeholder="Find a tag" autocomplete="off" aria-label="Find a tag"><div class="pick tagpick" id="f-tags">'+tagOrder(ui.form.tag).map(t=>'<button type="button" class="chip" style="--tc:'+esc(t.color)+'" data-act="pick-tag" data-tag="'+t.id+'" aria-pressed="'+(ui.form.tag===t.id)+'">'+esc(t.icon)+' '+esc(t.name)+'</button>').join('')+'<button type="button" class="linkbtn" data-act="new-tag-from-place">+ New tag</button></div></div>'+
     '<div class="field"><span>How important</span><div class="kind" id="f-kind">'+
       '<button type="button" data-act="pick-kind" data-kind="main" aria-pressed="'+ui.form.main+'"><i class="k-c"></i><span>Itinerary stop<small>Numbered, on the route</small></span></button>'+
       '<button type="button" data-act="pick-kind" data-kind="extra" aria-pressed="'+!ui.form.main+'"><i class="k-d"></i><span>Extra<small>On the map, off the route</small></span></button></div></div>'+
@@ -3064,7 +3271,7 @@ function openPlace(p,preset){
     '<div class="coords">'+(+ui.form.lat).toFixed(5)+', '+(+ui.form.lng).toFixed(5)+(isNew?'':' · drag the pin on the map to move it')+'</div>'+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(isNew?'':'<button class="btn danger" data-act="delete-place" id="f-del">Delete</button>')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-place">'+(isNew?'Add place':'Save')+'</button></div>');
-  renderModeField();
+  renderModeField();updJdur();
 }
 const DAYFMT={weekday:'short',month:'short',day:'numeric'};
 function ciOptions(sel){let o='<option value="-1"'+(sel===-1?' selected':'')+'>Night before Day 1 · '+fmt(dayDate(-1),DAYFMT)+'</option>';S.days.forEach((d,i)=>{o+='<option value="'+i+'"'+(sel===i?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),DAYFMT)+'</option>'});return o}
@@ -3110,33 +3317,46 @@ function removeDayAt(k){
 // The country of the city you're looking at, or the last one in the trip
 function workingCountry(){const v=S.view.day,cid=isCity(v)?v:(S.days.find(d=>d.id===v)||{}).city,c=(cid&&S.cities.find(x=>x.id===cid))||S.cities[S.cities.length-1];return c?c.country||'':''}
 /* ---------- Search to add: places, locations, hotels and cities ---------- */
-const OSM_TAG={aerodrome:'travel hub',terminal:'travel hub',station:'travel hub',halt:'travel hub',bus_station:'travel hub',ferry_terminal:'travel hub',restaurant:'food',fast_food:'food',food_court:'food',cafe:'treats',bakery:'treats',ice_cream:'treats',confectionery:'treats',pastry:'treats',museum:'museum',gallery:'museum',arts_centre:'museum',viewpoint:'viewpoint',park:'green space',garden:'green space',nature_reserve:'green space',beach:'green space',bar:'nightlife',pub:'nightlife',nightclub:'nightlife',biergarten:'nightlife',wine_bar:'nightlife',hotel:'hotel',hostel:'hotel',guest_house:'hotel',motel:'hotel',apartment:'hotel',attraction:'must-see',monument:'must-see',castle:'must-see',cathedral:'must-see',church:'must-see',memorial:'must-see',palace:'must-see',ruins:'must-see',tower:'must-see',theatre:'must-see',marketplace:'food'};
-function tagForOsm(key,val,name){const want=key==='shop'?'shopping':OSM_TAG[val];if(!want)return name?guessTag(name):null;const t=TAGS.find(x=>normTxt(x.name)===want);return t?t.id:null}
+const OSM_TAG={aerodrome:'airport|travel hub',terminal:'airport|travel hub',station:'train station|travel hub',halt:'train station|travel hub',bus_station:'travel hub',ferry_terminal:'ferry|travel hub',restaurant:'restaurant|food',fast_food:'restaurant|food',food_court:'restaurant|food',cafe:'cafe|treats',bakery:'treats|cafe',ice_cream:'treats',confectionery:'treats',pastry:'treats',museum:'museum',gallery:'museum',arts_centre:'museum',viewpoint:'scenic spot|viewpoint',park:'park|green space',garden:'garden|green space',nature_reserve:'park|green space',beach:'beach|green space',bar:'bar|nightlife',pub:'bar|nightlife',nightclub:'nightlife|bar',biergarten:'bar|nightlife',wine_bar:'bar|nightlife',hotel:'hotel',hostel:'hotel',guest_house:'hotel',motel:'hotel',apartment:'hotel',attraction:'attraction|must-see',monument:'monument|must-see',memorial:'monument|must-see',castle:'castle|must-see',palace:'castle|must-see',cathedral:'church|must-see',church:'church|must-see',chapel:'church',place_of_worship:'church',shrine:'shinto shrine',temple:'buddhist temple',ruins:'historic site|must-see',archaeological_site:'historic site|must-see',fort:'castle|historic site',tower:'attraction|must-see',theatre:'attraction|must-see',cinema:'cinema',zoo:'zoo',aquarium:'aquarium',theme_park:'theme park',post_office:'post office',bureau_de_change:'currency exchange',mall:'mall|shopping',department_store:'mall|shopping',island:'island',islet:'island',peak:'hiking',trailhead:'hiking',marketplace:'restaurant|food'};
+function tagByNames(list){for(const n of list.split('|')){const t=TAGS.find(x=>normTxt(x.name)===n);if(t)return t.id}return null}
+function tagForOsm(key,val,name){const want=key==='shop'&&!OSM_TAG[val]?'shop|shopping':OSM_TAG[val];const id=want?tagByNames(want):null;return id||(name?guessTag(name):null)}
 const HUB_RX=/\b(airport|aeroporto|aeropuerto|a[eé]roport|flughafen|aeroporto|station|esta[cç][aã]o|estaci[oó]n|gare|bahnhof|stazione|terminal|ferry)\b/i;
 // Travel details on a Travel hub stop: a flight, train, bus, ferry or car booked from there
 const JK={
-  flight:{label:'Flight',icon:'✈️',color:'#0EA5E9',mode:'plane',f:[['carrier','Airline','e.g. TAP Air Portugal'],['num','Flight number','e.g. TP 1946'],['from','From','e.g. OPO, Porto'],['to','To','e.g. MAD, Madrid'],['dep','Departs','','time'],['arr','Lands','','time'],['arrDay','Lands on','','arrday'],['board','Boarding','','time'],['t1','Terminal','e.g. 1'],['t2','Gate','e.g. B12'],['seat','Seats','e.g. 14A, 14B'],['bags','Baggage','e.g. 1 checked bag each'],['code','Confirmation code','e.g. IB7HZ4QA','code']]},
-  train:{label:'Train',icon:'🚆',color:'#14B8A6',mode:'transit',f:[['carrier','Operator','e.g. CP Alfa Pendular'],['num','Train number','e.g. AP 123'],['from','From','e.g. Santa Apolónia'],['to','To','e.g. Porto Campanhã'],['dep','Departs','','time'],['arr','Arrives','','time'],['arrDay','Arrives on','','arrday'],['t1','Platform','e.g. 4'],['t2','Car or coach','e.g. 3'],['seat','Seats','e.g. 41, 42'],['code','Confirmation code','e.g. CP3XW7D','code']]},
-  bus:{label:'Bus',icon:'🚌',color:'#F59E0B',mode:'transit',f:[['carrier','Company','e.g. FlixBus'],['num','Bus or route','e.g. N702'],['from','From','e.g. Sete Rios'],['to','To','e.g. Faro'],['dep','Departs','','time'],['arr','Arrives','','time'],['arrDay','Arrives on','','arrday'],['t1','Bay or stop','e.g. 12'],['seat','Seats','e.g. 7, 8'],['bags','Luggage','e.g. 1 large bag each'],['code','Confirmation code','','code']]},
-  ferry:{label:'Ferry',icon:'⛴️',color:'#2563EB',mode:'transit',f:[['carrier','Operator','e.g. Balearia'],['num','Sailing','e.g. 08:00 fast ferry'],['from','From','e.g. Barcelona'],['to','To','e.g. Palma'],['dep','Departs','','time'],['arr','Arrives','','time'],['arrDay','Arrives on','','arrday'],['t1','Check-in closes','','time'],['t2','Cabin or deck','e.g. Deck 6'],['seat','Seats','e.g. 112'],['code','Confirmation code','','code']]},
-  car:{label:'Car',icon:'🚗',color:'#64748B',mode:'car',f:[['carrier','Company','e.g. Europcar'],['num','Car','e.g. VW Golf or similar'],['dep','Pick-up','','time'],['from','Pick up at','e.g. Terminal 1 car park'],['retDay','Return day','','retday'],['arr','Return by','','time'],['to','Return to','e.g. Same place'],['bags','Extras','e.g. Full insurance, child seat'],['code','Confirmation code','','code']]}
+  flight:{label:'Flight',icon:'✈️',color:'#0EA5E9',mode:'plane',f:[['carrier','Airline','e.g. TAP Air Portugal'],['num','Flight number','e.g. TP 1946'],['from','From','e.g. OPO, Porto'],['to','To','e.g. MAD, Madrid'],['dep','Departs','','dt'],['arr','Lands','','dt'],['board','Boarding','','time'],['t1','Terminal','e.g. 1'],['t2','Gate','e.g. B12'],['seat','Seats','e.g. 14A, 14B'],['bags','Baggage','e.g. 1 checked bag each'],['code','Confirmation code','e.g. IB7HZ4QA','code']]},
+  train:{label:'Train',icon:'🚆',color:'#14B8A6',mode:'transit',f:[['carrier','Operator','e.g. CP Alfa Pendular'],['num','Train number','e.g. AP 123'],['from','From','e.g. Santa Apolónia'],['to','To','e.g. Porto Campanhã'],['dep','Departs','','dt'],['arr','Arrives','','dt'],['t1','Platform','e.g. 4'],['t2','Car or coach','e.g. 3'],['seat','Seats','e.g. 41, 42'],['code','Confirmation code','e.g. CP3XW7D','code']]},
+  bus:{label:'Bus',icon:'🚌',color:'#F59E0B',mode:'transit',f:[['carrier','Company','e.g. FlixBus'],['num','Bus or route','e.g. N702'],['from','From','e.g. Sete Rios'],['to','To','e.g. Faro'],['dep','Departs','','dt'],['arr','Arrives','','dt'],['t1','Bay or stop','e.g. 12'],['seat','Seats','e.g. 7, 8'],['bags','Luggage','e.g. 1 large bag each'],['code','Confirmation code','','code']]},
+  ferry:{label:'Ferry',icon:'⛴️',color:'#2563EB',mode:'transit',f:[['carrier','Operator','e.g. Balearia'],['num','Sailing','e.g. Fast ferry'],['from','From','e.g. Barcelona'],['to','To','e.g. Palma'],['dep','Departs','','dt'],['arr','Arrives','','dt'],['t1','Check-in closes','','time'],['t2','Cabin or deck','e.g. Deck 6'],['seat','Seats','e.g. 112'],['code','Confirmation code','','code']]},
+  car:{label:'Car',icon:'🚗',color:'#64748B',mode:'car',f:[['carrier','Company','e.g. Europcar'],['num','Car','e.g. VW Golf or similar'],['dep','Pick-up','','dt'],['from','Pick up at','e.g. Terminal 1 car park'],['arr','Return','','dt'],['to','Return to','e.g. Same place'],['bags','Extras','e.g. Full insurance, child seat'],['code','Confirmation code','','code']]}
 };
 const JK_KEYS=Object.keys(JK);
 const hubTagId=()=>{const t=TAGS.find(x=>normTxt(x.name)==='travel hub');return t?t.id:null};
-const isHub=p=>!!p&&(!!p.jr||(p.tag&&p.tag===hubTagId()));
+const isHub=p=>!!p&&(!!p.jr||isHubTag(p.tag));
 function guessJk(name){const n=normTxt(name);return /airport|aeroport|aeropuerto|flughafen/.test(n)?'flight':/\bbus\b|coach/.test(n)?'bus':/ferry|\bport\b|harbou?r/.test(n)?'ferry':/rental|rent a car|car hire/.test(n)?'car':/station|estacao|estacion|gare|bahnhof|stazione/.test(n)?'train':'flight'}
+const isoOf=d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');
+const isoAdd=(iso,n)=>{const d=new Date(iso+'T12:00:00');d.setDate(d.getDate()+n);return isoOf(d)};
+const isoDiff=(a,b)=>Math.round((Date.parse(a+'T12:00:00')-Date.parse(b+'T12:00:00'))/864e5);
+const fmtIso=(iso,o)=>fmt(new Date(iso+'T12:00:00'),o||DAYFMT);
+// Dates on a journey, filling in older saves that only had "arrives next day"
+const jDepDate=(j,base)=>j.depDate||base;
+const jArrDate=(j,base)=>j.arrDate||isoAdd(jDepDate(j,base),+j.arrDay||0);
 const jrTimed=p=>!!(p&&p.jr&&p.jr.kind!=='car'&&p.jr.arr&&p.jr.dep);
-const jrArrMin=j=>toMin(j.arr)+1440*(+j.arrDay||0);
-function jrTitle(p){const j=p.jr,k=JK[j.kind]||JK.flight,a=[k.label+(j.num?' '+j.num:'')];
-  if(j.kind==='car'){if(j.carrier)a.push(j.carrier)}else if(j.from&&j.to)a.push(j.from+' to '+j.to);else if(j.carrier)a.push(j.carrier);
+const jrDepMin=(j,base)=>toMin(j.dep)+1440*isoDiff(jDepDate(j,base),base);
+const jrArrMin=(j,base)=>toMin(j.arr)+1440*isoDiff(jArrDate(j,base),base);
+const jrSpan=(j,base)=>j.dep&&j.arr?jrArrMin(j,base)-jrDepMin(j,base):null;
+function durLong(m){if(m<1440)return dur(m);const d=Math.floor(m/1440),r=m%1440;return d+' day'+(d===1?'':'s')+(r?' '+dur(r):'')}
+function jrTitle(p,fb){const j=p.jr,k=JK[j.kind]||JK.flight,a=[k.label+(j.num?' '+j.num:'')];
+  if(j.kind==='car'){if(j.carrier)a.push(j.carrier)}else if(j.from&&j.to)a.push(j.from+' to '+j.to);else if(fb)a.push(fb);else if(j.carrier)a.push(j.carrier);
   return a.join(', ')}
-function jrBits(j){const k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1],out=[];
-  if(j.arr)out.push(lab('arr')+' '+clock24(j.arr)+(j.kind!=='car'&&+j.arrDay?' (+'+j.arrDay+')':''));
-  if(j.kind==='car'&&j.retDay){const d=S.days.find(x=>x.id===j.retDay);if(d)out.push('Day '+(dayIdx(d.id)+1))}
+function jrBits(j,base){const k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1],out=[];
+  base=base||jDepDate(j,isoOf(new Date()));
+  if(j.arr){const n=isoDiff(jArrDate(j,base),jDepDate(j,base));out.push(lab('arr')+' '+clock24(j.arr)+(n>0&&n<3?' (+'+n+')':n>=3||j.kind==='car'&&n>0?' '+fmtIso(jArrDate(j,base)):''))}
+  const sp=jrSpan(j,base);if(sp!=null&&sp>0&&j.kind!=='car')out.push(durLong(sp));
   if(j.kind!=='car'&&j.carrier)out.push(j.carrier);
   ['board','t1','t2','seat','bags'].forEach(key=>{const l=lab(key);if(l&&j[key])out.push(l+' '+(/^\d\d:\d\d$/.test(j[key])?clock24(j[key]):j[key]))});
   return out}
-function guessTag(name){if(!HUB_RX.test(name||''))return null;const t=TAGS.find(x=>normTxt(x.name)==='travel hub');return t?t.id:null}
+function guessTag(name){const n=normTxt(name);if(!HUB_RX.test(n))return null;
+  return tagByNames(/airport|aeroport|aeropuerto|flughafen/.test(n)?'airport|travel hub':/ferry/.test(n)?'ferry|travel hub':/\bbus\b/.test(n)?'travel hub':/station|estacao|estacion|gare|bahnhof|stazione/.test(n)?'train station|travel hub':'travel hub')}
 const SRCH_TITLE={place:'Add a place',lib:'Save a location',city:'Add a city',stay:'Add a hotel'};
 const SRCH_PH={place:'Search for a place, landmark or address',lib:'Search for a place, landmark or address',city:'Search for a city',stay:'Search for your hotel'};
 function srchBias(){const c=ui.srch.ctx,k=c&&c.draft&&c.draft.city&&cityCoord(c.draft.city);if(k)return k;const m=map.getCenter();return {lat:m.lat,lng:m.lng}}
@@ -3252,17 +3472,6 @@ function saveCity(){
   closeDlg();commit();
 }
 function ensureHotelTag(){let t=S.tags.find(x=>x.name.toLowerCase()==='hotel');if(!t){t={id:uid('t'),name:'Hotel',icon:'🛏️',color:'#334155'};S.tags.push(t)}return t.id}
-// The hotel you'd most likely head to next on a day: tonight's, else last night's (skips one already on the day)
-function quickHotel(dayId,i){
-  const c=[stayForNight(i),stayForNight(i-1)].filter((x,k,a)=>x&&a.indexOf(x)===k&&!linkedStop(x,dayId));
-  return c[0]||null;
-}
-function addHotelStop(dayId,stayId){
-  const st=S.stays.find(x=>x.id===stayId);if(!st)return;
-  const p={id:uid('p'),name:st.name,lat:st.lat,lng:st.lng,tag:ensureHotelTag(),day:dayId,main:true,order:9999,stay:30,notes:'',stayRef:st.id};
-  S.places.push(p);renumber(dayId);commit();
-  toast('Added '+st.name+' as the last stop of Day '+(dayIdx(dayId)+1)+'.');
-}
 function stayAsStop(){
   const st=S.stays.find(x=>x.id===ui.form.id),day=$('f-sday').value;if(!st||!day)return;
   const p={id:uid('p'),name:st.name,lat:st.lat,lng:st.lng,tag:ensureHotelTag(),day,main:true,order:9999,stay:30,notes:'',stayRef:st.id};
@@ -3307,9 +3516,8 @@ function savePlace(){
   Object.assign(p,{name,tag:f.tag,day,notes,main:f.main,stay:+$('f-stay').value||60});
   if(f.main&&f.mode)p.mode=f.mode;
   if(f.libRef&&!p.libRef)p.libRef=f.libRef;
-  readJr();const jb=$('f-jr');
-  if(jb&&!jb.hidden&&f.jr){const k=f.jr.kind,o={kind:k};JK[k].f.forEach(([key])=>{if(f.jr[key]&&!(key==='arrDay'&&f.jr[key]==='0'))o[key]=f.jr[key]});
-    if(Object.keys(o).length>1)p.jr=o;else delete p.jr}
+  const jb=$('f-jr');
+  if(jb&&!jb.hidden&&f.jr){const o=jrCollect();if(o)p.jr=o;else delete p.jr}
   else delete p.jr;
   if(p.main&&(!prevMain||prevDay!==day))p.order=9999;
   if(!p.main)p.order=0;
@@ -3326,7 +3534,7 @@ function openTag(t,fromPlace){
     '<div class="field"><label for="f-tname">Name</label><input class="inp" id="f-tname" value="'+esc(t?t.name:'')+'" placeholder="e.g. Rooftop bars" autocomplete="off"></div>'+
     '<div class="field"><span>Map icon</span><div class="icons" id="f-icons">'+ICONS.map(i=>'<button type="button" data-act="pick-icon" data-icon="'+i+'" aria-pressed="'+(ui.form.icon===i)+'" aria-label="'+i+'">'+i+'</button>').join('')+'</div>'+
       '<label for="f-ticon" style="text-transform:none;letter-spacing:0;font-weight:500">Or type any emoji</label><input class="inp" id="f-ticon" maxlength="8" style="max-width:120px" value="'+esc(ICONS.includes(ui.form.icon)?'':ui.form.icon)+'"></div>'+
-    '<div class="field"><span>Color</span><div class="swatches" id="f-colors">'+COLORS.map(c=>'<button type="button" style="--sc:'+c+'" data-act="pick-color" data-color="'+c+'" aria-pressed="'+(ui.form.color===c)+'" aria-label="Color '+c+'"></button>').join('')+'<input type="color" id="f-tcolor" value="'+esc(ui.form.color)+'" aria-label="Custom color"></div></div>'+
+    '<div class="field"><span>Color</span><div class="swatches" id="f-colors">'+allColors().map(c=>'<button type="button" style="--sc:'+c+'" data-act="pick-color" data-color="'+c+'" aria-pressed="'+(ui.form.color===c)+'" aria-label="Color '+c+'"></button>').join('')+'<label class="addcolor" title="Add your own color"><input type="color" id="f-tcolor" value="'+esc(ui.form.color)+'" aria-label="Add your own color"><span aria-hidden="true">+</span></label></div><div class="modehint">Colors you add are saved here for next time.</div></div>'+
     '<div class="preview" id="f-prev"></div>'+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(t?'<button class="btn danger" data-act="delete-tag" id="f-del">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-tag">'+(t?'Save':'Create tag')+'</button></div>'+
@@ -3335,11 +3543,18 @@ function openTag(t,fromPlace){
 }
 function updateTagPreview(){
   const f=ui.form,el=$('f-prev');if(!el)return;
-  el.innerHTML='<div><div class="pin pin-main" style="--c:'+DAY_COLORS[0]+'"><span class="pin-ico">'+esc(f.icon)+'</span><span class="pin-num">1</span></div>Itinerary stop</div>'+
-    '<div><div class="pin pin-extra" style="--c:'+esc(f.color)+'"><span class="pin-ico">'+esc(f.icon)+'</span></div>Extra</div>';
+  el.innerHTML='<div><div class="pin pin-main" style="--c:'+DAY_COLORS[0]+'">'+emo(f.icon,16)+'<span class="pin-num">1</span></div>Itinerary stop</div>'+
+    '<div><div class="pin pin-extra" style="--c:'+esc(f.color)+'">'+emo(f.icon,13)+'</div>Extra</div>';
   document.querySelectorAll('#f-icons [data-icon]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.icon===f.icon));
   document.querySelectorAll('#f-colors [data-color]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.color===f.color));
 }
+const allColors=()=>COLORS.concat((STORE.colors||[]).filter(c=>!COLORS.includes(c)));
+function addCustomColor(c){c=String(c||'').toUpperCase();if(!/^#[0-9A-F]{6}$/.test(c))return;
+  const list=STORE.colors||(STORE.colors=[]);if(!COLORS.includes(c)&&!list.includes(c)){list.push(c);if(list.length>16)list.shift();save()}
+  ui.form.color=c;const box=$('f-colors');if(!box)return;
+  if(!box.querySelector('[data-color="'+c+'"]')){const b=document.createElement('button');b.type='button';b.style.setProperty('--sc',c);b.dataset.act='pick-color';b.dataset.color=c;b.setAttribute('aria-label','Color '+c);
+    box.insertBefore(b,box.querySelector('.addcolor'));if(!reduced)b.animate([{scale:0},{scale:1}],{duration:260,easing:'cubic-bezier(.3,1.4,.5,1)'})}
+  box.querySelectorAll('[data-color]').forEach(x=>x.setAttribute('aria-pressed',x.dataset.color===c));updateTagPreview()}
 function saveTag(){
   const f=ui.form,name=$('f-tname').value.trim();
   if(!name){$('f-err').textContent='Give the tag a name.';$('f-err').hidden=false;return}
@@ -3357,27 +3572,41 @@ function reopenPlace(back){
   syncPlaceForm();renderModeField();
 }
 function jrInput(j,[k,label,ph,type]){
-  const id='f-j-'+k,v=j[k]||'',wide=k==='bags'||k==='code';
+  const id='f-j-'+k,v=j[k]||'',wide=k==='bags'||k==='code'||type==='dt';
   let ctl;
-  if(type==='time')ctl='<input class="inp" type="time" id="'+id+'" value="'+esc(v)+'">';
-  else if(type==='arrday')ctl='<select class="inp" id="'+id+'">'+[['0','Same day'],['1','Next day'],['2','2 days later']].map(o=>'<option value="'+o[0]+'"'+(String(v||'0')===o[0]?' selected':'')+'>'+o[1]+'</option>').join('')+'</select>';
-  else if(type==='retday')ctl='<select class="inp" id="'+id+'"><option value="">Not set</option>'+S.days.map((d,i)=>'<option value="'+d.id+'"'+(v===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),DAYFMT)+'</option>').join('')+'</select>';
+  if(type==='time')ctl=tfield(id,v,label);
+  else if(type==='dt')ctl='<div class="dtrow"><input class="inp" type="date" id="'+id+'Date" value="'+esc(j[k+'Date']||'')+'" aria-label="'+esc(label)+' date">'+tfield(id,v,label+' time')+'</div>'+(k==='arr'?'<small class="jdur" id="f-jdur" aria-live="polite"></small>':'');
   else ctl='<input class="inp'+(type==='code'?' mono':'')+'" id="'+id+'" value="'+esc(v)+'" placeholder="'+esc(ph||'')+'" autocomplete="off">';
-  return '<label class="jf'+(wide?' w':'')+'" for="'+id+'"><span>'+label+'</span>'+ctl+'</label>';
+  return '<div class="jf'+(wide?' w':'')+'"><label for="'+id+(type==='dt'?'Date':'')+'">'+label+'</label>'+ctl+'</div>';
 }
-function jrBlock(){
-  const f=ui.form,j=f.jr,show=f.tag===hubTagId()||!!(S.places.find(x=>x.id===f.id)||{}).jr;
-  return '<div class="field jr" id="f-jr"'+(show?'':' hidden')+'><span>Travel details</span>'+
+// Fill in dates the first time, so departures start on the stop's own day
+function jrDefaults(j,base){if(!base)return;if(!j.depDate)j.depDate=base;if(!j.arrDate)j.arrDate=isoAdd(j.depDate,+j.arrDay||0);delete j.arrDay}
+function jrBlock(force){
+  const f=ui.form,j=f.jr,show=force||isHubTag(f.tag)||!!(S.places.find(x=>x.id===f.id)||{}).jr;
+  jrDefaults(j,f.jrBase);
+  return '<div class="field jr" id="f-jr"'+(show?'':' hidden')+'>'+(force?'':'<span>Travel details</span>')+
     '<div class="pick" id="f-jk">'+JK_KEYS.map(k=>'<button type="button" class="chip" style="--tc:'+JK[k].color+'" data-act="pick-jkind" data-jk="'+k+'" aria-pressed="'+(j.kind===k)+'">'+JK[k].icon+' '+JK[k].label+'</button>').join('')+'</div>'+
     '<div class="jr-grid" id="f-jrf">'+JK[j.kind].f.map(x=>jrInput(j,x)).join('')+'</div>'+
-    '<div class="modehint">Fill in what you have, it all shows in Bookings too. The departure time sets when you leave this stop'+(j.kind==='car'?'':', and the arrival time when you get to the next one')+'.</div></div>';
+    '<div class="modehint">Fill in what you have. It all shows in Bookings too.'+(force?'':' The departure time sets when you leave this stop'+(j.kind==='car'?'':', and the arrival time when you get to the next one')+'.')+'</div></div>';
 }
-function readJr(){const j=ui.form&&ui.form.jr;if(!j)return;JK[j.kind].f.forEach(([k])=>{const el=$('f-j-'+k);if(el)j[k]=el.value.trim()})}
-function pickJkind(k){readJr();ui.form.jr.kind=k;const box=$('f-jr');if(!box)return;const keep=box.querySelector('.modehint');
-  const tmp=document.createElement('div');tmp.innerHTML=jrBlock();box.replaceWith(tmp.firstChild);
+function readJr(){const j=ui.form&&ui.form.jr;if(!j)return;
+  JK[j.kind].f.forEach(([k,,,type])=>{const el=$('f-j-'+k);if(!el)return;
+    if(type==='time'||type==='dt'){const v=parseTime(el.value);j[k]=v||''}else j[k]=el.value.trim();
+    if(type==='dt'){const de=$('f-j-'+k+'Date');if(de)j[k+'Date']=de.value}})}
+// What gets saved: only the fields of the chosen type, and nothing at all if only dates are set
+function jrCollect(){readJr();const j=ui.form.jr,k=j.kind,o={kind:k};let any=false;
+  JK[k].f.forEach(([key,,,type])=>{if(j[key]){o[key]=j[key];any=true}if(type==='dt'&&j[key+'Date'])o[key+'Date']=j[key+'Date']});
+  return any?o:null}
+function updJdur(){const el=$('f-jdur');if(!el||!ui.form||!ui.form.jr)return;readJr();const j=ui.form.jr,sp=jrSpan(j,ui.form.jrBase||j.depDate);
+  el.classList.toggle('bad',sp!=null&&sp<0);
+  el.textContent=sp==null?'':sp<0?'Arrival is before departure. Check the dates.':(j.kind==='car'?'Rental for ':'Takes ')+durLong(sp)+(j.kind==='car'?'':' in local times');}
+function pickJkind(k){readJr();ui.form.jr.kind=k;const box=$('f-jr');if(!box)return;
+  const tmp=document.createElement('div');tmp.innerHTML=jrBlock(ui.dlg==='ctr');box.replaceWith(tmp.firstChild);updJdur();
   const nb=$('f-jrf');if(nb&&!reduced)nb.animate([{opacity:.3},{opacity:1}],{duration:160,easing:'ease-out'})}
+function tagOrder(sel){const used=new Set(S.places.map(p=>p.tag));return S.tags.slice().sort((a,b)=>(b.id===sel)-(a.id===sel)||used.has(b.id)-used.has(a.id))}
+function filterTags(){const q=normTxt(($('f-tagq')||{}).value||'');document.querySelectorAll('#f-tags [data-tag]').forEach(b=>{b.hidden=!!q&&!normTxt(b.textContent).includes(q)&&b.dataset.tag!==ui.form.tag})}
 function syncPlaceForm(){
-  const jb=$('f-jr');if(jb){const show=ui.form.tag===hubTagId()||!!(S.places.find(x=>x.id===ui.form.id)||{}).jr;
+  const jb=$('f-jr');if(jb){const show=isHubTag(ui.form.tag)||!!(S.places.find(x=>x.id===ui.form.id)||{}).jr;
     if(show&&jb.hidden&&!reduced){jb.hidden=false;jb.animate([{opacity:0,transform:'translateY(-4px)'},{opacity:1,transform:'none'}],{duration:180,easing:'ease-out'})}else jb.hidden=!show}
   document.querySelectorAll('#f-tags [data-tag]').forEach(b=>b.setAttribute('aria-pressed',b.dataset.tag===ui.form.tag));
   document.querySelectorAll('#f-kind [data-kind]').forEach(b=>b.setAttribute('aria-pressed',(b.dataset.kind==='main')===ui.form.main));
@@ -3431,6 +3660,22 @@ document.addEventListener('click',e=>{
     case 'set-mode':if(p){p.mode=b.dataset.mode;commit()}break;
     case 'leg-menu':if(p)openQuick(b,p);break;
     case 'xfer-menu':openXfer(b,b.dataset.day);break;
+    case 'ctr-toggle':{const id=b.dataset.day,box=b.closest('.trans'),now=!ui.ctrOpen.has(id);if(now)ui.ctrOpen.add(id);else ui.ctrOpen.delete(id);
+      if(box){box.classList.toggle('open',now);b.setAttribute('aria-expanded',now)}break}
+    case 'ctr-edit':openCtr(b.dataset.day);break;
+    case 'save-ctr':saveCtr();break;
+    case 'remove-ctr':{const d=S.days.find(x=>x.id===ui.form.ctr);if(d)delete d.cjr;closeDlg();commit();break}
+    case 'time-dial':{const inp=$(b.dataset.for);if(inp)openDial(b,parseTime(inp.value)||'',v=>{inp.value=tShow(v);inp.classList.remove('bad');inp.dispatchEvent(new Event('change',{bubbles:true}))},inp.getAttribute('aria-label'));break}
+    case 'set-arrive':{if(!p)break;const pl=dayPlan(p.day),x=pl.find(y=>y.p===p);if(!x)break;
+      openDial(b,String(Math.floor(((x.arrive%1440)+1440)%1440/60)).padStart(2,'0')+':'+String(((x.arrive%60)+60)%60).padStart(2,'0'),v=>{
+        const d=S.days.find(y=>y.id===p.day);
+        if(pl[0]&&pl[0].p===p&&d){ // first stop: start the day early enough to get there on time
+          const pre=(pl.morning?pl.morning.min:0)+(pl.tin?pl.tin.min:0),st=Math.max(0,toMin(v)-pre);
+          d.start=String(Math.floor(st/60)).padStart(2,'0')+':'+String(st%60).padStart(2,'0');delete p.at;commit();
+          if(pre)toast('Day '+(dayIdx(d.id)+1)+' now starts at '+clock(st)+' so you get to '+p.name+' at '+clock(toMin(v))+'.');
+        }else{p.at=v;commit()}},'Arrive at '+p.name);break}
+    case 'auto-arrive':if(p){delete p.at;commit()}break;
+    case 'day-start':{const d=S.days.find(x=>x.id===b.dataset.day);if(d)openDial(b,d.start||'09:00',v=>{d.start=v;commit()},'Day '+(dayIdx(d.id)+1)+' start time');break}
     case 'ctr-menu':showQuick(b,esc(cityPair(b.dataset.day)),ctrOptions(b.dataset.day,'data-act'),'var(--transit)');break;
     case 'ctr-mode':{const d=S.days.find(x=>x.id===b.dataset.day);if(d){closeQuick();d.tmode=d.mmode=b.dataset.mode;commit();
       const row=document.querySelector('#panel .trans[data-flip="tr-'+d.id+'"]');if(row&&!reduced){row.classList.remove('flash');void row.offsetWidth;row.classList.add('flash')}}break}
@@ -3459,7 +3704,6 @@ document.addEventListener('click',e=>{
     case 'add-day':{const cid=b.dataset.city||S.cities[S.cities.length-1].id,ds=cityDays(cid),k=ds.length?dayIdx(ds[ds.length-1].id)+1:S.days.length;
       insertDayAt(k,{id:uid('d'),city:cid,start:'09:00'},true);S.view.ccol=(S.view.ccol||[]).filter(x=>x!==cid);commit();break}
     case 'add-city':openSearch('city',{});break;
-    case 'add-hotel-stop':addHotelStop(b.dataset.day,b.dataset.stay);break;
     case 'add-stop':{const id=b.dataset.day,dd=S.days.find(x=>x.id===id),c=dd&&S.cities.find(x=>x.id===dd.city);openSearch('place',{day:id,main:true,draft:{city:c?c.name:''}});break}
     case 'srch-pick':{const r=ui.srch&&ui.srch.list[+b.dataset.i];if(r)pickSearch(r);break}
     case 'srch-map':searchFallback('map');break;
@@ -3489,7 +3733,7 @@ document.addEventListener('click',e=>{
     case 'pick-kind':ui.form.main=b.dataset.kind==='main';syncPlaceForm();renderModeField();break;
     case 'pick-mode':ui.form.mode=b.dataset.mode;renderModeField();break;
     case 'pick-icon':ui.form.icon=b.dataset.icon;$('f-ticon').value='';updateTagPreview();break;
-    case 'pick-color':ui.form.color=b.dataset.color;$('f-tcolor').value=b.dataset.color;updateTagPreview();break;
+    case 'pick-color':ui.form.color=b.dataset.color;$('f-tcolor').value=b.dataset.color.toLowerCase();document.querySelectorAll('#f-colors [data-color]').forEach(x=>x.setAttribute('aria-pressed',x===b));updateTagPreview();break;
     case 'save-place':savePlace();break;
     case 'save-tag':saveTag();break;
     case 'close':{const back=ui.dlg==='tag'&&ui.form&&ui.form.back;closeDlg();if(back)reopenPlace(back);break}
@@ -3508,16 +3752,21 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{
   const s=e.target;
+  if(s.id==='f-tcolor'){addCustomColor(s.value);return}
   if(s.id==='f-ci'){const ci=+s.value,co=Math.min(Math.max(+$('f-co').value,ci+1),S.days.length);$('f-co').innerHTML=coOptions(ci,co);updateNights();return}
   if(s.id==='f-co'){updateNights();return}
-  if(s.id==='f-day'&&ui.dlg==='place'){renderModeField();return}
+  if(s.id==='f-day'&&ui.dlg==='place'){renderModeField();
+    const nb=s.value?isoOf(dayDate(dayIdx(s.value))):null,ob=ui.form.jrBase;
+    if(nb&&ob&&nb!==ob){const sh=isoDiff(nb,ob);['dep','arr'].forEach(k=>{const de=$('f-j-'+k+'Date');if(de&&de.value)de.value=isoAdd(de.value,sh)})}
+    if(nb)ui.form.jrBase=nb;updJdur();return}
+  if(s.closest&&s.closest('#f-jr')){updJdur()}
   if(s.dataset&&s.dataset.act==='stay'){const p=S.places.find(x=>x.id===s.dataset.id);if(p){p.stay=+s.value;commit()}return}
-  if(s.dataset&&s.dataset.act==='day-start'&&s.value){const d=S.days.find(x=>x.id===s.dataset.day);if(d){d.start=s.value;commit()}return}
   if(s.dataset&&s.dataset.act==='schedule'&&s.value){const p=S.places.find(x=>x.id===s.dataset.id);if(p){p.day=s.value;p.main=false;commit()}}
 });
 document.addEventListener('input',e=>{
   if(e.target.id==='f-cname'){const cc=$('f-ccountry'),g=guessCountry(e.target.value)||workingCountry();if(cc&&cc.dataset.auto==='1'){cc.value=g;const sh=$('f-ccshow');if(sh)sh.textContent=g||'no country yet'}}
   if(e.target.id==='f-ccountry')e.target.dataset.auto='';
+  if(e.target.id==='f-tagq')filterTags();
   if(e.target.id==='f-ticon'){const v=e.target.value.trim();if(v){ui.form.icon=Array.from(v).slice(0,2).join('');updateTagPreview()}}
   if(e.target.id==='f-tcolor'){ui.form.color=e.target.value;updateTagPreview()}
 });
@@ -3931,7 +4180,9 @@ function budgetBar(bs,compact){
 function allBookings(){
   const out=S.bookings.map(b=>{const t=btOf(b.type);return {kind:'b',id:b.id,title:b.title,day:b.day,time:b.time,code:b.code,notes:b.notes,icon:t.icon,color:t.color,label:t.label,ord:dayOrder(b.day)*10000+(b.time?+b.time.replace(':',''):0)}});
   S.places.forEach(p=>{if(!p.jr||!p.day)return;const k=JK[p.jr.kind]||JK.flight,day=p.day;
-    out.push({kind:'j',id:p.id,title:jrTitle(p),day,time:p.jr.dep||'',code:p.jr.code||'',notes:jrBits(p.jr).join(' · '),icon:k.icon,color:k.color,label:k.label,ord:dayOrder(day)*10000+(p.jr.dep?+p.jr.dep.replace(':',''):0)})});
+    out.push({kind:'j',id:p.id,title:jrTitle(p),day,time:p.jr.dep||'',code:p.jr.code||'',notes:jrBits(p.jr,isoOf(dayDate(dayIdx(day)))).join(' · '),icon:k.icon,color:k.color,label:k.label,ord:dayOrder(day)*10000+(p.jr.dep?+p.jr.dep.replace(':',''):0)})});
+  S.days.forEach(d=>{const j=d.cjr;if(!j)return;const k=JK[j.kind]||JK.flight;
+    out.push({kind:'c',id:d.id,title:jrTitle({jr:j},cityPair(d.id)),day:d.id,time:j.dep||'',code:j.code||'',notes:jrBits(j,isoOf(dayDate(dayIdx(d.id)))).join(' · '),icon:k.icon,color:k.color,label:k.label,ord:dayOrder(d.id)*10000+(j.dep?+j.dep.replace(':',''):0)})});
   S.stays.forEach(st=>{const day=st.ci<0?'before':S.days[st.ci]?S.days[st.ci].id:'after';out.push({kind:'s',id:st.id,title:st.name,day,time:'15:00',code:'',notes:nightsText(st)+(st.notes?'. '+st.notes:''),icon:'🛏️',color:'#6366F1',label:'Hotel',ord:dayOrder(day)*10000+1500})});
   return out.sort((a,b)=>a.ord-b.ord);
 }
@@ -3944,9 +4195,9 @@ function pgBookings(){
     const dc=g.k&&g.k!=='before'&&g.k!=='after'?dayColor(g.k):'var(--muted)';
     h+='<section class="bgroup" style="--dc:'+dc+'"><h3 class="bg-h"><i class="dot"></i>'+esc(dayLabel(g.k))+'</h3><div class="blist">'+g.items.map(x=>
       '<div class="bk"><span class="bico" style="--bc:'+x.color+'">'+x.icon+'</span><div class="bk-main"><div class="bk-top"><b>'+esc(x.title)+'</b><span class="bk-type">'+esc(x.label)+'</span></div>'+
-      '<div class="bk-meta">'+(x.time?'<span class="mono">'+(x.kind==='s'?'Check-in ':x.kind==='j'?'Departs ':'')+clock24(x.time)+'</span>':'')+(x.notes?'<span>'+esc(x.notes)+'</span>':'')+'</div></div>'+
+      '<div class="bk-meta">'+(x.time?'<span class="mono">'+(x.kind==='s'?'Check-in ':x.kind==='j'||x.kind==='c'?'Departs ':'')+clock24(x.time)+'</span>':'')+(x.notes?'<span>'+esc(x.notes)+'</span>':'')+'</div></div>'+
       (x.code?'<button class="code" data-act="copy-code" data-code="'+esc(x.code)+'" title="Copy confirmation code"><span class="mono">'+esc(x.code)+'</span>'+ico('<rect x="7" y="7" width="9" height="9" rx="1.5"/><path d="M13 7V5.5A1.5 1.5 0 0 0 11.5 4h-6A1.5 1.5 0 0 0 4 5.5v6A1.5 1.5 0 0 0 5.5 13H7"/>')+'</button>':'')+
-      '<button class="ib" data-act="'+(x.kind==='s'?'edit-stay" data-stay="':x.kind==='j'?'edit" data-id="':'edit-booking" data-id="')+x.id+'" aria-label="Edit '+esc(x.title)+'">'+SVG.edit+'</button></div>').join('')+'</div></section>';
+      '<button class="ib" data-act="'+(x.kind==='s'?'edit-stay" data-stay="':x.kind==='j'?'edit" data-id="':x.kind==='c'?'ctr-edit" data-day="':'edit-booking" data-id="')+x.id+'" aria-label="Edit '+esc(x.title)+'">'+SVG.edit+'</button></div>').join('')+'</div></section>';
   });
   return h;
 }
@@ -4083,7 +4334,7 @@ function openBooking(b){
   openDlg('<h2>'+(b?'Edit booking':'Add booking')+'</h2>'+
     '<div class="field"><span>Type</span><div class="pick" id="f-bt">'+BTYPES.map(t=>'<button type="button" class="chip" style="--tc:'+t.color+'" data-act="pick-btype" data-type="'+t.id+'" aria-pressed="'+(ui.form.type===t.id)+'">'+t.icon+' '+t.label+'</button>').join('')+'</div><div class="modehint">Hotels come from your stays in the itinerary.</div></div>'+
     '<div class="field"><label for="f-bn">Name</label><input class="inp" id="f-bn" value="'+esc(b?b.title:'')+'" placeholder="e.g. Flight to Lisbon" autocomplete="off"></div>'+
-    '<div class="dt-grid2"><div class="field"><label for="f-bd">Day</label><select class="inp" id="f-bd">'+dayOptions(b?b.day:(S.days[0]||{}).id,false)+'</select></div><div class="field"><label for="f-bh">Time</label><input class="inp" type="time" id="f-bh" value="'+esc(b?b.time:'')+'"></div></div>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-bd">Day</label><select class="inp" id="f-bd">'+dayOptions(b?b.day:(S.days[0]||{}).id,false)+'</select></div><div class="field"><label for="f-bh">Time</label>'+tfield('f-bh',b?b.time:'','Time')+'</div></div>'+
     '<div class="field"><label for="f-bc">Confirmation code</label><input class="inp mono" id="f-bc" value="'+esc(b?b.code:'')+'" placeholder="Optional" autocomplete="off"></div>'+
     '<div class="field"><label for="f-bo">Notes</label><textarea class="inp" id="f-bo" placeholder="Seats, terminal, what to bring">'+esc(b?b.notes:'')+'</textarea></div>'+
     '<p class="err" id="f-err" hidden></p><div class="dlg-acts">'+(b?'<button class="btn danger" data-act="delete-booking">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-booking">'+(b?'Save':'Add booking')+'</button></div>');
@@ -4092,7 +4343,7 @@ function saveBooking(){
   const f=ui.form,title=$('f-bn').value.trim();
   if(!title){$('f-err').textContent='Give the booking a name.';$('f-err').hidden=false;return}
   let b=S.bookings.find(x=>x.id===f.id);if(!b){b={id:uid('b')};S.bookings.push(b)}
-  Object.assign(b,{type:f.type,title,day:$('f-bd').value,time:$('f-bh').value,code:$('f-bc').value.trim(),notes:$('f-bo').value.trim()});closeDlg();commit();
+  Object.assign(b,{type:f.type,title,day:$('f-bd').value,time:tval('f-bh'),code:$('f-bc').value.trim(),notes:$('f-bo').value.trim()});closeDlg();commit();
 }
 function openNewTrip(){
   ui.dlg='trip';ui.form={};
