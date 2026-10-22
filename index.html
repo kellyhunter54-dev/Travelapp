@@ -11,7 +11,7 @@
 :root{
   --bg:#E9EEEC; --surface:#FFFFFF; --surface-2:#F3F6F5; --fg:#16201D; --muted:#5B6964; --line:#D5DDDA;
   --accent:#0E6E66; --accent-fg:#FFFFFF; --accent-soft:#D7ECE9; --danger:#B42318;
-  --land:#E9ECE5; --water:#A9CFDF; --grid:rgba(22,32,29,.05); --label:#6E7A76;
+  --land:#E9ECE5; --water:#A9CFDF; --grid:rgba(22,32,29,.05); --label:#6E7A76; --transit:#3D4B5C;
   --park:#C9E2BD; --plaza:#F4F1EA; --street:#FFFFFF; --road:#FCE6A4; --road-casing:#DCC27A; --rail:#9AA29D; --water-edge:#94BFD2; --water-label:#4E7F96; --park-label:#4B7A3E;
   --tile-filter:none; --shadow:0 6px 24px rgba(16,30,26,.14);
   --f-display:"Bricolage Grotesque", "Figtree", system-ui, sans-serif;
@@ -21,14 +21,14 @@
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){
   --bg:#0D1311; --surface:#141C19; --surface-2:#1A2420; --fg:#E4ECE9; --muted:#93A39E; --line:#283430;
   --accent:#3FB5A8; --accent-fg:#06201C; --accent-soft:#163B36; --danger:#F97066;
-  --land:#1A2220; --water:#14303D; --grid:rgba(228,236,233,.05); --label:#7E8D88;
+  --land:#1A2220; --water:#14303D; --grid:rgba(228,236,233,.05); --label:#7E8D88; --transit:#C8D3DF;
   --park:#1D3325; --plaza:#242E2A; --street:#2A3632; --road:#4A4632; --road-casing:#121A17; --rail:#4D5A55; --water-edge:#1C3C4A; --water-label:#5F93A8; --park-label:#6E9B62;
   --tile-filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.9) saturate(.7); --shadow:0 6px 24px rgba(0,0,0,.45);
   color-scheme:dark }}
 :root[data-theme="dark"]{
   --bg:#0D1311; --surface:#141C19; --surface-2:#1A2420; --fg:#E4ECE9; --muted:#93A39E; --line:#283430;
   --accent:#3FB5A8; --accent-fg:#06201C; --accent-soft:#163B36; --danger:#F97066;
-  --land:#1A2220; --water:#14303D; --grid:rgba(228,236,233,.05); --label:#7E8D88;
+  --land:#1A2220; --water:#14303D; --grid:rgba(228,236,233,.05); --label:#7E8D88; --transit:#C8D3DF;
   --park:#1D3325; --plaza:#242E2A; --street:#2A3632; --road:#4A4632; --road-casing:#121A17; --rail:#4D5A55; --water-edge:#1C3C4A; --water-label:#5F93A8; --park-label:#6E9B62;
   --tile-filter:invert(1) hue-rotate(180deg) brightness(.82) contrast(.9) saturate(.7); --shadow:0 6px 24px rgba(0,0,0,.45);
   color-scheme:dark }
@@ -87,6 +87,22 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .trip-meta{color:var(--muted);font-size:13px}
 .tabs{display:flex;gap:4px;padding:10px 12px;border-bottom:1px solid var(--line)}
 .sm-city{display:grid;gap:6px;padding-bottom:6px}
+.trans{--dc:var(--transit);display:grid;grid-template-columns:24px minmax(0,1fr);gap:8px;margin:6px 0 4px}
+.trans-rail{display:flex;justify-content:center}
+.trans-rail i{width:0;border-left:3px solid var(--transit);border-radius:2px;height:100%;opacity:.85}
+.trans-body{display:grid;gap:4px;padding:10px 12px;border-radius:12px;background:color-mix(in srgb,var(--transit) 9%,var(--surface));box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--transit) 22%,transparent)}
+.trans-top{display:flex;align-items:baseline;justify-content:space-between;gap:8px}
+.trans-cities{display:flex;align-items:center;gap:7px;font-family:var(--f-display);font-weight:700;font-size:15px;color:var(--transit)}
+.trans-cities svg{width:15px;height:10px;opacity:.8}
+.trans-date{font-size:12px;color:var(--muted);white-space:nowrap}
+.trans-mode{padding:0;margin-left:-1px}
+.trans-mode .legt{color:var(--fg)}
+.trans-times{display:flex;flex-wrap:wrap;gap:2px 14px;font-size:12.5px;color:var(--muted)}
+.trans-times b{font-family:var(--f-mono);font-weight:500;color:var(--transit)}
+.trans.flash .trans-body{animation:legFlash .9s ease}
+.lg-tr{width:20px;height:4px;border-radius:2px;background:var(--transit)}
+path.rt-transit{stroke:var(--transit)}
+.legb[style*="--transit"]{color:var(--fg)}
 .sm-ch{display:grid;gap:1px;border:0;background:none;text-align:left;padding:6px 8px;margin:0 -8px;border-radius:10px;transition:background-color .2s ease}
 .sm-ch:hover{background:var(--surface-2)}
 .sm-city.on>.sm-ch .city-n{color:var(--accent)}
@@ -466,7 +482,7 @@ textarea.inp{min-height:70px;resize:vertical}
 .drag-src>*{opacity:0}
 .drag-ghost{position:fixed;z-index:6000;margin:0;list-style:none;pointer-events:none;background:var(--surface);border-radius:10px;box-shadow:0 14px 34px rgba(10,20,16,.24),0 0 0 1px var(--line);scale:1.03;rotate:-.6deg}
 .drag-ghost .grip{opacity:.9}
-body.grabbing,body.grabbing *{cursor:grabbing!important}
+body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!important;-webkit-user-select:none!important}
 .stops .empty-li{color:var(--muted);font-size:13px;padding:10px 8px;border:1.5px dashed var(--line);border-radius:9px;text-align:center}
 .stops:has(.row) .empty-li{display:none}
 
@@ -480,7 +496,18 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
 .day.collapsed .chev svg{transform:rotate(-90deg)}
 .ib.chev{width:24px;height:24px;margin-left:-4px}
 .city{display:grid;gap:4px;transition:opacity .35s ease}
-.city-head{display:flex;align-items:center;gap:6px;padding:8px 0 2px;border-top:1px solid var(--line)}
+.city-head{display:flex;align-items:center;gap:6px;padding:8px 0 2px;border-top:1px solid var(--line);user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;border-radius:10px;transition:background-color .18s ease,scale .25s var(--ease,ease)}
+.city-head.pressing{scale:.98;background:var(--surface-2)}
+.cdrag .city-body{grid-template-rows:0fr!important;opacity:0!important}
+.cdrag .country{display:none}
+.cdrag .plan-tools{opacity:.35}
+.cdrag>.city{padding:2px 0}
+.cdrag-src{outline:2px dashed color-mix(in srgb,var(--accent) 45%,transparent);outline-offset:-2px;border-radius:12px}
+.cdrag-src>*{opacity:0}
+.city-ghost{padding:10px 12px;border-top:0;background:var(--surface)}
+.city-ghost .city-n{color:var(--accent)}
+.cc-line{margin:-4px 0 0;font-size:13px;color:var(--muted);display:flex;align-items:center;gap:6px}
+.cc-line b{color:var(--fg);font-weight:600}
 .city:first-of-type .city-head{border-top:0}
 .city-h{flex:1;min-width:0;display:grid;gap:1px;border:0;background:none;text-align:left;padding:2px 0;border-radius:8px}
 .city-n{font-family:var(--f-display);font-weight:700;font-size:22px;letter-spacing:-.01em;line-height:1.1;transition:color .25s ease}
@@ -825,7 +852,8 @@ body.grabbing,body.grabbing *{cursor:grabbing!important}
       <div class="legend">
         <span><i class="lg-c"></i>Itinerary stop</span>
         <span><i class="lg-d"></i>Extra for a day</span>
-                <span><i class="lg-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 7.4 8 3l5.2 4.4"/><path d="M4.3 6.3V13h7.4V6.3"/></svg></i>Hotel</span>
+                <span><i class="lg-tr"></i>Between cities</span>
+        <span><i class="lg-home"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.8 7.4 8 3l5.2 4.4"/><path d="M4.3 6.3V13h7.4V6.3"/></svg></i>Hotel</span>
         <i class="lg-sep"></i>
         <span><svg class="lg-l" viewBox="0 0 24 8"><line x1="2" y1="4" x2="22" y2="4" stroke-width="3" stroke-linecap="round" stroke-dasharray="0.5 5"/></svg>Walk</span>
         <span><svg class="lg-l" viewBox="0 0 24 8"><line x1="1" y1="4" x2="23" y2="4" stroke-width="2.5" stroke-dasharray="5 3"/></svg>Bike</span>
@@ -1506,13 +1534,58 @@ function midpoint(path){
 function modeButtons(lg,id,attr){
   return '<div class="modes">'+MODE_KEYS.map(m=>'<button '+attr+'="'+(attr==='data-act'?'set-mode':'mode')+'" data-id="'+id+'" data-mode="'+m+'" aria-pressed="'+(lg.mode===m)+'"><span class="mi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="mt">'+dur(minsFor(m,lg.km))+'</span></button>').join('')+'</div>';
 }
-function drawLeg(lg,dc,p,isNew,isSel,onBadge,title){
-  const st={interactive:false,lineCap:'round',lineJoin:'round',color:dc,className:isNew?'rt-in':''};
+// The trip into a city: from where you were in the previous city to the new city's first stop
+// Last place in the earlier city and first place in the next one, falling back to hotels and any stop
+function cityEnds(di){
+  const d=S.days[di],pd=S.days[di-1],prevDays=S.days.filter(x=>x.city===pd.city),newDays=S.days.filter(x=>x.city===d.city);
+  let from=null;const pp=mains(pd.id);
+  const hb=stayForNight(di-1);
+  if(hb)from=hb;else if(pp.length)from=pp[pp.length-1];else{for(let k=prevDays.length-1;k>=0&&!from;k--){const ms=mains(prevDays[k].id);if(ms.length)from=ms[ms.length-1]}}
+  let to=null;const ms=mains(d.id);
+  if(ms.length)to=ms[0];else{const st=stayForNight(di);if(st&&stayCityId(st)===d.city)to=st;else for(const x of newDays){const m=mains(x.id);if(m.length){to=m[0];break}}
+    if(!to){const hs=S.stays.filter(st=>stayCityId(st)===d.city);if(hs.length)to=hs[0]}}
+  if(!from){const hs=S.stays.filter(st=>stayCityId(st)===pd.city);if(hs.length)from=hs[hs.length-1]}
+  return {from,to};
+}
+function cityTransition(dayId){
+  const di=dayIdx(dayId),d=S.days[di];if(!d||di<1||S.days[di-1].city===d.city)return null;
+  const pl=dayPlan(dayId),pd=S.days[di-1];
+  if(pl.morning&&stayCityId(pl.morning.stay)!==d.city){const lg=pl.morning;return {lg,kind:'h',day:dayId,date:di,leave:toMin(d.start),fromName:lg.stay.name,toName:lg.to.name}}
+  const x=transferOf(di);
+  if(!x){
+    // Not enough of the plan yet for a day-to-day leg: use any place we know in each city
+    const {from,to}=cityEnds(di),cm=(d.tmode&&MODES[d.tmode])?d.tmode:((d.mmode&&MODES[d.mmode])?d.mmode:null);
+    if(from&&to){const m=cm||legMode(from,{lat:to.lat,lng:to.lng}),r=legRoute(from,to,m);
+      return {lg:{mode:m,km:r.km,min:minsFor(m,r.km),path:r.path,live:r.live,from,to},kind:'g',day:dayId,date:di,leave:toMin(d.start),fromName:from.name,toName:to.name}}
+    const pc=S.cities.find(c=>c.id===pd.city),nc=S.cities.find(c=>c.id===d.city);
+    return {lg:null,kind:'g',mode:cm,day:dayId,date:di,leave:toMin(d.start),need:!from?(pc?pc.name:'the earlier city'):(nc?nc.name:'the next city')};
+  }
+  if(x.when==='end'){const pp=dayPlan(pd.id),lv=pp.length?pp[pp.length-1].leave:toMin(pd.start);return {lg:x,kind:'x',day:dayId,date:di-1,leave:lv,fromName:x.from.name,toName:x.to.name}}
+  return {lg:x,kind:'x',day:dayId,date:di,leave:toMin(d.start),fromName:x.from.name,toName:x.to.name};
+}
+function transitionCard(t,fromC,toC){
+  const lg=t.lg,act=t.kind==='h'?'hleg-menu" data-part="m':t.kind==='x'?'xfer-menu':'ctr-menu',mode=lg?lg.mode:t.mode;
+  const head='<div class="trans" data-flip="tr-'+t.day+'"><div class="trans-rail"><i></i></div><div class="trans-body">'+
+    '<div class="trans-top"><span class="trans-cities">'+esc(fromC.name)+'<svg viewBox="0 0 16 10" aria-hidden="true"><path d="M1 5h13M10 1.5 14 5l-4 3.5" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>'+esc(toC.name)+'</span>'+
+    '<span class="trans-date">'+fmt(dayDate(t.date),{weekday:'short',month:'short',day:'numeric'})+'</span></div>'+
+    '<button class="legrow trans-mode" data-act="'+act+'" data-day="'+t.day+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc((mode?MODES[mode].label:'Choose how you travel')+' from '+fromC.name+' to '+toC.name)+'"><span class="legmode">'+(mode?MODES[mode].icon+' '+MODES[mode].label:'Choose how you travel')+CHEV+'</span>'+(lg?'<span class="legt">'+dur(lg.min)+' · '+fmtKm(lg.km)+'</span>':'')+'</button>';
+  if(!lg)return head+'<div class="trans-times"><span>Add a stop or hotel in '+esc(t.need)+' to see the distance and travel time.</span></div></div></div>';
+  return head+'<div class="trans-times"><span><b>'+clock(t.leave)+'</b> leave '+esc(t.fromName)+'</span><span><b>'+clock(t.leave+lg.min)+'</b> arrive '+esc(t.toName)+'</span></div></div></div>';
+}
+function ctrOptions(dayId,attr){
+  const di=dayIdx(dayId),t=cityTransition(dayId);if(!t)return '';
+  const ends=t.lg?{from:t.lg.from,to:t.lg.to}:cityEnds(di),cur=t.lg?t.lg.mode:t.mode;
+  return MODE_KEYS.map(m=>{const r=ends.from&&ends.to?legRoute(ends.from,ends.to,m):null;
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(cur===m)+'" '+attr+'="'+(attr==='data-pact'?'cmode':'ctr-mode')+'" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+(r?dur(minsFor(m,r.km)):'')+'</span>'+CHECK+'</button>'}).join('');
+}
+function cityPair(dayId){const di=dayIdx(dayId),a=S.cities.find(c=>c.id===S.days[di-1].city),b=S.cities.find(c=>c.id===S.days[di].city);return (a?a.name:'')+' to '+(b?b.name:'')}
+function drawLeg(lg,dc,p,isNew,isSel,onBadge,title,cls){
+  const st={interactive:false,lineCap:'round',lineJoin:'round',color:dc,className:(isNew?'rt-in':'')+(cls?' '+cls:'')};
   if(isSel)L.polyline(lg.path,{interactive:false,lineCap:'round',lineJoin:'round',color:dc,weight:16,opacity:.22,className:'leg-glow'}).addTo(routeLayer);
-  if(lg.mode==='transit'){L.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.9})).addTo(routeLayer);L.polyline(lg.path,Object.assign({},st,{color:'#ffffff',weight:2,dashArray:'5 6',opacity:.95})).addTo(routeLayer)}
+  if(lg.mode==='transit'){L.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.9})).addTo(routeLayer);L.polyline(lg.path,Object.assign({},st,{color:'#ffffff',weight:2,dashArray:'5 6',opacity:.95,className:isNew?'rt-in':''})).addTo(routeLayer)}
   else if(lg.mode==='car')L.polyline(lg.path,Object.assign({},st,{weight:5,opacity:.85})).addTo(routeLayer);
   else if(lg.mode==='bike')L.polyline(lg.path,Object.assign({},st,{weight:4,opacity:.9,dashArray:'9 7',lineCap:'butt'})).addTo(routeLayer);
-  else if(lg.mode==='plane'){L.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.95,lineCap:'butt'})).addTo(routeLayer);L.polyline(lg.path,Object.assign({},st,{weight:2.6,opacity:1,lineCap:'butt',className:(st.className?st.className+' ':'')+'plane-gap'})).addTo(routeLayer)}
+  else if(lg.mode==='plane'){L.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.95,lineCap:'butt'})).addTo(routeLayer);L.polyline(lg.path,Object.assign({},st,{weight:2.6,opacity:1,lineCap:'butt',className:(isNew?'rt-in ':'')+'plane-gap'})).addTo(routeLayer)}
   else L.polyline(lg.path,Object.assign({},st,{weight:5,opacity:.9,dashArray:'0.5 9'})).addTo(routeLayer);
   if(isSel&&!reduced)L.polyline(lg.path,{interactive:false,lineCap:'round',color:'#ffffff',weight:2.5,opacity:.95,dashArray:'2 14',className:'leg-flow'}).addTo(routeLayer);
   if(isSel||lg.mode==='plane'||S.view.day!=='all'||map.getZoom()>=15){
@@ -1534,8 +1607,8 @@ function summaryHtml(){
   S.cities.forEach((c,ci)=>{
     const ds=cityDays(c.id);if(!ds.length)return;
     const a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id),o={month:'short',day:'numeric'},cn=(c.country||'').trim();
-    if(ci>0){const pl=dayPlan(ds[0].id),lg=pl.morning||pl.tin||(S.days[a-1]&&dayPlan(S.days[a-1].id).tout);
-      if(lg)h+='<div class="sm-hop" data-flip="smh-'+c.id+'"><span class="legline '+lg.mode+'" style="--dc:'+dayColor(ds[0].id)+'"></span>'+MODES[lg.mode].icon+' '+MODES[lg.mode].label+' to '+esc(c.name)+'<span class="legt">'+dur(lg.min)+' · '+fmtKm(lg.km)+'</span></div>'}
+    if(ci>0&&a>0){const t=cityTransition(ds[0].id),lg=t&&t.lg,md=lg?lg.mode:t&&t.mode;
+      h+='<div class="sm-hop" data-flip="smh-'+c.id+'"><span class="legline '+(md||'walk')+'" style="--dc:var(--transit)"></span>'+(md?MODES[md].icon+' '+MODES[md].label+' to ':'To ')+esc(c.name)+'<span class="legt">'+(lg?dur(lg.min)+' · '+fmtKm(lg.km):'distance not known yet')+'</span></div>'}
     if(multi&&cn&&(!prevC||(prevC.country||'').trim()!==cn))h+='<div class="country"><span>'+esc(cn)+'</span></div>';
     prevC=c;
     const hs=S.stays.filter(st=>stayCityId(st)===c.id).sort((x,y)=>x.ci-y.ci);
@@ -1751,11 +1824,19 @@ function renderRoutes(){
     const v=S.view.day;if(!inView(x.owner))continue;
     if(v==='all'&&(!visible(x.from)||!visible(x.to)))continue;
     const key='x|'+x.day+'|'+x.mode+'|'+x.when+'|'+(x.live?1:0);now.add(key);
-    drawLeg(x,dayColor(x.owner),x.to,!reduced&&!ui.prevLegs.has(key),false,at=>openXferPopup(x.day,at),MODES[x.mode].label+' from Day '+i+' to Day '+(i+1));
+    const isT=S.days[i-1].city!==S.days[i].city;
+    drawLeg(x,isT?'var(--transit)':dayColor(x.owner),x.to,!reduced&&!ui.prevLegs.has(key),false,at=>openXferPopup(x.day,at),MODES[x.mode].label+' from Day '+i+' to Day '+(i+1),isT?'rt-transit':'');
     if(v!=='all'&&!(inView(x.day)&&inView(x.prevDay))){const g=inView(x.day)?x.from:x.to,gd=inView(x.day)?x.prevDay:x.day,t=tagOf(g);
       L.marker([g.lat,g.lng],{keyboard:false,title:g.name+' (Day '+(dayIdx(gd)+1)+')',zIndexOffset:300,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],
         html:'<div class="pin pin-ghost" style="--c:'+dayColor(gd)+'"><span class="pin-ico">'+esc(t.icon)+'</span></div>'})})
         .on('click',()=>{const btn=document.querySelector('.seg [data-day="'+gd+'"]');if(btn)btn.click()}).addTo(routeLayer)}
+  }
+  // city-to-city trips worked out from whatever places each city has so far
+  for(let i=1;i<S.days.length;i++){
+    if(S.days[i].city===S.days[i-1].city||!inView(S.days[i].id))continue;
+    const t=cityTransition(S.days[i].id);if(!t||t.kind!=='g'||!t.lg)continue;
+    const key='g|'+S.days[i].id+'|'+t.lg.mode+'|'+(t.lg.live?1:0);now.add(key);const did=S.days[i].id;
+    drawLeg(t.lg,'var(--transit)',t.lg.to,!reduced&&!ui.prevLegs.has(key),false,at=>{L.popup({maxWidth:280,minWidth:240,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:var(--transit)"><div class="pop-tag">'+esc(cityPair(did))+'</div>'+ctrOptions(did,'data-pact')+'</div>').openOn(map)},MODES[t.lg.mode].label+' '+cityPair(did),'rt-transit');
   }
   // hotels, and the legs to and from them
   const vd=S.view.day,shownStays=new Set();
@@ -1763,7 +1844,8 @@ function renderRoutes(){
     if(!inView(d.id))return;
     ['m','e'].forEach(part=>{const lg=hotelLeg(d.id,part);if(!lg||!visible(part==='m'?lg.to:lg.from))return;
       const key='h|'+d.id+'|'+part+'|'+lg.mode+'|'+(lg.live?1:0);now.add(key);
-      drawLeg(lg,dayColor(d.id),lg.to,!reduced&&!ui.prevLegs.has(key),false,at=>openHlegPopup(d.id,part,at),MODES[lg.mode].label+(part==='m'?' from ':' to ')+lg.stay.name)});
+      const isT=part==='m'&&stayCityId(lg.stay)!==d.city;
+      drawLeg(lg,isT?'var(--transit)':dayColor(d.id),lg.to,!reduced&&!ui.prevLegs.has(key),false,at=>openHlegPopup(d.id,part,at),MODES[lg.mode].label+(part==='m'?' from ':' to ')+lg.stay.name,isT?'rt-transit':'')});
     [stayForNight(i-1),stayForNight(i)].forEach(st=>{if(st)shownStays.add(st)});
   });
   if(vd==='all')S.stays.forEach(st=>shownStays.add(st));
@@ -1832,6 +1914,7 @@ function fitVisible(fly,done){
 map.on('popupopen',e=>{
   e.popup.getElement().querySelectorAll('[data-pact]').forEach(b=>b.addEventListener('click',()=>{
     const a=b.dataset.pact;
+    if(a==='cmode'){map.closePopup();const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.tmode=d.mmode=b.dataset.mode;commit()}return}
     if(a==='hmode'){map.closePopup();setHleg(b.dataset.day,b.dataset.part,b.dataset.mode);return}
     if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)openStay(st);return}
     if(a==='xmode'||a==='xwhen'){map.closePopup();setXfer(b.dataset.day,a==='xmode'?'tmode':'twhen',a==='xmode'?b.dataset.mode:b.dataset.when);return}
@@ -1899,13 +1982,15 @@ function stopName(p,i){
   if(st.co===i)return '<span class="hlab">Back to</span> '+esc(st.name)+' <span class="hlab">for bags</span>';
   return '<span class="hlab">Stop at</span> '+esc(st.name);
 }
+// Everything is folded when every day is collapsed, or every city is
+function allFolded(){return S.days.length>0&&(S.days.every(d=>S.view.collapsed.includes(d.id))||S.cities.every(c=>(S.view.ccol||[]).includes(c.id)))}
 function cityHead(c){
   const ds=cityDays(c.id),a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id),o={month:'short',day:'numeric'},v=S.view.day;
   const cc=(S.view.ccol||[]).includes(c.id),mine=v===c.id||ds.some(d=>d.id===v);
   const stops=ds.reduce((n,d)=>n+mains(d.id).length,0);
   return '<section class="city'+(cc?' ccol':'')+(v===c.id?' cfocus':'')+(v!=='all'&&!mine?' cdim':'')+'" data-city="'+c.id+'"><div class="city-head" data-flip="ch-'+c.id+'">'+
     '<button class="ib chev" data-act="collapse-city" data-city="'+c.id+'" aria-expanded="'+!cc+'" aria-label="Show or hide '+esc(c.name)+'">'+SVG.down+'</button>'+
-    '<button class="city-h" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v===c.id)+'" title="Show only '+esc(c.name)+' on the map"><span class="city-n">'+esc(c.name)+'</span>'+
+    '<button class="city-h" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v===c.id)+'" title="Show only '+esc(c.name)+' on the map. Press and hold, or drag, to reorder cities"><span class="city-n">'+esc(c.name)+'</span>'+
     '<span class="city-d">'+(a===b?'Day '+(a+1):'Days '+(a+1)+' to '+(b+1))+' · '+fmt(dayDate(a),o)+(a===b?'':' to '+fmt(dayDate(b),o))+' · '+stops+' stop'+(stops===1?'':'s')+'</span></button>'+
     '<button class="ib" data-act="edit-city" data-city="'+c.id+'" aria-label="Edit '+esc(c.name)+'">'+SVG.edit+'</button></div>'+
     '<div class="city-body"><div class="city-inner">'+cityStays(c,a,b);
@@ -1937,11 +2022,13 @@ function renderPanel(){
   let h='';
   if(ui.tab==='plan'){
     h+='<div class="plan-tools"><button class="mini-toggle" data-act="toggle-travel" aria-pressed="'+!S.view.hideTravel+'" title="Show or hide travel between stops"><span class="sw2"></span>Travel</button>'+
-      (S.days.length>1?'<button class="linkbtn" data-act="collapse-all">'+(S.days.every(d=>S.view.collapsed.includes(d.id))?'Expand all days':'Collapse all days')+'</button>':'')+'</div>';
+      (S.days.length>1?'<button class="linkbtn" data-act="collapse-all">'+(allFolded()?'Expand all':'Collapse all days')+'</button>':'')+'</div>';
     S.days.forEach((d,i)=>{
       const cty=S.cities.find(c=>c.id===d.city)||S.cities[0],cFirst=i===0||S.days[i-1].city!==d.city,cLast=i===S.days.length-1||S.days[i+1].city!==d.city;
+      const tr=cFirst&&i>0?cityTransition(d.id):null;
       if(cFirst){
         const pc=i>0?S.cities.find(c=>c.id===S.days[i-1].city):null,multi=countriesOf().length>1,cn=(cty.country||'').trim();
+        if(tr&&pc&&pc.id!==cty.id)h+=transitionCard(tr,pc,cty);
         if(multi&&cn&&(!pc||(pc.country||'').trim()!==cn))h+='<div class="country" data-flip="co-'+esc(cn)+'"><span>'+esc(cn)+'</span></div>';
         h+=cityHead(cty);
       }
@@ -1955,17 +2042,18 @@ function renderPanel(){
       h+='<div class="day-sum" data-flip="ds-'+d.id+'"><span>Starts</span><label class="tpick" title="Change start time"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg><input type="time" id="ds-'+d.id+'" data-act="day-start" data-day="'+d.id+'" value="'+esc(d.start||'09:00')+'" aria-label="Day '+(i+1)+' start time"></label>'+
         (plan.length?'<span>· ends about '+clock(plan.end)+'</span>'+(travel?'<span>· '+dur(travel)+' getting around</span>':''):'')+'</div>';
       h+='<ol class="stops" data-day="'+d.id+'">';
-      if(mst)h+=hotelRow(mst,'m',i,clock(toMin(d.start)));
+      const trH=tr&&tr.kind==='h',trX=tr&&tr.kind==='x',nextNew=i<S.days.length-1&&S.days[i+1].city!==d.city;
+      if(mst&&!trH)h+=hotelRow(mst,'m',i,clock(toMin(d.start)));
       if(plan.length){
-        if(plan.morning)h+=hlegRow(plan.morning);
-        if(plan.tin)h+=xferRow(plan.tin,'in');
+        if(plan.morning&&!trH)h+=hlegRow(plan.morning);
+        if(plan.tin&&!trX)h+=xferRow(plan.tin,'in');
         plan.forEach((x,k)=>{
           const p=x.p,t=tagOf(p),open=ui.open===p.id;
           if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
           h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i)+'</span><span class="stime">'+clock(x.arrive)+'</span></button></li>';
           if(open)h+=detailHtml(x,true);
         });
-        if(plan.tout)h+=xferRow(plan.tout,'out');
+        if(plan.tout&&!nextNew)h+=xferRow(plan.tout,'out');
         if(plan.evening)h+=hlegRow(plan.evening);
       }
       if(est)h+=hotelRow(est,'e',i,plan.length?clock(plan.end):'');
@@ -2068,11 +2156,14 @@ function removeDayAt(k){
   S.stays.forEach(st=>{if(st.ci>=k)st.ci--;if(st.co>k)st.co--});
   S.stays=S.stays.filter(st=>st.co>st.ci);
 }
+// The country of the city you're looking at, or the last one in the trip
+function workingCountry(){const v=S.view.day,cid=isCity(v)?v:(S.days.find(d=>d.id===v)||{}).city,c=(cid&&S.cities.find(x=>x.id===cid))||S.cities[S.cities.length-1];return c?c.country||'':''}
 function openCity(c){
   ui.dlg='city';ui.form={id:c?c.id:null};
   openDlg('<h2>'+(c?'Edit city':'Add a city')+'</h2>'+
     '<div class="field"><label for="f-cname">City name</label><input class="inp" id="f-cname" value="'+esc(c?c.name:'')+'" placeholder="e.g. Seville" autocomplete="off"></div>'+
-    '<div class="field"><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':((S.cities[S.cities.length-1]||{}).country||''))+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
+    (c?'':'<p class="cc-line" id="f-ccline">In <b id="f-ccshow">'+esc(workingCountry()||'no country yet')+'</b> <button type="button" class="linkbtn sm" data-act="cc-change">Change</button></p>')+
+    '<div class="field" id="f-ccfield"'+(c?'':' hidden')+'><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':workingCountry())+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
     (c?'':'<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+[1,2,3,4,5,6,7].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">Added after your last city. You can add more days later.</div></div>')+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
@@ -2216,15 +2307,20 @@ document.addEventListener('click',e=>{
       const id=b.dataset.day,sec=b.closest('.day'),c=S.view.collapsed;
       S.view.collapsed=c.includes(id)?c.filter(x=>x!==id):c.concat(id);save();
       const now=S.view.collapsed.includes(id);sec.classList.toggle('collapsed',now);b.setAttribute('aria-expanded',!now);
-      const all=document.querySelector('[data-act="collapse-all"]');if(all)all.textContent=S.days.every(d=>S.view.collapsed.includes(d.id))?'Expand all days':'Collapse all days';
+      const all=document.querySelector('[data-act="collapse-all"]');if(all)all.textContent=allFolded()?'Expand all':'Collapse all days';
       break}
     case 'collapse-all':{
-      const allc=S.days.every(d=>S.view.collapsed.includes(d.id));S.view.collapsed=allc?[]:S.days.map(d=>d.id);save();
-      document.querySelectorAll('#panel .day').forEach((sec,i)=>{const id=S.days[i]&&S.days[i].id,now=S.view.collapsed.includes(id);sec.classList.toggle('collapsed',now);const cb=sec.querySelector('.chev');if(cb)cb.setAttribute('aria-expanded',!now)});
-      b.textContent=allc?'Collapse all days':'Expand all days';break}
+      const fold=!allFolded();
+      S.view.collapsed=fold?S.days.map(d=>d.id):[];if(!fold)S.view.ccol=[];save();
+      document.querySelectorAll('#panel .day[data-day]').forEach(sec=>{const now=S.view.collapsed.includes(sec.dataset.day);sec.classList.toggle('collapsed',now);const cb=sec.querySelector('.chev');if(cb)cb.setAttribute('aria-expanded',!now)});
+      if(!fold)document.querySelectorAll('#panel .city[data-city]').forEach(sec=>{sec.classList.remove('ccol');const cb=sec.querySelector('.city-head .chev');if(cb)cb.setAttribute('aria-expanded','true')});
+      b.textContent=fold?'Expand all':'Collapse all days';break}
     case 'set-mode':if(p){p.mode=b.dataset.mode;commit()}break;
     case 'leg-menu':if(p)openQuick(b,p);break;
     case 'xfer-menu':openXfer(b,b.dataset.day);break;
+    case 'ctr-menu':showQuick(b,esc(cityPair(b.dataset.day)),ctrOptions(b.dataset.day,'data-act'),'var(--transit)');break;
+    case 'ctr-mode':{const d=S.days.find(x=>x.id===b.dataset.day);if(d){closeQuick();d.tmode=d.mmode=b.dataset.mode;commit();
+      const row=document.querySelector('#panel .trans[data-flip="tr-'+d.id+'"]');if(row&&!reduced){row.classList.remove('flash');void row.offsetWidth;row.classList.add('flash')}}break}
     case 'toggle-extras':{
       const id=b.dataset.day,c=S.view.xcol||(S.view.xcol=[]),now=!c.includes(id);
       S.view.xcol=now?c.concat(id):c.filter(x=>x!==id);save();
@@ -2250,6 +2346,7 @@ document.addEventListener('click',e=>{
     case 'add-day':{const cid=b.dataset.city||S.cities[S.cities.length-1].id,ds=cityDays(cid),k=ds.length?dayIdx(ds[ds.length-1].id)+1:S.days.length;
       insertDayAt(k,{id:uid('d'),city:cid,start:'09:00'},true);S.view.ccol=(S.view.ccol||[]).filter(x=>x!==cid);commit();break}
     case 'add-city':openCity(null);break;
+    case 'cc-change':{const f=$('f-ccfield'),l=$('f-ccline');if(f){f.hidden=false;$('f-ccountry').focus();$('f-ccountry').select()}if(l)l.hidden=true;break}
     case 'edit-city':{const c=S.cities.find(x=>x.id===b.dataset.city);if(c)openCity(c);break}
     case 'save-city':saveCity();break;
     case 'delete-city':{
@@ -2263,7 +2360,8 @@ document.addEventListener('click',e=>{
     case 'collapse-city':{
       const id=b.dataset.city,c=S.view.ccol||(S.view.ccol=[]),now=!c.includes(id);
       S.view.ccol=now?c.concat(id):c.filter(x=>x!==id);save();
-      const sec=b.closest('.city');if(sec)sec.classList.toggle('ccol',now);b.setAttribute('aria-expanded',!now);break}
+      const sec=b.closest('.city');if(sec)sec.classList.toggle('ccol',now);b.setAttribute('aria-expanded',!now);
+      {const all=document.querySelector('[data-act="collapse-all"]');if(all)all.textContent=allFolded()?'Expand all':'Collapse all days'}break}
     case 'remove-day':{const d=b.dataset.day;removeDayAt(dayIdx(d));if(S.view.day===d)S.view.day='all';commit();break}
     case 'new-tag':openTag(null);break;
     case 'edit-tag':openTag(S.tags.find(t=>t.id===b.dataset.tag));break;
@@ -2299,7 +2397,7 @@ document.addEventListener('change',e=>{
   if(s.dataset&&s.dataset.act==='schedule'&&s.value){const p=S.places.find(x=>x.id===s.dataset.id);if(p){p.day=s.value;p.main=false;commit()}}
 });
 document.addEventListener('input',e=>{
-  if(e.target.id==='f-cname'){const cc=$('f-ccountry'),g=guessCountry(e.target.value);if(cc&&g&&(!cc.value||cc.dataset.auto==='1')){cc.value=g}}
+  if(e.target.id==='f-cname'){const cc=$('f-ccountry'),g=guessCountry(e.target.value)||workingCountry();if(cc&&cc.dataset.auto==='1'){cc.value=g;const sh=$('f-ccshow');if(sh)sh.textContent=g||'no country yet'}}
   if(e.target.id==='f-ccountry')e.target.dataset.auto='';
   if(e.target.id==='f-ticon'){const v=e.target.value.trim();if(v){ui.form.icon=Array.from(v).slice(0,2).join('');updateTagPreview()}}
   if(e.target.id==='f-tcolor'){ui.form.color=e.target.value;updateTagPreview()}
@@ -2419,7 +2517,81 @@ document.addEventListener('pointermove',e=>{
 });
 document.addEventListener('pointerup',e=>{if(drag.st&&e.pointerId===drag.st.pid)endDrag(false)});
 document.addEventListener('pointercancel',e=>{if(drag.st&&e.pointerId===drag.st.pid)endDrag(!drag.st.active)});
-document.addEventListener('touchmove',e=>{if(drag.st&&drag.st.active)e.preventDefault()},{passive:false});
+document.addEventListener('touchmove',e=>{if((drag.st&&drag.st.active)||(cdrag.st&&cdrag.st.active))e.preventDefault()},{passive:false});
+/* ---------- Drag cities to reorder ---------- */
+const cdrag={st:null};
+function reorderCities(order){
+  const start={};S.cities.forEach(c=>{const ds=cityDays(c.id);if(ds.length)start[c.id]=dayIdx(ds[0].id)});
+  const meta=S.stays.map(st=>{const cid=stayCityId(st);return {st,cid,rel:st.ci-(start[cid]||0),n:st.co-st.ci}});
+  const cities=order.map(id=>S.cities.find(c=>c.id===id)).filter(Boolean);S.cities.forEach(c=>{if(!cities.includes(c))cities.push(c)});
+  const days=[];cities.forEach(c=>S.days.filter(d=>d.city===c.id).forEach(d=>days.push(d)));S.days.forEach(d=>{if(!days.includes(d))days.push(d)});
+  S.cities=cities;S.days=days;
+  const ns={};S.cities.forEach(c=>{const ds=cityDays(c.id);if(ds.length)ns[c.id]=dayIdx(ds[0].id)});
+  // keep each hotel's nights relative to its city; the night before a city belongs to the city before it
+  meta.forEach(m=>{const b=ns[m.cid]||0,end=b+m.rel+m.n;let ci=b+m.rel;if(ci<b&&b>0)ci=b;m.st.ci=ci;m.st.co=Math.min(S.days.length,Math.max(ci+1,end))});
+  S.stays.sort((a,b)=>a.ci-b.ci).forEach((st,i,arr)=>{const nx=arr[i+1];if(nx&&nx.ci<st.co)st.co=nx.ci});
+  S.stays=S.stays.filter(st=>st.co>st.ci);
+}
+function cBegin(y){
+  const st=cdrag.st;if(!st)return;st.active=true;clearTimeout(st.timer);st.head.classList.remove('pressing');
+  const panel=$('panel');closeQuick&&qm.el&&closeQuick(true);
+  if(ui.open){const was=ui.open;ui.open=null;refreshSel(was);renderRoutes()}
+  st.offY=y-st.head.getBoundingClientRect().top;st.order0=[...panel.querySelectorAll(':scope > .city')].map(x=>x.dataset.city).join();
+  flipMove(()=>panel.classList.add('cdrag'));
+  const r=st.head.getBoundingClientRect(),sc=panelScroller();if(sc)sc.scrollTop+=r.top-(y-st.offY);
+  const r1=st.head.getBoundingClientRect(),g=st.head.cloneNode(true);g.classList.add('drag-ghost','city-ghost');g.removeAttribute('data-flip');
+  g.style.width=r1.width+'px';g.style.left=r1.left+'px';g.style.top=(y-st.offY)+'px';document.body.appendChild(g);st.ghost=g;
+  if(!reduced)g.animate([{scale:'1'},{scale:'1.03'}],{duration:160,easing:EASE});
+  st.sec.classList.add('cdrag-src');document.body.classList.add('grabbing');try{getSelection().removeAllRanges()}catch(e){}
+  if(st.type==='touch'&&navigator.vibrate)try{navigator.vibrate(8)}catch(e){}
+  st.y=y;cAuto();
+}
+function cMove(y){
+  const st=cdrag.st;if(!st||!st.active)return;st.y=y;st.ghost.style.top=(y-st.offY)+'px';
+  const panel=$('panel'),secs=[...panel.querySelectorAll(':scope > .city')].filter(x=>x!==st.sec);
+  let ref=null;for(const s2 of secs){const r=s2.getBoundingClientRect();if(y<r.top+r.height/2){ref=s2;break}}
+  const anchor=ref||(secs.length?secs[secs.length-1].nextElementSibling:null);
+  if(st.sec.nextElementSibling===anchor||(ref===null&&secs.length&&secs[secs.length-1].nextElementSibling===st.sec))return;
+  flipMove(()=>{if(anchor)panel.insertBefore(st.sec,anchor);else panel.appendChild(st.sec)});
+}
+function cAuto(){
+  const st=cdrag.st;if(!st||!st.active)return;
+  const sc=panelScroller(),y=st.y;let sp=0;
+  if(sc){const r=sc.getBoundingClientRect();if(y<r.top+56)sp=-(r.top+56-y)/3;else if(y>r.bottom-56)sp=(y-(r.bottom-56))/3}
+  else{if(y<70)sp=-(70-y)/3;else if(y>innerHeight-70)sp=(y-(innerHeight-70))/3}
+  sp=Math.max(-20,Math.min(20,sp));if(sp){if(sc)sc.scrollTop+=sp;else window.scrollBy(0,sp);cMove(y)}
+  st.raf=requestAnimationFrame(cAuto);
+}
+function cEnd(cancel){
+  const st=cdrag.st;cdrag.st=null;if(!st)return;clearTimeout(st.timer);cancelAnimationFrame(st.raf);st.head.classList.remove('pressing');
+  if(!st.active)return;
+  document.body.classList.remove('grabbing');ui.suppressClick=true;setTimeout(()=>{ui.suppressClick=false},0);
+  const panel=$('panel'),order=[...panel.querySelectorAll(':scope > .city')].map(x=>x.dataset.city);
+  const finish=()=>{st.ghost.remove();st.sec.classList.remove('cdrag-src');
+    const changed=!cancel&&order.join()!==st.order0;
+    if(changed)reorderCities(order);
+    panel.classList.remove('cdrag');ui.anim.legs=true;commit();
+    if(changed){const c=S.cities.find(x=>x.id===st.sec.dataset.city);gtoast('Moved '+(c?c.name:'city')+'. Dates and hotels updated.')}};
+  if(reduced||cancel){finish();return}
+  const t=st.head.getBoundingClientRect();
+  st.ghost.animate([{top:st.ghost.style.top,scale:'1.03'},{top:t.top+'px',left:t.left+'px',scale:'1'}],{duration:190,easing:EASE,fill:'forwards'}).onfinish=finish;
+}
+document.addEventListener('pointerdown',e=>{
+  if(cdrag.st||drag.st||e.button>0||S.cities.length<2)return;
+  const head=e.target.closest&&e.target.closest('#panel > .city > .city-head');if(!head||e.target.closest('.ib'))return;
+  cdrag.st={sec:head.parentElement,head,x:e.clientX,y:e.clientY,pid:e.pointerId,type:e.pointerType,active:false,timer:null};
+  if(e.pointerType!=='mouse'){head.classList.add('pressing');cdrag.st.timer=setTimeout(()=>{if(cdrag.st&&!cdrag.st.active)cBegin(cdrag.st.y)},320)}
+});
+document.addEventListener('pointermove',e=>{
+  const st=cdrag.st;if(!st||e.pointerId!==st.pid)return;
+  if(!st.active){const dist=Math.hypot(e.clientX-st.x,e.clientY-st.y);
+    if(st.type==='mouse'){if(dist>6)cBegin(e.clientY);return}
+    if(dist>8){clearTimeout(st.timer);st.head.classList.remove('pressing');cdrag.st=null}return}
+  e.preventDefault();cMove(e.clientY);
+});
+document.addEventListener('pointerup',e=>{if(cdrag.st&&e.pointerId===cdrag.st.pid)cEnd(false)});
+document.addEventListener('pointercancel',e=>{if(cdrag.st&&e.pointerId===cdrag.st.pid)cEnd(!cdrag.st.active)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&cdrag.st&&cdrag.st.active)cEnd(true)});
 document.addEventListener('contextmenu',e=>{if(drag.st)e.preventDefault()});
 document.addEventListener('dragstart',e=>{if(e.target.closest&&e.target.closest('#panel'))e.preventDefault()});
 
@@ -2607,7 +2779,7 @@ function pgOverview(){
   h+='<section class="card"><div class="card-h"><h2>Route</h2></div><div class="route-strip">';
   S.cities.forEach((c,ci)=>{
     const ds=cityDays(c.id);if(!ds.length)return;const a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id);
-    if(ci>0){const pl=dayPlan(ds[0].id),lg=pl.morning||pl.tin||(S.days[a-1]&&dayPlan(S.days[a-1].id).tout);
+    if(ci>0){const t=a>0?cityTransition(ds[0].id):null,lg=t&&t.lg;
       h+='<div class="hop">'+(lg?'<span class="hop-m">'+MODES[lg.mode].icon+'</span><span class="hop-t">'+dur(lg.min)+'</span>':'<span class="hop-t">·</span>')+'</div>'}
     const hs=[...new Set(ds.map((d,k)=>stayForNight(a+k)).filter(Boolean))];
     h+='<button class="rcity" data-act="goto-city" data-city="'+c.id+'"><span class="rc-n">'+esc(c.name)+'</span><span class="rc-d">'+fmt(dayDate(a),o)+(a===b?'':' to '+fmt(dayDate(b),o))+' · '+ds.length+' day'+(ds.length>1?'s':'')+'</span>'+(hs.length?'<span class="rc-h">🛏️ '+hs.map(x=>esc(x.name)).join(', ')+'</span>':'')+
