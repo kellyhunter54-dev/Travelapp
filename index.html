@@ -1758,6 +1758,12 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 .sseg button[aria-pressed="true"]{background:var(--surface);color:var(--fg);box-shadow:0 1px 3px rgba(0,0,0,.12)}
 .gtoast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);z-index:7000;background:var(--fg);color:var(--bg);padding:9px 14px;border-radius:10px;font-weight:500;box-shadow:var(--shadow);max-width:calc(100% - 32px)}
 .gtoast:not([hidden]){animation:gIn .3s var(--spring) both}
+.gtoast{display:flex;align-items:center;justify-content:space-between;gap:12px;width:max-content;min-width:min(340px,calc(100% - 32px))}
+@media (hover:none){.ib.rm:hover{color:var(--muted);background:transparent}}
+.gt-undo{border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:2px 4px;margin:-2px -4px -2px 0;border-radius:6px;text-decoration:underline;text-underline-offset:3px;flex:none}
+.gt-undo:hover{background:color-mix(in srgb,var(--bg) 18%,transparent)}
+.ib.rm:hover{color:#DC2626;background:color-mix(in srgb,#DC2626 10%,transparent)}
+.ghost-rm{margin-left:auto}
 @keyframes gIn{from{opacity:0;transform:translate(-50%,10px)}}
 @media (max-width:1100px){.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.bsum{grid-template-columns:1fr 1fr}}
 @media (max-width:820px){
@@ -2901,7 +2907,7 @@ function popupHtml(p){
     '<h3>'+esc(p.name)+'</h3><p class="pop-meta">'+meta+'</p>'+
     (p.notes?'<p class="pop-notes">'+esc(p.notes)+'</p>':'')+
     '<div class="pop-acts"><button class="btn small" data-pact="edit" data-id="'+p.id+'">Edit</button>'+
-    (p.main?'<button class="btn small" data-pact="demote" data-id="'+p.id+'">Make it an extra</button>'
+    (p.day?'<button class="btn small" data-pact="remove" data-id="'+p.id+'">Remove</button>':'')+(p.main?'<button class="btn small" data-pact="demote" data-id="'+p.id+'">Make it an extra</button>'
            :'<button class="btn small" data-pact="promote" data-id="'+p.id+'">Add to itinerary</button>')+
     '</div></div>';
 }
@@ -2955,6 +2961,7 @@ map.on('popupopen',e=>{
     map.closePopup();
     if(a==='edit')openPlace(p);
     else if(a==='mode'){p.mode=b.dataset.mode;commit()}
+    else if(a==='remove')removePlace(p);
     else if(a==='demote'){const d=p.day;p.main=false;p.order=0;renumber(d);commit()}
     else if(a==='promote'){
       if(!p.day){openPlace(p,{main:true});return}
@@ -2991,7 +2998,7 @@ function rowExtra(p,withSelect){
   return '<li class="row" data-flip="x-'+p.id+'"><i class="dia'+(p.day?'':' loose')+'" style="--tc:'+esc(t.color)+'"></i>'+
     '<button class="row-main" data-act="focus" data-id="'+p.id+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+esc(p.name)+'</span><span class="tg">'+esc(t.name)+'</span></button>'+
     '<span class="acts">'+(withSelect?'<select class="sel" data-act="schedule" data-id="'+p.id+'" aria-label="Schedule '+esc(p.name)+'"><option value="">Schedule…</option>'+S.days.map((d,i)=>'<option value="'+d.id+'">Day '+(i+1)+'</option>').join('')+'</select>':'')+
-    '<button class="ib" data-act="edit" data-id="'+p.id+'" aria-label="Edit '+esc(p.name)+'">'+SVG.edit+'</button></span></li>';
+    '<button class="ib" data-act="edit" data-id="'+p.id+'" aria-label="Edit '+esc(p.name)+'">'+SVG.edit+'</button>'+(p.day?'<button class="ib rm" data-act="remove-place" data-id="'+p.id+'" aria-label="Remove '+esc(p.name)+' from this day" title="Remove from this day"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true"><path d="M4.5 4.5l7 7M11.5 4.5l-7 7"/></svg></button>':'')+'</span></li>';
 }
 function stayOpts(v){const list=STAYS.includes(v)?STAYS:STAYS.concat(v).sort((a,b)=>a-b);return list.map(m=>'<option value="'+m+'"'+(m===v?' selected':'')+'>'+dur(m)+'</option>').join('')}
 function detailHtml(x,open){
@@ -3009,7 +3016,7 @@ function detailHtml(x,open){
   if(x.late)s+='<p class="dt-warn">You\u2019d get here after '+(p.jr.kind==='car'?'pick-up':'departure')+'. Start the day earlier or move this stop up.</p>';
   if(p.jr)s+=jrCard(p);else if(isHub(p))s+='<button class="linkbtn sm jr-add" data-act="edit" data-id="'+p.id+'">+ Add flight, train or bus details</button>';
   if(p.notes)s+='<p class="dt-notes">'+esc(p.notes)+'</p>';
-  return s+'<div class="dt-acts"><button class="btn small" data-act="focus" data-id="'+p.id+'">Show on map</button><button class="btn small" data-act="edit" data-id="'+p.id+'">Edit place</button></div></div></div></li>';
+  return s+'<div class="dt-acts"><button class="btn small" data-act="focus" data-id="'+p.id+'">Show on map</button><button class="btn small" data-act="edit" data-id="'+p.id+'">Edit place</button><button class="btn small ghost-rm" data-act="remove-place" data-id="'+p.id+'">Remove from day</button></div></div></div></li>';
 }
 function jrCard(p,base){return jrCardJ(p.jr,base||(p.day?isoOf(dayDate(dayIdx(p.day))):null))}
 function jrCardJ(j,base){
@@ -3270,7 +3277,8 @@ function openPlace(p,preset){
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp" id="f-notes" placeholder="Hours, tickets, what to order">'+esc(p?p.notes:'')+'</textarea></div>'+
     '<div class="coords">'+(+ui.form.lat).toFixed(5)+', '+(+ui.form.lng).toFixed(5)+(isNew?'':' · drag the pin on the map to move it')+'</div>'+
     '<p class="err" id="f-err" hidden></p>'+
-    '<div class="dlg-acts">'+(isNew?'':'<button class="btn danger" data-act="delete-place" id="f-del">Delete</button>')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-place">'+(isNew?'Add place':'Save')+'</button></div>');
+    (!isNew&&inSaved(p)?'<p class="modehint" style="margin:0">This place is also in Saved places. Removing it here only takes it out of this trip.</p>':'')+
+    '<div class="dlg-acts">'+(isNew?'':'<button class="btn danger" data-act="delete-place" id="f-del">Remove from trip</button>')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-place">'+(isNew?'Add place':'Save')+'</button></div>');
   renderModeField();updJdur();
 }
 const DAYFMT={weekday:'short',month:'short',day:'numeric'};
@@ -3737,10 +3745,8 @@ document.addEventListener('click',e=>{
     case 'save-place':savePlace();break;
     case 'save-tag':saveTag();break;
     case 'close':{const back=ui.dlg==='tag'&&ui.form&&ui.form.back;closeDlg();if(back)reopenPlace(back);break}
-    case 'delete-place':{
-      if(!arm('del',b,'Click again to delete'))break;
-      const q=S.places.find(x=>x.id===ui.form.id);if(q){S.places=S.places.filter(x=>x!==q);if(q.day)renumber(q.day)}
-      closeDlg();commit();break}
+    case 'delete-place':{const q=S.places.find(x=>x.id===ui.form.id);closeDlg();if(q)removePlace(q);break}
+    case 'remove-place':if(p)removePlace(p);break;
     case 'delete-tag':{
       const t=S.tags.find(x=>x.id===ui.form.id),others=S.tags.filter(x=>x!==t);
       if(!others.length){$('f-err').textContent='Keep at least one tag.';$('f-err').hidden=false;break}
@@ -3965,7 +3971,18 @@ document.addEventListener('dragstart',e=>{if(e.target.closest&&e.target.closest(
 
 /* ---------- small helpers ---------- */
 let gtT;
-function gtoast(msg){const t=$('gtoast');t.textContent=msg;t.hidden=false;clearTimeout(gtT);gtT=setTimeout(()=>{t.hidden=true},2600)}
+function gtoast(msg,undo){const t=$('gtoast');t.textContent=msg;t.hidden=false;clearTimeout(gtT);
+  if(undo){const b=document.createElement('button');b.type='button';b.className='gt-undo';b.textContent='Undo';b.onclick=()=>{clearTimeout(gtT);t.hidden=true;undo()};t.appendChild(b)}
+  gtT=setTimeout(()=>{t.hidden=true},undo?6000:2600)}
+const inSaved=p=>!!p&&STORE.library.some(l=>l.id===p.libRef||(normTxt(l.name)===normTxt(p.name)&&l.lat!=null&&Math.abs(l.lat-p.lat)<.002&&Math.abs(l.lng-p.lng)<.002));
+// Takes a place out of this trip only. Saved places are deleted from the Saved page, nowhere else.
+function removePlace(q){
+  const k=S.places.indexOf(q);if(k<0)return;const day=q.day,dn=day?'Day '+(dayIdx(day)+1):'this trip',keep=Object.assign({},q);
+  if(ui.open===q.id)ui.open=null;
+  S.places.splice(k,1);if(day)renumber(day);commit();
+  gtoast('Removed '+q.name+' from '+dn+(inSaved(q)?'. It\u2019s still in Saved places.':''),()=>{S.places.splice(Math.min(k,S.places.length),0,keep);
+    if(keep.main&&day){const ms=mains(day).filter(x=>x!==keep);ms.splice(Math.max(0,keep.order-1),0,keep);ms.forEach((x,i)=>x.order=i+1)}commit()});
+}
 function copyText(txt,msg){
   const done=()=>gtoast(msg||'Copied');
   try{navigator.clipboard.writeText(txt).then(done,()=>fallbackCopy(txt,done))}catch(e){fallbackCopy(txt,done)}
