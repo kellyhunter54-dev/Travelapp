@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051426"></script>
+<script src="config.js?v=202611051428"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -697,7 +697,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 
 /* Map motion */
 @keyframes pinIn{from{scale:.2;opacity:0}60%{opacity:1}}
-@keyframes ring{from{opacity:.85;scale:.9}to{opacity:0;scale:1.7}}
+@keyframes ring{0%{opacity:0;transform:translateZ(0) scale(.86)}12%{opacity:.8}100%{opacity:0;transform:translateZ(0) scale(1.65)}}
 .pin{transition:scale .32s var(--spring)}
 .pin.in{animation:pinIn .55s var(--spring) backwards;animation-delay:var(--d,0ms)}
 @media (hover:hover){.leaflet-marker-icon:hover .pin{scale:1.1}}
@@ -705,7 +705,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 .pin-main.sel{box-shadow:0 0 0 3px var(--c),0 4px 14px rgba(0,0,0,.45);z-index:2}
 .pin-extra.sel{box-shadow:0 0 0 3px var(--c),0 3px 10px rgba(0,0,0,.4)}
 .pin-extra{position:relative}
-.pin.sel::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2.5px solid var(--c);animation:ring 1.8s ease-out infinite;pointer-events:none}
+.pin.sel::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2.5px solid var(--c);animation:ring 2s cubic-bezier(.22,.61,.36,1) infinite;pointer-events:none;will-change:transform,opacity;transform:translateZ(0);backface-visibility:hidden}
 .pin-extra.sel::after{border-radius:9px}
 @keyframes rtIn{from{opacity:0}}
 @keyframes pinOut{to{scale:.3;opacity:0}}
