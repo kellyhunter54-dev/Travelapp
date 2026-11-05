@@ -938,6 +938,8 @@ html{-webkit-tap-highlight-color:transparent}
 .row,.cityhead,.rail,.tabs,.chip,.btn,.ib{-webkit-touch-callout:none}
 @media (max-width:820px){body{padding-top:calc(16px + env(safe-area-inset-top,0px))}}
 .gm-pin{transform:translateY(50%);cursor:pointer}
+.gm-host{position:absolute;inset:0}
+#basesw button.dim{opacity:.55}
 .gm-pin.gm-noint{pointer-events:none}
 .gm-pin:hover .pin{scale:1.1}
 .gm-pin .pin.sel,.gm-pin:hover .pin.sel{scale:1.24}
@@ -949,6 +951,9 @@ html{-webkit-tap-highlight-color:transparent}
 .gst.ok{background:color-mix(in srgb,#16A34A 16%,transparent);color:#15803D}
 .gst.bad{background:color-mix(in srgb,#DC2626 14%,transparent);color:#B91C1C}
 .gi{margin-top:10px}
+.sv-tag{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-bottom:-6px}
+.sv-dates{margin:-6px 0 4px;color:var(--muted);font-size:13.5px}
+.sv-notes{margin:0;white-space:pre-wrap;line-height:1.45}
 #gi-stay,#gi-dlg{margin:0 0 4px}
 .pop-gi:not(:empty){margin:8px 0 4px}
 .pop-gi .gi-ph img{height:120px}
@@ -969,7 +974,10 @@ html{-webkit-tap-highlight-color:transparent}
 .gi-h li.on{color:var(--fg);font-weight:600}
 .gi-l{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
 .gi-l a{color:var(--accent);font-weight:600;text-decoration:none}
-.gi-g{font-size:10.5px;color:var(--muted);text-align:right}
+.gi-g{font-size:10.5px;color:var(--muted);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.gi-g span{margin-left:auto}
+.gi-hide{border:0;background:none;padding:0;font:inherit;font-size:11.5px;color:var(--muted);text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.gi-hide:hover{color:var(--fg)}
 .gusage{margin:12px 0 4px;display:grid;gap:6px;font-size:13px}
 .gu-h{font-weight:600}.gu-h small{font-weight:400;color:var(--muted)}
 .gu-r{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;align-items:center;gap:10px}
@@ -1442,7 +1450,7 @@ function pill(box,selector,key){
 // Re-render a container and glide rows that moved (FLIP)
 // Smooth camera move: pans and zooms together on a straight path (no zoom-out arc)
 function glideTo(center,zoom,dur,done){
-  if(GL){map.glide(center,Math.min(zoom,18),dur||640,done);return}
+  if(GL){const z=Math.min(zoom,18);if(sheetOn()){const t=map.view([center],{paddingTopLeft:[30,150],paddingBottomRight:[30,30],maxZoom:z});map.glide(t.center,z,dur||640,done)}else map.glide(center,z,dur||640,done);return}
   let fired=false;const fin=()=>{if(!fired){fired=true;done&&done()}};
   center=L.latLng(center);zoom=map._limitZoom(zoom);
   if(reduced){map.setView(center,zoom,{animate:false});fin();return}
@@ -1535,10 +1543,10 @@ const GL=GM&&(()=>{
       if(this.options.icon)this.wrap.innerHTML=this.options.icon.html;
       this.wrap.addEventListener('click',e=>{if(this.options.interactive===false)return;e.stopPropagation();this.fire('click',{target:this});if(this.pop)this.openPopup()});}
     addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
-    _show(m){if(this.m)return;this.map=m;
+    _show(m){if(this.m)return;this.map=m;m.shown.add(this);
       this.m=new GM.marker.AdvancedMarkerElement({map:m.g,position:this.ll,content:this.wrap,zIndex:this.z,title:this.options.title||'',gmpDraggable:!!this.options.draggable});
       if(this.options.draggable)this.m.addListener('dragend',()=>{this.ll=toLL(this.m.position);this.fire('dragend',{target:this})})}
-    _hide(){if(this.m){this.m.map=null;this.m=null}}
+    _hide(){if(this.map)this.map.shown.delete(this);if(this.m){this.m.map=null;this.m=null}}
     remove(){if(this._group)this._group.items.delete(this);this._hide();return this}
     setIcon(ic){this.wrap.innerHTML=ic?ic.html:'';return this}
     getLatLng(){return {lat:this.ll.lat,lng:this.ll.lng}}
@@ -1550,7 +1558,7 @@ const GL=GM&&(()=>{
   class Line{
     constructor(path,o){this.path=path.map(toLL);this.o=o||{}}
     addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
-    _show(m){if(this.line)return;const o=this.o,cls=o.className||'',w=o.weight||3,op=o.opacity==null?1:o.opacity;
+    _show(m){if(this.line)return;this.map=m;m.shown.add(this);const o=this.o,cls=o.className||'',w=o.weight||3,op=o.opacity==null?1:o.opacity;
       const col=/plane-gap/.test(cls)?gColor('var(--surface)'):gColor(o.color);
       const opts={path:this.path,clickable:false,strokeColor:col,strokeWeight:w,strokeOpacity:op,zIndex:/leg-glow/.test(cls)?1:/plane-gap|leg-flow/.test(cls)?3:2,map:m.g};
       if(o.dashArray){const [d,g]=String(o.dashArray).split(/[ ,]+/).map(Number);opts.strokeOpacity=0;
@@ -1563,7 +1571,7 @@ const GL=GM&&(()=>{
     setF(f){if(!this.line)return;this.line.setOptions({strokeOpacity:this.base.so*f,icons:this.base.icons?this.base.icons.map(x=>Object.assign({},x,{icon:Object.assign({},x.icon,{strokeOpacity:(x.icon.strokeOpacity||0)*f,fillOpacity:(x.icon.fillOpacity||0)*f})})):undefined})}
     fade(a,b,T,done){const t0=performance.now(),step=()=>{const t=Math.min(1,(performance.now()-t0)/T);this.setF(a+(b-a)*t);if(t<1&&this.line)requestAnimationFrame(step);else done&&done()};this.setF(a);requestAnimationFrame(step)}
     fadeOut(){this.fade(1,0,200)}
-    _hide(){clearInterval(this.timer);if(this.line){this.line.setMap(null);this.line=null}}
+    _hide(){if(this.map)this.map.shown.delete(this);clearInterval(this.timer);if(this.line){this.line.setMap(null);this.line=null}}
     remove(){if(this._group)this._group.items.delete(this);this._hide()}
     getElement(){return null}}
   class Popup{
@@ -1575,25 +1583,40 @@ const GL=GM&&(()=>{
       this.el.querySelector('.leaflet-popup-close-button').addEventListener('click',e=>{e.stopPropagation();map.closePopup()});
       ['click','pointerdown','mousedown','touchstart','wheel','dblclick','contextmenu'].forEach(t=>this.el.addEventListener(t,e=>e.stopPropagation()));
       this.m=new GM.marker.AdvancedMarkerElement({map:map.g,position:this.ll,content:this.el,zIndex:1e6});
-      map.popup=this;map.fire('popupopen',{popup:this});requestAnimationFrame(()=>this.autopan());return this}
+      map.popup=this;map.fire('popupopen',{popup:this});requestAnimationFrame(()=>this.autopan());setTimeout(()=>{if(map.popup===this)this.autopan()},520);return this}
     getElement(){return this.el}
-    autopan(){if(!this.m||!this.map)return;const r=this.el.getBoundingClientRect(),m=this.map.el.getBoundingClientRect(),pad=24,top=sheetOn&&sheetOn()?150:pad;let dx=0,dy=0;
-      if(r.top<m.top+top)dy=r.top-m.top-top;else if(r.bottom>m.bottom-pad)dy=r.bottom-m.bottom+pad;
-      if(r.left<m.left+pad)dx=r.left-m.left-pad;else if(r.right>m.right-pad)dx=r.right-m.right+pad;
-      if(dx||dy)this.map.g.panBy(dx,dy)}
+    autopan(){if(!this.m||!this.map)return;const map=this.map,W=map.el.clientWidth,H=map.el.clientHeight;
+      const w=this.el.offsetWidth,h=this.el.offsetHeight;if(!w||!h){if(!this.tries||this.tries<8){this.tries=(this.tries||0)+1;setTimeout(()=>this.autopan(),80)}return}
+      const z=map.getZoom(),c=map.getCenter(),a=MERC.px(c.lat,c.lng,z),b=MERC.px(this.ll.lat,this.ll.lng,z),px=b.x-a.x+W/2,py=b.y-a.y+H/2;
+      const pad=24,top=(typeof sheetOn==='function'&&sheetOn())?112:pad,L=px-w/2,R=px+w/2,T=py-h-24,B=py+12;let dx=0,dy=0;
+      if(T<top)dy=T-top;else if(B>H-pad)dy=B-(H-pad);
+      if(L<pad)dx=L-pad;else if(R>W-pad)dx=R-(W-pad);
+      if(dx||dy)map.g.panBy(Math.round(dx),Math.round(dy))}
     remove(){if(this.m){this.m.map=null;this.m=null}}}
   class Map extends Evt{
-    constructor(id){super();this.el=document.getElementById(id);this.popup=null;this.attributionControl={setPrefix(){}};
+    constructor(id){super();this.el=document.getElementById(id);this.popup=null;this.attributionControl={setPrefix(){}};this.shown=new Set();
+      this.build(SET.gtype==='clean'&&window.GMODE.cleanMapId?window.GMODE.cleanMapId:(window.GMODE.mapId||'DEMO_MAP_ID'),{lat:38.71,lng:-9.16},13)}
+    // Google fixes a map's style when it's created, so switching style builds a fresh map in the same spot and moves everything onto it
+    build(mapId,center,zoom){
       const th=SET.theme==='dark'?'DARK':SET.theme==='light'?'LIGHT':'FOLLOW_SYSTEM';
-      const o={center:{lat:38.71,lng:-9.16},zoom:13,mapId:window.GMODE.mapId||'DEMO_MAP_ID',disableDefaultUI:true,zoomControl:!matchMedia('(max-width:820px)').matches,fullscreenControl:false,streetViewControl:false,mapTypeControl:false,clickableIcons:true,gestureHandling:'greedy',isFractionalZoomEnabled:true};
+      const o={center,zoom,mapId,disableDefaultUI:true,zoomControl:!matchMedia('(max-width:820px)').matches,fullscreenControl:false,streetViewControl:false,mapTypeControl:false,clickableIcons:true,gestureHandling:'greedy',isFractionalZoomEnabled:true};
       if(GM.ColorScheme)o.colorScheme=GM.ColorScheme[th];
       if(GM.RenderingType)o.renderingType=GM.RenderingType.VECTOR;
-      this.g=new GM.Map(this.el,o);
+      const host=document.createElement('div');host.className='gm-host';this.el.appendChild(host);
+      const old=this.host;this.host=host;this.mapId=mapId;
+      this.g=new GM.Map(host,o);this._h=this.el.clientHeight;
+      if(old)setTimeout(()=>old.remove(),350);
       let zt;this.g.addListener('zoom_changed',()=>{if(this.gliding)return;clearTimeout(zt);zt=setTimeout(()=>this.fire('zoomend',{}),180)});
       this.g.addListener('click',e=>{const ll=e.latLng?{lat:e.latLng.lat(),lng:e.latLng.lng()}:null;
         if(e.placeId&&!ui.placing){if(e.stop)e.stop();this.fire('poiclick',{placeId:e.placeId,latlng:ll});return}
         if(e.placeId&&e.stop)e.stop();
         this.closePopup();if(ll)this.fire('click',{latlng:ll})})}
+    restyle(mapId,type){
+      if(mapId===this.mapId){this.g.setMapTypeId(type);return}
+      if(typeof gUse==='function'&&!gUse('load')){toast('You\u2019ve reached today\u2019s limit for opening Google maps, so the style can\u2019t change until tomorrow.');return}
+      const c=this.getCenter(),z=this.getZoom(),items=[...this.shown];this.closePopup();
+      items.forEach(l=>l._hide());this.build(mapId,c,z);this.g.setMapTypeId(type);items.forEach(l=>l._show(this));
+      if(!reduced)this.host.animate([{opacity:0},{opacity:1}],{duration:300,easing:'ease-out'})}
     setView(c,z){c=toLL(c);this.g.moveCamera({center:c,zoom:z});return this}
     getZoom(){return this.g.getZoom()||0}
     getCenter(){const c=this.g.getCenter();return c?{lat:c.lat(),lng:c.lng()}:{lat:0,lng:0}}
@@ -1615,7 +1638,7 @@ const GL=GM&&(()=>{
       this.raf=requestAnimationFrame(frame)}
     closePopup(){if(this.popup){this.popup.remove();this.popup=null}}
     removeLayer(l){if(l&&l.remove)l.remove()}
-    invalidateSize(){}
+    invalidateSize(){const h=this.el.clientHeight;if(this._h&&h&&h!==this._h)this.g.panBy(0,Math.round((h-this._h)/2));this._h=h}
     createPane(){return {style:{}}}
     setCursor(on){this.g.setOptions({draggableCursor:on?'crosshair':null})}}
   return {map:id=>new Map(id),marker:(ll,o)=>new Marker(ll,o),divIcon:o=>({html:o.html||''}),polyline:(p,o)=>new Line(p,o),popup:o=>new Popup(o),layerGroup:()=>new Group()};
@@ -1756,9 +1779,14 @@ tiles.on('tileload',()=>{tileOk=true});
 tiles.on('tileerror',()=>{if(!tileOk&&S.view.basemap==='street'){setBasemap('illustrated');toast('The live street map can’t load here, so you’re seeing the illustrated map. It works when you open the app in your own browser.')}});
 let toastT;
 function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},6000)}
-function setBasemap(kind){
-  if(GL){if(kind==='street'||kind==='sat'){S.view.gtype=kind;save()}const sat=S.view.gtype==='sat';map.g.setMapTypeId(sat?'hybrid':'roadmap');
-    $('basesw').innerHTML=[['street','Map'],['sat','Satellite']].map(([k,l])=>'<button data-act="basemap" data-kind="'+k+'" aria-pressed="'+((k==='sat')===sat)+'">'+l+'</button>').join('');
+function setBasemap(kind,user){
+  if(GL){const cid=window.GMODE.cleanMapId||'';
+    if(!user)kind=null;
+    if(kind==='clean'&&!cid){toast('To use the Clean map, add a clean map style in Google Cloud and paste its Map ID in Settings > Google Maps. The README has the steps.');kind=S.view.gtype||'street'}
+    if(kind==='street'||kind==='sat'||kind==='clean'){S.view.gtype=kind;SET.gtype=kind;saveSet();save()}
+    let t=SET.gtype||S.view.gtype||'street';if(t==='clean'&&!cid)t='street';
+    map.restyle(t==='clean'?cid:(window.GMODE.mapId||'DEMO_MAP_ID'),t==='sat'?'hybrid':'roadmap');
+    $('basesw').innerHTML=[['street','Map'],['clean','Clean'],['sat','Satellite']].map(([k,l])=>'<button data-act="basemap" data-kind="'+k+'" aria-pressed="'+(t===k)+'"'+(k==='clean'&&!cid?' class="dim" title="Set up in Settings > Google Maps"':'')+'>'+l+'</button>').join('');
     pill($('basesw'),'[aria-pressed="true"]','base');return}
   S.view.basemap=kind;save();
   if(kind==='street'){map.removeLayer(illus);tiles.addTo(map);setTimeout(()=>{if(!tileOk&&S.view.basemap==='street')tiles.fire('tileerror')},4500)}
@@ -2129,8 +2157,9 @@ function expandDom(p){
 }
 function selectStop(p,fromMap){
   const was=ui.open;
+  // on phones, tapping a pin pulls the plan down so the place's card has room on the map
+  if(fromMap&&sheetOn()&&sheet.state!=='peek')setSheet('peek',true);
   if(GL&&p.gauto&&was!==p.id)setTimeout(()=>{const bx=$('gi-'+p.id);if(bx&&!bx.querySelector('.gi-card'))showGInfo(p)},60);
-  if(fromMap&&sheetOn()&&sheet.state==='peek')setSheet('half',true);
   if(!fromMap&&was===p.id){closeDetail();return}
   if(fromMap&&was===p.id)return;
   ui.open=p.id;
@@ -2396,7 +2425,7 @@ map.on('popupopen',e=>{
     const a=b.dataset.pact;
     if(a==='cmode'){map.closePopup();const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.tmode=d.mmode=b.dataset.mode;commit()}return}
     if(a==='hmode'){map.closePopup();setHleg(b.dataset.day,b.dataset.part,b.dataset.mode);return}
-    if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st){openStay(st);if(GL&&!st.gauto)showStayInfo()}return}
+    if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)(GL?openStayView:openStay)(st);return}
     if(a==='poi-add'||a==='poi-save'){map.closePopup();const q=ui.poi;if(!q)return;
       if(a==='poi-save'){ui.libReturn='plan';openLib(Object.assign(blankLib(),{gid:q.gid,name:q.name,lat:q.lat,lng:q.lng,city:q.city,country:q.country,tag:q.tag}));return}
       const d=S.days.some(x=>x.id===S.view.day)?S.view.day:(isCity(S.view.day)?(cityDays(S.view.day)[0]||{}).id||null:null);
@@ -2787,6 +2816,16 @@ const DAYFMT={weekday:'short',month:'short',day:'numeric'};
 function ciOptions(sel){let o='<option value="-1"'+(sel===-1?' selected':'')+'>Night before Day 1 · '+fmt(dayDate(-1),DAYFMT)+'</option>';S.days.forEach((d,i)=>{o+='<option value="'+i+'"'+(sel===i?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),DAYFMT)+'</option>'});return o}
 function coOptions(ci,sel){let o='';for(let i=ci+1;i<=S.days.length;i++)o+='<option value="'+i+'"'+(sel===i?' selected':'')+'>'+(i<S.days.length?'Day '+(i+1):'After Day '+S.days.length)+' · '+fmt(dayDate(i),DAYFMT)+'</option>';return o}
 function updateNights(){const el=$('f-nights');if(!el)return;const ci=+$('f-ci').value,co=+$('f-co').value,n=co-ci;el.textContent=n+' night'+(n===1?'':'s')+'. Days in between start and end here.'}
+function openStayView(st){
+  ui.dlg='stayview';ui.form={id:st.id,gid:st.gid||null};
+  const c=S.cities.find(x=>x.id===stayCityId(st)),cached=st.gid&&ui.ginfo&&ui.ginfo[st.gid];
+  openDlg('<div class="sv-tag">🛏️ Hotel'+(c?' · '+esc(c.name):'')+'</div><h2>'+esc(st.name)+'</h2>'+
+    '<p class="sv-dates">'+nightsText(st)+'</p>'+
+    (GL?'<div class="gi" id="gi-stay">'+(cached?giHtml(cached,'data-act="g-hide-stay"'):'<div class="si-note"><span class="spin"></span>Loading details…</div>')+'</div>':'')+
+    (st.notes?'<div class="field"><span>Notes</span><p class="sv-notes">'+esc(st.notes)+'</p></div>':'')+
+    '<div class="dlg-acts"><button class="btn" data-act="sv-map">Show on map</button><span class="spacer"></span><button class="btn" data-act="close">Close</button><button class="btn primary" data-act="sv-edit">Edit hotel</button></div>');
+  if(GL&&!cached)setTimeout(showStayInfo,0);
+}
 function openStay(st,preset){
   preset=preset||{};const isNew=!st;ui.dlg='stay';
   const ci=st?st.ci:(preset.ci!=null?preset.ci:firstFreeNight()),co=st?st.co:Math.min(ci+1,S.days.length);
@@ -2795,14 +2834,13 @@ function openStay(st,preset){
     '<div class="field"><label for="f-sname">Name</label><input class="inp" id="f-sname" value="'+esc(st?st.name:(preset.name||''))+'" placeholder="e.g. Hotel Avenida Palace" autocomplete="off"></div>'+
     '<div class="dt-grid2"><div class="field"><label for="f-ci">Check in</label><select class="inp" id="f-ci">'+ciOptions(ci)+'</select></div><div class="field"><label for="f-co">Check out</label><select class="inp" id="f-co">'+coOptions(ci,co)+'</select></div></div>'+
     '<p class="modehint" id="f-nights" style="margin:-4px 0 0"></p>'+
-    (GL&&!isNew?'<div class="gi" id="gi-stay">'+(st.gid&&ui.ginfo&&ui.ginfo[st.gid]&&st.gauto?giHtml(ui.ginfo[st.gid],'data-act="g-hide-stay"'):'<button type="button" class="linkbtn sm" data-act="g-info-stay">Hotel details: rating, photo, website and phone</button>')+'</div>':'')+
+
     '<div class="field"><label for="f-snotes">Notes</label><textarea class="inp" id="f-snotes" placeholder="Booking number, check-in time, breakfast">'+esc(st?st.notes:'')+'</textarea></div>'+
     (isNew?'':'<div class="field"><span>Stop here during a day</span><div class="inline"><select class="inp" id="f-sday" aria-label="Day">'+S.days.map((d,i)=>'<option value="'+d.id+'">Day '+(i+1)+' · '+fmt(dayDate(i),DAYFMT)+'</option>').join('')+'</select><button class="btn" data-act="stay-as-stop">Add as a stop</button></div><div class="modehint">For dropping bags or checking in mid-day. It becomes a normal stop you can drag into place.</div></div>')+
     '<div class="coords">'+(+ui.form.lat).toFixed(5)+', '+(+ui.form.lng).toFixed(5)+(isNew?'':' · drag the hotel pin on the map to move it')+'</div>'+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(isNew?'':'<button class="btn danger" data-act="delete-stay">Delete</button>')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-stay">'+(isNew?'Add hotel':'Save')+'</button></div>');
   updateNights();
-  if(GL&&st&&st.gauto&&!(st.gid&&ui.ginfo&&ui.ginfo[st.gid]))setTimeout(showStayInfo,0);
 }
 function saveStay(){
   const f=ui.form,name=$('f-sname').value.trim(),ci=+$('f-ci').value,co=+$('f-co').value,notes=$('f-snotes').value.trim();
@@ -3197,7 +3235,7 @@ document.addEventListener('click',e=>{
     case 'set-day':{
       const nd=(S.view.day===b.dataset.day&&(b.classList.contains('day-h')||b.classList.contains('city-h')||b.classList.contains('sm-dmain')||b.classList.contains('sm-ch')))?'all':b.dataset.day;
       setMapView(nd);break}
-    case 'basemap':setBasemap(b.dataset.kind);renderPanel();renderMap();break;
+    case 'basemap':setBasemap(b.dataset.kind,true);renderPanel();renderMap();break;
     case 'open':if(p)selectStop(p,false);break;
     case 'collapse':{
       const id=b.dataset.day,sec=b.closest('.day'),c=S.view.collapsed;
@@ -3218,7 +3256,7 @@ document.addEventListener('click',e=>{
     case 'g-info':if(p)showGInfo(p);break;
     case 'g-info-stay':showStayInfo();break;
     case 'g-hide':if(p){gRemember(p,false);const bx=$('gi-'+p.id);if(bx)bx.innerHTML='<button type="button" class="linkbtn sm" data-act="g-info" data-id="'+p.id+'">Hours, rating and photo</button>'}break;
-    case 'g-hide-stay':{const st=S.stays.find(x=>x.id===ui.form.id);if(st)gRemember(st,false);const bx=$('gi-stay');if(bx)bx.innerHTML='<button type="button" class="linkbtn sm" data-act="g-info-stay">Hotel details: rating, photo, website and phone</button>';break}
+    case 'g-hide-stay':{const st=S.stays.find(x=>x.id===ui.form.id);if(st)gRemember(st,false);const bx=$('gi-stay');if(bx)bx.innerHTML='<button type="button" class="linkbtn sm" data-act="g-info-stay">Show rating, photo, website and phone</button>';break}
     case 'g-hide-dlg':{const q=S.places.find(x=>x.id===ui.form.id);if(q)gRemember(q,false);const bx=$('gi-dlg');if(bx)bx.innerHTML='<button type="button" class="linkbtn sm" data-act="g-info-dlg">Hours, rating and photo</button>';break}
     case 'g-info-dlg':{const q=S.places.find(x=>x.id===ui.form.id);const box=$('gi-dlg');if(!q||!box)break;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
       const c=S.cities.find(x=>x.id===(S.days.find(d=>d.id===q.day)||{}).city);
@@ -3254,7 +3292,9 @@ document.addEventListener('click',e=>{
     case 'hleg-menu':openHleg(b,b.dataset.day,b.dataset.part);break;
     case 'hleg-mode':setHleg(b.dataset.day,b.dataset.part,b.dataset.mode);break;
     case 'add-stay':openSearch('stay',{ci:b.dataset.ci!=null?+b.dataset.ci:firstFreeNight()});break;
-    case 'edit-stay':{const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)openStay(st);break}
+    case 'edit-stay':{const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)(GL?openStayView:openStay)(st);break}
+    case 'sv-edit':{const st=S.stays.find(x=>x.id===ui.form.id);if(st){closeDlg();openStay(st)}break}
+    case 'sv-map':{const st=S.stays.find(x=>x.id===ui.form.id);closeDlg();if(st){if(SET.view!=='plan')setView('plan');glideTo([st.lat,st.lng],Math.max(map.getZoom(),16))}break}
     case 'save-stay':saveStay();break;
     case 'stay-as-stop':stayAsStop();break;
     case 'delete-stay':{if(!arm('del',b,'Click again to delete'))break;S.stays=S.stays.filter(x=>x.id!==ui.form.id);closeDlg();commit();break}
@@ -3618,6 +3658,9 @@ function sheetPlace(y){const side=sideEl();side.style.setProperty('--sy',y+'px')
 function sheetUnsettle(){const side=sideEl();if(!side.style.height)return;const y=sheet.y||0;sheetFull();sheetPlace(y)}
 function sheetSettle(){const side=sideEl(),y=sheet.y||0,H=sheet.H||sheetFull();side.classList.remove('snapping');
   side.style.height=(H-y)+'px';side.style.setProperty('--sy','0px');side.style.setProperty('--hide','0px')}
+function keepSelVisible(){if(!ui.open)return;const p=S.places.find(x=>x.id===ui.open);if(!p)return;const el=document.querySelector('#map');if(!el)return;
+  const W=el.clientWidth,H=el.clientHeight,z=map.getZoom(),c=map.getCenter(),a=MERC.px(c.lat,c.lng,z),b=MERC.px(p.lat,p.lng,z),x=b.x-a.x+W/2,y=b.y-a.y+H/2,top=sheetOn()?150:40;
+  if(x<30||x>W-30||y<top||y>H-30)glideTo([p.lat,p.lng],z,420)}
 function sizeMap(state){
   const ys=sheetYs(),y=state==='full'?ys.half:ys[state],h=ys.H-y,col=document.querySelector('.mapcol').offsetHeight;
   const mh=Math.max(160,col-h+20);document.querySelector('.mapwrap').style.setProperty('--maph',mh+'px');map.invalidateSize({pan:false});
@@ -3630,7 +3673,7 @@ function setSheet(state,anim){
   clearTimeout(sheet.t);
   // the map grows before the sheet slides down, and shrinks after it slides up, so it never shows a gap
   if(!go||state==='peek'||(prev==='full'&&state!=='full'))sizeMap(state);
-  if(go){side.classList.add('snapping');void side.offsetWidth;sheetPlace(y);sheet.t=setTimeout(()=>{sizeMap(state);sheetSettle()},420)}
+  if(go){side.classList.add('snapping');void side.offsetWidth;sheetPlace(y);sheet.t=setTimeout(()=>{sizeMap(state);sheetSettle();setTimeout(keepSelVisible,60)},420)}
   else{sheetPlace(y);sheetSettle()}
 }
 function sheetInit(){
@@ -3928,10 +3971,10 @@ function appSetup(){
     gtoast('Add Waypoint to your home screen to use it like an app.',()=>{localStorage.setItem('waypoint-install-hint','1');APP.prompt?installApp():setView('settings')},{label:APP.prompt?'Install':'How',stay:true,close:()=>localStorage.setItem('waypoint-install-hint','1')})},4000)}catch(e){}
 }
 function gCfg(){let c=null;try{c=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
-  const b=window.WAYPOINT_CONFIG||{};if(b.googleKey&&(!c||!c.key))c={key:b.googleKey,mapId:b.googleMapId||'',on:!(c&&c.on===false),built:true};return c}
-function gSaveCfg(){const k=($('f-gkey')||{}).value||'',id=($('f-gmid')||{}).value||'';
-  if(!k.trim()){gtoast('Paste your API key first.');return}
-  try{localStorage.setItem('waypoint-google',JSON.stringify({key:k.trim(),mapId:id.trim(),on:true}))}catch(e){}
+  const b=window.WAYPOINT_CONFIG||{};if(b.googleKey&&(!c||!c.key))c={key:b.googleKey,mapId:(c&&c.mapId)||b.googleMapId||'',cleanMapId:(c&&c.cleanMapId)||b.googleCleanMapId||'',on:!(c&&c.on===false),built:true};return c}
+function gSaveCfg(){const k=($('f-gkey')||{}).value||'',id=($('f-gmid')||{}).value||'',cid=(($('f-gcid')||{}).value||'').trim(),c0=gCfg();
+  if(!k.trim()&&!(c0&&c0.built)){gtoast('Paste your API key first.');return}
+  try{localStorage.setItem('waypoint-google',JSON.stringify(k.trim()?{key:k.trim(),mapId:id.trim(),cleanMapId:cid,on:true}:{on:true,cleanMapId:cid,mapId:id.trim()}))}catch(e){}
   location.reload()}
 function gSetOn(on){const c=gCfg();if(!c)return;const o=c.built?{on}:Object.assign({},c,{on});delete o.built;try{localStorage.setItem('waypoint-google',JSON.stringify(o))}catch(e){}location.reload()}
 function gUsageHtml(){const u=gUsage();
@@ -3945,6 +3988,7 @@ function googleCard(){
   else h+='<p class="muted">Use Google\u2019s map, place search (with photos, ratings and hours) and real directions, including transit. You need a free Google Maps API key. See the README for the 10-minute setup.</p>';
   if(c&&c.built)h+='<p class="muted small-note">Your key is built into this copy of the app (in config.js), so every device uses it automatically. To use a different key on just this device, paste it below.</p>';
   h+='<div class="field"><label for="f-gkey">API key</label><input class="inp mono" id="f-gkey" value="'+esc(c&&!c.built?c.key:'')+'" placeholder="'+(c&&c.built?'Using the built-in key':'AIza\u2026')+'" autocomplete="off" spellcheck="false"></div>'+
+    '<div class="field"><label for="f-gcid">Clean map ID <small class="muted">(for the Clean map style)</small></label><input class="inp mono" id="f-gcid" value="'+esc(c&&c.cleanMapId||'')+'" placeholder="From a Map ID linked to your clean style" autocomplete="off" spellcheck="false"></div>'+
     '<div class="field"><label for="f-gmid">Map ID <small class="muted">(optional)</small></label><input class="inp mono" id="f-gmid" value="'+esc(c&&c.mapId||'')+'" placeholder="Leave blank to use Google\u2019s demo map ID" autocomplete="off" spellcheck="false"></div>'+
     '<div class="inline"><button class="btn primary" data-act="g-save">'+(c?'Save and reload':'Connect')+'</button>'+(c?(c.on?'<button class="btn" data-act="g-off">Use the built-in map</button>':'<button class="btn" data-act="g-on">Turn Google Maps on</button>'):'')+'</div>'+
     (c?gUsageHtml():'')+'<p class="muted small-note">'+(c&&c.built?'':'A key you paste here is stored only on this device. ')+'Without a connection, the app switches to the built-in map automatically.</p>';
@@ -4222,7 +4266,7 @@ if(window.GAUTHFAIL)window.onGoogleAuthFail();
   var started=false,run=function(){if(started)return;started=true;var s=document.createElement('script');s.textContent=document.getElementById('app-js').textContent;document.body.appendChild(s)};
   var cfg=null;try{cfg=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
   var built=window.WAYPOINT_CONFIG||{};
-  if(built.googleKey&&(!cfg||!cfg.key)){cfg={key:built.googleKey,mapId:built.googleMapId||'',on:!(cfg&&cfg.on===false),built:true}}
+  if(built.googleKey&&(!cfg||!cfg.key)){cfg={key:built.googleKey,mapId:(cfg&&cfg.mapId)||built.googleMapId||'',cleanMapId:(cfg&&cfg.cleanMapId)||built.googleCleanMapId||'',on:!(cfg&&cfg.on===false),built:true}}
   window.GMODE=null;window.GFAIL=null;
   if(!cfg||!cfg.on||!cfg.key||(window.top!==window.self)){run();return}
   if(navigator.onLine===false){window.GFAIL='offline';run();return}
