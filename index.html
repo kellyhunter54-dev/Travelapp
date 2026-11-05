@@ -3,12 +3,17 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Plan trips day by day on a live map.">
 <meta name="theme-color" content="#E9EEEC" media="(prefers-color-scheme: light)">
 <meta name="theme-color" content="#0D1311" media="(prefers-color-scheme: dark)">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="Waypoint">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
+<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -926,6 +931,13 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 .gtoast{display:flex;align-items:center;justify-content:space-between;gap:12px;width:max-content;min-width:min(340px,calc(100% - 32px))}
 @media (hover:none){.ib.rm:hover{color:var(--muted);background:transparent}}
 .gt-undo{border:0;background:none;color:inherit;font:inherit;font-weight:700;padding:2px 4px;margin:-2px -4px -2px 0;border-radius:6px;text-decoration:underline;text-underline-offset:3px;flex:none}
+.steps{margin:4px 0 0;padding-left:20px;display:grid;gap:6px;line-height:1.45}
+.small-note{font-size:12.5px;margin-top:10px}
+html{-webkit-tap-highlight-color:transparent}
+.row,.cityhead,.rail,.tabs,.chip,.btn,.ib{-webkit-touch-callout:none}
+@media (max-width:820px){body{padding-top:calc(16px + env(safe-area-inset-top,0px))}}
+.gt-x{border:0;background:none;color:inherit;font-size:20px;line-height:1;padding:0 2px;margin-left:-4px;opacity:.7;flex:none}
+.gt-x:hover{opacity:1}
 .gt-undo:hover{background:color-mix(in srgb,var(--bg) 18%,transparent)}
 .ib.rm:hover{color:#DC2626;background:color-mix(in srgb,#DC2626 10%,transparent)}
 .ghost-rm{margin-left:auto}
@@ -1074,7 +1086,7 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 
 <div class="dlg" id="dlg" hidden><div class="dlg-card" id="dlg-card" role="dialog" aria-modal="true"></div></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.js"></script>
+<script src="lib/leaflet-1.9.4.js"></script>
 <script>
 (function(){
 const KEY='waypoint-planner-v1';
@@ -1590,7 +1602,7 @@ const redrawStreets=()=>streets.redraw();
 try{window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change',redrawStreets)}catch(e){}
 new MutationObserver(redrawStreets).observe(document.documentElement,{attributes:true,attributeFilter:['data-theme']});
 
-const tiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,attribution:'&copy; OpenStreetMap contributors &copy; CARTO'});
+const tiles=L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{subdomains:'abcd',maxZoom:19,crossOrigin:'',attribution:'&copy; OpenStreetMap contributors &copy; CARTO'});
 let tileOk=false;
 tiles.on('tileload',()=>{tileOk=true});
 tiles.on('tileerror',()=>{if(!tileOk&&S.view.basemap==='street'){setBasemap('illustrated');toast('The live street map can’t load here, so you’re seeing the illustrated map. It works when you open the app in your own browser.')}});
@@ -2905,6 +2917,7 @@ document.addEventListener('click',e=>{
     case 'set-mode':if(p){p.mode=b.dataset.mode;commit()}break;
     case 'leg-menu':if(p)openQuick(b,p);break;
     case 'xfer-menu':openXfer(b,b.dataset.day);break;
+    case 'install-app':installApp();break;
     case 'tab-more':openTabMore(b);break;
     case 'toggle-key':{const lg=document.querySelector('.legend'),on=!lg.classList.contains('show');lg.classList.toggle('show',on);b.setAttribute('aria-expanded',on);b.textContent=on?'Hide key':'Map key';break}
     case 'ctr-toggle':{const id=b.dataset.day,box=b.closest('.trans'),now=!ui.ctrOpen.has(id);if(now)ui.ctrOpen.add(id);else ui.ctrOpen.delete(id);
@@ -3211,9 +3224,10 @@ document.addEventListener('dragstart',e=>{if(e.target.closest&&e.target.closest(
 
 /* ---------- small helpers ---------- */
 let gtT;
-function gtoast(msg,undo){const t=$('gtoast');t.textContent=msg;t.hidden=false;clearTimeout(gtT);
-  if(undo){const b=document.createElement('button');b.type='button';b.className='gt-undo';b.textContent='Undo';b.onclick=()=>{clearTimeout(gtT);t.hidden=true;undo()};t.appendChild(b)}
-  gtT=setTimeout(()=>{t.hidden=true},undo?6000:2600)}
+function gtoast(msg,undo,opt){opt=opt||{};const t=$('gtoast');t.textContent=msg;t.hidden=false;clearTimeout(gtT);
+  if(undo){const b=document.createElement('button');b.type='button';b.className='gt-undo';b.textContent=opt.label||'Undo';b.onclick=()=>{clearTimeout(gtT);t.hidden=true;undo()};t.appendChild(b)}
+  if(opt.close){const c=document.createElement('button');c.type='button';c.className='gt-x';c.setAttribute('aria-label','Dismiss');c.textContent='\u00d7';c.onclick=()=>{clearTimeout(gtT);t.hidden=true;opt.close()};t.appendChild(c)}
+  if(!opt.stay)gtT=setTimeout(()=>{t.hidden=true},undo?6000:2600)}
 const inSaved=p=>!!p&&STORE.library.some(l=>l.id===p.libRef||(normTxt(l.name)===normTxt(p.name)&&l.lat!=null&&Math.abs(l.lat-p.lat)<.002&&Math.abs(l.lng-p.lng)<.002));
 // Takes a place out of this trip only. Saved places are deleted from the Saved page, nowhere else.
 function removePlace(q){
@@ -3581,11 +3595,45 @@ function pgTrips(){
   return h;
 }
 
+/* ---------- Installed app: offline support, updates, install button ---------- */
+const APP={prompt:null,ios:/iphone|ipad|ipod/i.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1),
+  standalone:(()=>{try{return matchMedia('(display-mode: standalone)').matches||navigator.standalone===true}catch(e){return false}})()};
+const swOK=()=>{try{return 'serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')&&window.top===window.self}catch(e){return false}};
+addEventListener('beforeinstallprompt',e=>{e.preventDefault();APP.prompt=e;if(SET.view==='settings')renderPage()});
+addEventListener('appinstalled',()=>{APP.prompt=null;gtoast('Waypoint is installed. Open it from your home screen.');if(SET.view==='settings')renderPage()});
+function installApp(){const e=APP.prompt;if(!e)return;e.prompt();e.userChoice.then(()=>{APP.prompt=null;if(SET.view==='settings')renderPage()}).catch(()=>{})}
+function appSetup(){
+  if(!swOK())return;
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    const offer=w=>gtoast('A new version of Waypoint is ready.',()=>w.postMessage('skip'),{label:'Update',stay:true});
+    const watch=w=>w.addEventListener('statechange',()=>{if(w.state==='installed'&&navigator.serviceWorker.controller)offer(w)});
+    if(reg.waiting&&navigator.serviceWorker.controller)offer(reg.waiting);
+    reg.addEventListener('updatefound',()=>{if(reg.installing)watch(reg.installing)});
+    document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')reg.update().catch(()=>{})});
+  }).catch(()=>{});
+  let reloading=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(reloading)return;reloading=true;location.reload()});
+  // ask the browser to keep this app's saved trips even when the phone is low on space
+  try{if(navigator.storage&&navigator.storage.persist)navigator.storage.persisted().then(p=>{if(!p&&APP.standalone)navigator.storage.persist()})}catch(e){}
+  // one gentle nudge to install, on phones only
+  try{if(!APP.standalone&&mq.matches&&!localStorage.getItem('waypoint-install-hint'))setTimeout(()=>{
+    gtoast('Add Waypoint to your home screen to use it like an app.',()=>{localStorage.setItem('waypoint-install-hint','1');APP.prompt?installApp():setView('settings')},{label:APP.prompt?'Install':'How',stay:true,close:()=>localStorage.setItem('waypoint-install-hint','1')})},4000)}catch(e){}
+}
+function installCard(){
+  let body;
+  if(APP.standalone)body='<p class="muted">You’re using the installed app. It works offline and updates itself when you’re online.</p>';
+  else if(!swOK())body='<p class="muted">Open your GitHub Pages link on your phone to install Waypoint as an app. Installing doesn’t work from this preview.</p>';
+  else if(APP.prompt)body='<div class="srow"><div class="slab"><span>Install Waypoint</span><small>Adds it to your home screen. It opens full screen and works offline.</small></div><button class="btn primary" data-act="install-app">Install</button></div>';
+  else if(APP.ios)body='<ol class="steps"><li>In Safari, tap the <b>Share</b> button.</li><li>Choose <b>Add to Home Screen</b>, then <b>Add</b>.</li><li>Open Waypoint from its new icon.</li></ol>';
+  else body='<ol class="steps"><li>Open this page in Chrome on your phone.</li><li>Open the menu (⋮) and choose <b>Install app</b> or <b>Add to Home screen</b>.</li><li>Open Waypoint from its new icon.</li></ol>';
+  if(!APP.standalone&&swOK())body+='<p class="muted small-note">The installed app keeps its own copy of your trips. To bring the trips you have here, use <b>Copy backup</b> below, then <b>Restore or import</b> in the app.</p>';
+  return '<section class="card set"><div class="card-h"><h2>Use as an app</h2></div>'+body+'</section>';
+}
 function pgSettings(){
   const seg=(act,cur,opts)=>'<div class="sseg">'+opts.map(([v,l])=>'<button data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(cur===v)+'">'+l+'</button>').join('')+'</div>';
   const row=(label,hint,ctrl)=>'<div class="srow"><div class="slab"><span>'+label+'</span>'+(hint?'<small>'+hint+'</small>':'')+'</div>'+ctrl+'</div>';
   const ids=Object.keys(STORE.trips),kb=Math.max(1,Math.round(((()=>{try{return (localStorage.getItem(TKEY)||'').length}catch(e){return 0}})())/1024));
   let h=pageHead('Settings','These apply to the whole app. Each trip has its own settings too.','<button class="btn" data-act="trip-settings">'+ico('<path d="M5.5 3h6.5l3.5 3.5v9A1.5 1.5 0 0 1 14 17H5.5A1.5 1.5 0 0 1 4 15.5v-11A1.5 1.5 0 0 1 5.5 3z"/>')+'Settings for '+esc(S.trip.name)+'</button>','Waypoint');
+  h+=installCard();
   h+='<section class="card set"><div class="card-h"><h2>Appearance</h2></div>'+
     row('Theme','',seg('set-theme',SET.theme,[['system','System'],['light','Light'],['dark','Dark']]))+
     row('Motion','Turn off animations if they feel too busy',seg('set-motion',SET.motion,[['system','Full'],['reduce','Reduced']]))+'</section>';
@@ -3829,8 +3877,9 @@ if(!S.days.some(d=>d.id===S.view.day)&&!isCity(S.view.day))S.view.day='all';
 setBasemap(S.view.basemap==='street'?'street':'illustrated');
 $('panel').classList.toggle('hide-travel',!!S.view.hideTravel);
 renderAll();fitVisible();
-applyTheme();applyMotion();renderRail();setView(SET.start==='last'?SET.view:SET.start);
-sheetInit();
+applyTheme();applyMotion();renderRail();
+{const qv=new URLSearchParams(location.search).get('view');setView(VIEWS.some(v=>v.id===qv)?qv:SET.start==='last'?SET.view:SET.start)}
+sheetInit();appSetup();
 })();
 </script>
 </body>
