@@ -949,6 +949,8 @@ html{-webkit-tap-highlight-color:transparent}
 .gst.ok{background:color-mix(in srgb,#16A34A 16%,transparent);color:#15803D}
 .gst.bad{background:color-mix(in srgb,#DC2626 14%,transparent);color:#B91C1C}
 .gi{margin-top:10px}
+#gi-stay,#gi-dlg{margin:0 0 4px}
+#gi-stay .gi-ph img{height:170px}
 .gi-card{border-radius:12px;background:var(--surface-2);overflow:hidden}
 .gi-ph{position:relative}
 .gi-ph img{display:block;width:100%;height:150px;object-fit:cover}
@@ -2311,7 +2313,7 @@ function renderRoutes(){
   S.places.filter(p=>visible(p)&&p.main).forEach(p=>shownStays.forEach(st=>{if(p.stayRef===st.id||hav([p.lat,p.lng],[st.lat,st.lng])<.04)shownStays.delete(st)}));
   shownStays.forEach(st=>{
     const m=ML.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:ML.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
-    m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">Edit</button></div></div>',{maxWidth:260});
+    m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">'+(GL?'Details':'Edit')+'</button></div></div>',{maxWidth:260});
     m.on('dragend',e=>{const ll=e.target.getLatLng();st.lat=+ll.lat.toFixed(6);st.lng=+ll.lng.toFixed(6);S.places.forEach(p=>{if(p.stayRef===st.id){p.lat=st.lat;p.lng=st.lng}});commit()});
     m.addTo(routeLayer);
   });
@@ -2379,7 +2381,7 @@ map.on('popupopen',e=>{
     const a=b.dataset.pact;
     if(a==='cmode'){map.closePopup();const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.tmode=d.mmode=b.dataset.mode;commit()}return}
     if(a==='hmode'){map.closePopup();setHleg(b.dataset.day,b.dataset.part,b.dataset.mode);return}
-    if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)openStay(st);return}
+    if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st){openStay(st);if(GL)showStayInfo()}return}
     if(a==='poi-add'||a==='poi-save'){map.closePopup();const q=ui.poi;if(!q)return;
       if(a==='poi-save'){ui.libReturn='plan';openLib(Object.assign(blankLib(),{gid:q.gid,name:q.name,lat:q.lat,lng:q.lng,city:q.city,country:q.country,tag:q.tag}));return}
       const d=S.days.some(x=>x.id===S.view.day)?S.view.day:(isCity(S.view.day)?(cityDays(S.view.day)[0]||{}).id||null:null);
@@ -2444,10 +2446,19 @@ function detailHtml(x,open){
   if(x.fixed)s+='<p class="dt-sub dt-fixed">'+(x.early?'<span class="bad">That\u2019s earlier than travel allows. </span>':'')+'The rest of the day follows this time. <button type="button" class="linkbtn sm" data-act="auto-arrive" data-id="'+p.id+'">Use travel time instead</button></p>';
   if(x.late)s+='<p class="dt-warn">You\u2019d get here after '+(p.jr.kind==='car'?'pick-up':'departure')+'. Start the day earlier or move this stop up.</p>';
   if(p.jr)s+=jrCard(p);else if(isHub(p))s+='<button class="linkbtn sm jr-add" data-act="edit" data-id="'+p.id+'">+ Add flight, train or bus details</button>';
-  if(GL&&p.gid)s+='<div class="gi" id="gi-'+p.id+'">'+(ui.ginfo&&ui.ginfo[p.gid]?giHtml(ui.ginfo[p.gid]):'<button type="button" class="linkbtn sm" data-act="g-info" data-id="'+p.id+'">Hours, rating and photo</button>')+'</div>';
+  if(GL)s+='<div class="gi" id="gi-'+p.id+'">'+(p.gid&&ui.ginfo&&ui.ginfo[p.gid]?giHtml(ui.ginfo[p.gid]):'<button type="button" class="linkbtn sm" data-act="g-info" data-id="'+p.id+'">Hours, rating and photo</button>')+'</div>';
   if(p.notes)s+='<p class="dt-notes">'+esc(p.notes)+'</p>';
   return s+'<div class="dt-acts"><button class="btn small" data-act="focus" data-id="'+p.id+'">Show on map</button><button class="btn small" data-act="edit" data-id="'+p.id+'">Edit place</button><button class="btn small ghost-rm" data-act="remove-place" data-id="'+p.id+'">Remove from day</button></div></div></div></li>';
 }
+async function gEnsureId(o,city){
+  if(o.gid)return o.gid;
+  if(!gUse('details'))throw new Error('limit');
+  const {Place}=await GM.importLibrary('places');
+  const req={textQuery:o.name+(city?' '+city:''),fields:['id'],maxResultCount:1};
+  if(o.lat!=null)req.locationBias={center:{lat:+o.lat,lng:+o.lng},radius:2000};
+  const res=await Place.searchByText(req),hit=res&&res.places&&res.places[0];
+  if(!hit)throw new Error('notfound');
+  o.gid=hit.id;save();return o.gid}
 // Looked up only when you ask (these details count against Google's smaller free allowance), and kept just for this session
 async function gInfo(gid){
   ui.ginfo=ui.ginfo||{};if(ui.ginfo[gid])return ui.ginfo[gid];
@@ -2469,9 +2480,14 @@ function giHtml(g){
   if(hrs)h+='<details class="gi-h"><summary>'+esc(hrs)+'</summary><ul>'+g.hours.map((x,i)=>'<li'+(i===today?' class="on"':'')+'>'+esc(x)+'</li>').join('')+'</ul></details>';
   h+='<div class="gi-l">'+(g.web?'<a href="'+esc(g.web)+'" target="_blank" rel="noopener">Website</a>':'')+(g.phone?'<a href="tel:'+esc(g.phone.replace(/[^\d+]/g,''))+'">'+esc(g.phone)+'</a>':'')+(g.url?'<a href="'+esc(g.url)+'" target="_blank" rel="noopener">Open in Google Maps</a>':'')+'</div>';
   return h+'<div class="gi-g">Google Maps</div></div></div>'}
-function showGInfo(p){const box=$('gi-'+p.id);if(!box||!p.gid)return;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
-  gInfo(p.gid).then(g=>{const b=$('gi-'+p.id);if(b){b.innerHTML=giHtml(g);if(!reduced)b.animate([{opacity:0},{opacity:1}],{duration:200})}})
-    .catch(e=>{const b=$('gi-'+p.id);if(b)b.innerHTML='<p class="dt-sub">'+(e&&e.message==='limit'?'You\u2019ve reached today\u2019s limit for place details, which keeps Google free. It resets tomorrow.':'Couldn\u2019t get details from Google right now.')+'</p>'})}
+function showGInfo(p){const box=$('gi-'+p.id);if(!box)return;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
+  const c=S.cities.find(x=>x.id===(S.days.find(d=>d.id===p.day)||{}).city);
+  gEnsureId(p,c&&c.name).then(gInfo).then(g=>{const b=$('gi-'+p.id);if(b){b.innerHTML=giHtml(g);if(!reduced)b.animate([{opacity:0},{opacity:1}],{duration:200})}})
+    .catch(e=>{const b=$('gi-'+p.id);if(b)b.innerHTML='<p class="dt-sub">'+(e&&e.message==='limit'?'You\u2019ve reached today\u2019s limit for place details, which keeps Google free. It resets tomorrow.':e&&e.message==='notfound'?'Google couldn\u2019t find this place by its name.':'Couldn\u2019t get details from Google right now.')+'</p>'})}
+function showStayInfo(){const box=$('gi-stay'),st=S.stays.find(x=>x.id===ui.form.id);if(!box||!st)return;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
+  const c=S.cities.find(x=>x.id===stayCityId(st));
+  gEnsureId(st,c&&c.name).then(gInfo).then(g=>{const b=$('gi-stay');if(b){b.innerHTML=giHtml(g);if(!reduced)b.animate([{opacity:0},{opacity:1}],{duration:200})}})
+    .catch(e=>{const b=$('gi-stay');if(b)b.innerHTML='<p class="dt-sub">'+(e&&e.message==='limit'?'You\u2019ve reached today\u2019s limit for place details. It resets tomorrow.':e&&e.message==='notfound'?'Google couldn\u2019t find this hotel by its name.':'Couldn\u2019t get details from Google right now.')+'</p>'})}
 // Tap a place on the Google map to add it
 function openPoi(placeId,at){
   if(!gAllow('details')){toast('You\u2019ve reached today\u2019s limit for looking up places on the map. It resets tomorrow.');return}gUse('details');
@@ -2738,6 +2754,7 @@ function openPlace(p,preset){
     '<div class="field"><label for="f-day">Day</label><select class="inp" id="f-day"><option value="">Not on a day (keep in Saved places)</option>'+S.days.map((d,i)=>'<option value="'+d.id+'"'+(day===d.id?' selected':'')+'>Day '+(i+1)+' · '+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</option>').join('')+'</select></div>'+
     '<div class="field" id="f-modefield"></div>'+
     '<div class="field"><label for="f-stay">Time here</label><select class="inp" id="f-stay">'+stayOpts(p?(p.stay||60):60)+'</select></div>'+
+    (GL&&p?'<div class="gi" id="gi-dlg">'+(p.gid&&ui.ginfo&&ui.ginfo[p.gid]?giHtml(ui.ginfo[p.gid]):'<button type="button" class="linkbtn sm" data-act="g-info-dlg">Hours, rating and photo</button>')+'</div>':'')+
     jrBlock()+
     '<div class="field"><label for="f-notes">Notes</label><textarea class="inp" id="f-notes" placeholder="Hours, tickets, what to order">'+esc(p?p.notes:'')+'</textarea></div>'+
     '<div class="coords">'+(+ui.form.lat).toFixed(5)+', '+(+ui.form.lng).toFixed(5)+(isNew?'':' · drag the pin on the map to move it')+'</div>'+
@@ -2753,11 +2770,12 @@ function updateNights(){const el=$('f-nights');if(!el)return;const ci=+$('f-ci')
 function openStay(st,preset){
   preset=preset||{};const isNew=!st;ui.dlg='stay';
   const ci=st?st.ci:(preset.ci!=null?preset.ci:firstFreeNight()),co=st?st.co:Math.min(ci+1,S.days.length);
-  ui.form={id:st?st.id:null,lat:st?st.lat:preset.lat,lng:st?st.lng:preset.lng};
+  ui.form={id:st?st.id:null,lat:st?st.lat:preset.lat,lng:st?st.lng:preset.lng,gid:st?st.gid||null:(preset.gid||null),gname:st?st.name:(preset.name||'')};
   openDlg('<h2>'+(isNew?'Add a hotel':'Edit hotel')+'</h2>'+
     '<div class="field"><label for="f-sname">Name</label><input class="inp" id="f-sname" value="'+esc(st?st.name:(preset.name||''))+'" placeholder="e.g. Hotel Avenida Palace" autocomplete="off"></div>'+
     '<div class="dt-grid2"><div class="field"><label for="f-ci">Check in</label><select class="inp" id="f-ci">'+ciOptions(ci)+'</select></div><div class="field"><label for="f-co">Check out</label><select class="inp" id="f-co">'+coOptions(ci,co)+'</select></div></div>'+
     '<p class="modehint" id="f-nights" style="margin:-4px 0 0"></p>'+
+    (GL&&!isNew?'<div class="gi" id="gi-stay">'+(st.gid&&ui.ginfo&&ui.ginfo[st.gid]?giHtml(ui.ginfo[st.gid]):'<button type="button" class="linkbtn sm" data-act="g-info-stay">Hotel details: rating, photo, website and phone</button>')+'</div>':'')+
     '<div class="field"><label for="f-snotes">Notes</label><textarea class="inp" id="f-snotes" placeholder="Booking number, check-in time, breakfast">'+esc(st?st.notes:'')+'</textarea></div>'+
     (isNew?'':'<div class="field"><span>Stop here during a day</span><div class="inline"><select class="inp" id="f-sday" aria-label="Day">'+S.days.map((d,i)=>'<option value="'+d.id+'">Day '+(i+1)+' · '+fmt(dayDate(i),DAYFMT)+'</option>').join('')+'</select><button class="btn" data-act="stay-as-stop">Add as a stop</button></div><div class="modehint">For dropping bags or checking in mid-day. It becomes a normal stop you can drag into place.</div></div>')+
     '<div class="coords">'+(+ui.form.lat).toFixed(5)+', '+(+ui.form.lng).toFixed(5)+(isNew?'':' · drag the hotel pin on the map to move it')+'</div>'+
@@ -2773,7 +2791,7 @@ function saveStay(){
   if(clash)return err('Those nights overlap with '+clash.name+'. Change the dates on one of them.');
   let st=S.stays.find(x=>x.id===f.id);
   if(!st){st={id:uid('s'),lat:f.lat,lng:f.lng};S.stays.push(st)}
-  Object.assign(st,{name,ci,co,notes});
+  Object.assign(st,{name,ci,co,notes});if(f.gid)st.gid=f.gid;
   S.places.forEach(p=>{if(p.stayRef===st.id)p.name=st.name});
   closeDlg();commit();
 }
@@ -2946,7 +2964,7 @@ function pickSearch(r){
   if(m==='lib'){ui.libReturn=ctx.ret||'saved';openLib(Object.assign(blankLib(),ctx.draft||{},{gid:r.gid||null,name:r.name,lat:r.lat,lng:r.lng,city:r.city||(ctx.draft&&ctx.draft.city)||'',country:r.country||(ctx.draft&&ctx.draft.country)||'',tag:r.tag||(TAGS[0]||{}).id}));return}
   if(SET.view!=='plan')setView('plan');
   glideTo([r.lat,r.lng],Math.max(map.getZoom(),15));
-  if(m==='stay'){openStay(null,{lat:r.lat,lng:r.lng,ci:ctx.ci,name:r.name});return}
+  if(m==='stay'){openStay(null,{lat:r.lat,lng:r.lng,ci:ctx.ci,name:r.name,gid:r.gid||null});return}
   openPlace(null,{lat:r.lat,lng:r.lng,day:ctx.day||null,name:r.name,tag:r.tag||undefined,main:!!ctx.main,libRef:r.lib||null,gid:r.gid||null});
 }
 function searchFallback(kind){
@@ -3176,6 +3194,10 @@ document.addEventListener('click',e=>{
     case 'xfer-menu':openXfer(b,b.dataset.day);break;
     case 'install-app':installApp();break;
     case 'g-info':if(p)showGInfo(p);break;
+    case 'g-info-stay':showStayInfo();break;
+    case 'g-info-dlg':{const q=S.places.find(x=>x.id===ui.form.id);const box=$('gi-dlg');if(!q||!box)break;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
+      const c=S.cities.find(x=>x.id===(S.days.find(d=>d.id===q.day)||{}).city);
+      gEnsureId(q,c&&c.name).then(gInfo).then(g=>{const b2=$('gi-dlg');if(b2)b2.innerHTML=giHtml(g)}).catch(e=>{const b2=$('gi-dlg');if(b2)b2.innerHTML='<p class="dt-sub">'+(e&&e.message==='limit'?'You\u2019ve reached today\u2019s limit for place details. It resets tomorrow.':e&&e.message==='notfound'?'Google couldn\u2019t find this place by its name.':'Couldn\u2019t get details from Google right now.')+'</p>'});break}
     case 'g-save':gSaveCfg();break;
     case 'g-off':gSetOn(false);break;
     case 'g-on':gSetOn(true);break;
