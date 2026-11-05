@@ -60,7 +60,7 @@ With your own Google Maps API key, the app uses Google's map and data instead of
 
 - **Search** suggests real places as you type, near the city you're planning.
 - **Directions** are real routes with real travel times for walking, cycling, driving and **transit**, cached for 30 days so each trip leg is only looked up once.
-- **Place details:** tap **Hours, rating and photo** on a stop to see its rating, today's hours, website, phone and a photo.
+- **Place details:** tap **Hours, rating and photo** on a stop or **Details** on its map pin; tapping a hotel opens its details straight away, with an **Edit hotel** button, to see the rating, today's hours, website, phone and a photo. Places added before Google was connected are found on Google by their name the first time. Once you've opened a place's details, they load automatically every time you open that place (Google doesn't allow apps to store ratings, hours or photos, so they're fetched fresh). **Hide details** in the card turns that off for the place.
 - **Tap any place on the map** (a restaurant, a museum) to add it to the day you're viewing or save it for later.
 - **Map / Satellite** switch, and the map follows your light or dark theme.
 
@@ -76,6 +76,19 @@ Google asks for a credit card on the billing account even when usage stays free.
    - **Application restrictions:** choose **Websites** and add `https://<your-username>.github.io/*`.
    - **API restrictions:** choose **Restrict key** and tick the three APIs from step 2.
 4. Optional but recommended: under **Google Maps Platform > Map management**, create a **Map ID** (type JavaScript, Vector). Without one, the app uses Google's demo map ID, which is meant for testing.
+
+### Clean map style (optional, free)
+
+The Clean button on the map hides Google's shops, restaurants and other places so only your own pins show. Google does not ship a ready-made "no places" map for maps with custom pins, so you make one once (about 3 minutes, no cost):
+
+1. In Google Cloud, open **Google Maps Platform > Map Styles** and click **Create style**.
+2. Pick the **Silver** or **Standard** template and click **Customize**.
+3. In the left list, choose **Points of interest** and set **Visibility** to off (you can also turn off **Transit**). Click **Save**, name it "Waypoint clean".
+4. Open **Map management** and click **Create Map ID**: name "Waypoint clean", type **JavaScript**, **Vector**. Save.
+5. On that Map ID's page, under **Map styles**, choose "Waypoint clean" and save.
+6. Copy the Map ID and paste it in the app under **Settings > Google Maps > Clean map ID** (or into `config.js` after `googleCleanMapId:` so every device gets it).
+
+Switching between Map, Clean and Satellite counts as one map load against the free allowance.
 5. **Usage limits are built into the app.** Google doesn't let you lower most Maps limits yourself (they show "Quota is not adjustable"), so the app counts every Google request on each device and stops well under Google's free monthly amounts. Map opens are capped at 60 a day and 1,500 a month (Google's free amount is 10,000), and route lookups, search, place details and photos have similar limits. When a limit is reached, the app quietly falls back (built-in map, estimated travel times, built-in search) until the next day or month. **Settings > Google Maps** shows this month's usage.
 6. Set a budget alert under **Billing > Budgets & alerts** (for example $1) so you'd hear about any charge right away.
 7. Put the key in the app, one of two ways:
