@@ -950,6 +950,9 @@ html{-webkit-tap-highlight-color:transparent}
 .gst.bad{background:color-mix(in srgb,#DC2626 14%,transparent);color:#B91C1C}
 .gi{margin-top:10px}
 #gi-stay,#gi-dlg{margin:0 0 4px}
+.pop-gi:not(:empty){margin:8px 0 4px}
+.pop-gi .gi-ph img{height:120px}
+.pop-gi .gi-b{padding:8px 10px}
 #gi-stay .gi-ph img{height:170px}
 .gi-card{border-radius:12px;background:var(--surface-2);overflow:hidden}
 .gi-ph{position:relative}
@@ -2330,7 +2333,8 @@ function popupHtml(p){
   return '<div class="pop"><div class="pop-tag" style="--c:'+esc(t.color)+'"><i></i>'+esc(t.icon)+' '+esc(t.name)+'</div>'+
     '<h3>'+esc(p.name)+'</h3><p class="pop-meta">'+meta+'</p>'+
     (p.notes?'<p class="pop-notes">'+esc(p.notes)+'</p>':'')+
-    '<div class="pop-acts"><button class="btn small" data-pact="edit" data-id="'+p.id+'">Edit</button>'+
+    (GL?'<div class="pop-gi">'+(p.gid&&ui.ginfo&&ui.ginfo[p.gid]?giHtml(ui.ginfo[p.gid]):'')+'</div>':'')+
+    '<div class="pop-acts">'+(GL&&!(p.gid&&ui.ginfo&&ui.ginfo[p.gid])?'<button class="btn small primary" data-pact="gdet" data-id="'+p.id+'">Details</button>':'')+'<button class="btn small" data-pact="edit" data-id="'+p.id+'">Edit</button>'+
     (p.day?'<button class="btn small" data-pact="remove" data-id="'+p.id+'">Remove</button>':'')+(p.main?'<button class="btn small" data-pact="demote" data-id="'+p.id+'">Make it an extra</button>'
            :'<button class="btn small" data-pact="promote" data-id="'+p.id+'">Add to itinerary</button>')+
     '</div></div>';
@@ -2388,6 +2392,12 @@ map.on('popupopen',e=>{
       openPlace(null,{lat:q.lat,lng:q.lng,day:d,name:q.name,tag:q.tag,main:!!d,gid:q.gid});return}
     if(a==='xmode'||a==='xwhen'){map.closePopup();setXfer(b.dataset.day,a==='xmode'?'tmode':'twhen',a==='xmode'?b.dataset.mode:b.dataset.when);return}
     const p=S.places.find(x=>x.id===b.dataset.id);if(!p)return;
+    if(a==='gdet'){const box=b.closest('.pop').querySelector('.pop-gi');b.remove();if(!box)return;
+      if(sheetOn()&&sheet.state!=='peek')setSheet('peek',true);
+      box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
+      const c=S.cities.find(x=>x.id===(S.days.find(d=>d.id===p.day)||{}).city);
+      gEnsureId(p,c&&c.name).then(gInfo).then(g=>{box.innerHTML=giHtml(g);if(!reduced)box.animate([{opacity:0},{opacity:1}],{duration:200});const pp=map.popup;if(pp&&pp.autopan){requestAnimationFrame(()=>pp.autopan());setTimeout(()=>{if(map.popup===pp)pp.autopan()},480)}})
+        .catch(e=>{box.innerHTML='<p class="dt-sub">'+(e&&e.message==='limit'?'You\u2019ve reached today\u2019s limit for place details. It resets tomorrow.':e&&e.message==='notfound'?'Google couldn\u2019t find this place by its name.':'Couldn\u2019t get details from Google right now.')+'</p>'});return}
     map.closePopup();
     if(a==='edit')openPlace(p);
     else if(a==='mode'){p.mode=b.dataset.mode;commit()}
