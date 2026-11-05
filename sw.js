@@ -1,5 +1,5 @@
 /* Waypoint Planner service worker: makes the app open offline and keeps it up to date. */
-const VERSION = 'waypoint-20261105-1350';
+const VERSION = 'waypoint-20261105-1403';
 const RUNTIME = 'waypoint-runtime';
 const TILES = 'waypoint-tiles';
 const MAX_TILES = 1500;
@@ -42,7 +42,7 @@ self.addEventListener('fetch', event => {
   }
   // Your settings file: always the newest copy when online, so a key change applies right away
   if (url.origin === self.location.origin && url.pathname.endsWith('/config.js')) {
-    event.respondWith(networkFirst(req, req.url));
+    event.respondWith(networkFirst(new Request(url.pathname, { cache: 'no-cache' }), url.pathname));
     return;
   }
   // Map tiles for the Street map: keep the ones you've looked at for offline use
