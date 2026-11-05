@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051428"></script>
+<script src="config.js?v=202611051532"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -3853,7 +3853,7 @@ function pgOverview(){
   h+='<section class="stats">'+
     stat('Days',n,S.cities.length+' cit'+(S.cities.length===1?'y':'ies'))+
     stat('Stops',stops,extrasN+' extra'+(extrasN===1?'':'s')+' if there\u2019s time')+
-    stat('Distance',fmtKm(ts.km),modes||'No travel yet')+
+    stat('Distance',ts.km<.1?fmtKm(0):fmtKm(ts.km),modes||'No travel yet')+
     stat('Getting around',dur(Math.round(ts.min)),'about '+dur(Math.round(ts.min/Math.max(1,n)))+' a day')+
     '</section>';
   // route across cities
@@ -4057,7 +4057,7 @@ function pgSettings(){
     '<p class="muted">Wipes this app back to brand new: '+(ids.length===1?'your trip':'all '+ids.length+' trips')+', '+nPl+' place'+(nPl===1?'':'s')+', hotels, saved places, custom tags and colors, and your settings. There is no undo, so copy a backup above first if you might want any of it.</p>'+
     '<p class="muted small-note">Kept: your Google Maps key, Clean map ID and the free-usage counter, so the map keeps working and the spending guard stays accurate.</p>'+
     '<div class="nuke-acts">'+
-      '<button class="btn danger'+(arm('wipe-blank')?' armed':'')+'" data-act="wipe-all" data-mode="blank">'+(arm('wipe-blank')?'Tap again to erase everything':'Erase all and start blank')+'</button>'+
+      '<button class="btn danger'+(arm('wipe-blank')?' armed':'')+'" data-act="wipe-all" data-mode="blank">'+(arm('wipe-blank')?'Tap again to erase everything':'Erase all and start empty')+'</button>'+
       '<button class="btn danger'+(arm('wipe-sample')?' armed':'')+'" data-act="wipe-all" data-mode="sample">'+(arm('wipe-sample')?'Tap again to erase everything':'Erase all and load the sample trip')+'</button>'+
     '</div></section>';
   h+='<section class="card set about"><div class="card-h"><h2>About</h2></div><p class="muted">Waypoint Planner, version 1.0. Maps use Leaflet with OpenStreetMap and CARTO data, and street routes come from the FOSSGIS routing service. Travel times are estimates.</p></section>';
@@ -4229,8 +4229,15 @@ document.addEventListener('click',e=>{
       try{[KEY,TKEY,SKEY,RKEY,'waypoint-groutes-v1'].forEach(k=>localStorage.removeItem(k))}catch(x){}
       gCache={};ui.ginfo={};
       SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'settings',map:'illustrated',motion:'system',start:'last'};saveSet();applyTheme();applyMotion();
-      STORE={current:null,trips:{}};TAGS=null;const t=normalize(sampleExtras(sample()));STORE={current:t.id,trips:{[t.id]:t}};initStore();S=t;
-      if(mode==='blank'){save();ui.dropSample=t.id;openTrip(t.id,'overview');openNewTrip();toast('Everything was erased. Name your first trip to begin.');break}
+      TAGS=null;
+      if(mode==='blank'){
+        // a truly empty start: no sample trip, no sample saved places
+        STORE={current:null,trips:{},library:[],libv:2};initStore();
+        const d=new Date();d.setDate(d.getDate()+30);const t={id:uid('trip'),trip:{name:'My trip',start:d.toISOString().slice(0,10)},cities:[],days:[{id:uid('d'),city:'c1',start:'09:00'}],tags:TAGS,places:[],stays:[],
+          view:{day:'all',mainOnly:false,hidden:[],basemap:'illustrated',collapsed:[]},currency:SET.currency||'EUR'};
+        normalize(t);STORE.trips[t.id]=t;STORE.current=t.id;S=t;save();ui.dropSample=t.id;openTrip(t.id,'overview');openNewTrip();
+        toast('Everything was erased. Name your first trip to begin.');break}
+      STORE={current:null,trips:{}};const t=normalize(sampleExtras(sample()));STORE={current:t.id,trips:{[t.id]:t}};initStore();S=t;
       openTrip(t.id,'overview');gtoast('Everything was erased. Here\u2019s the sample trip.');break}
     case 'ts-sample':{if(ui.armed!=='ts-sample'){ui.armed='ts-sample';b.classList.add('armed');b.textContent='Click again to replace';break}
       ui.armed=null;const id=ui.form.id,t=normalize(sampleExtras(sample()));t.id=id;STORE.trips[id]=t;closeDlg();
