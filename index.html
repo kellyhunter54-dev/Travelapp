@@ -14,6 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<script src="config.js"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -964,6 +965,11 @@ html{-webkit-tap-highlight-color:transparent}
 .gi-l{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
 .gi-l a{color:var(--accent);font-weight:600;text-decoration:none}
 .gi-g{font-size:10.5px;color:var(--muted);text-align:right}
+.gusage{margin:12px 0 4px;display:grid;gap:6px;font-size:13px}
+.gu-h{font-weight:600}.gu-h small{font-weight:400;color:var(--muted)}
+.gu-r{display:grid;grid-template-columns:minmax(0,1fr) 90px auto;align-items:center;gap:10px}
+.gu-bar{height:6px;border-radius:3px;background:var(--surface-2);overflow:hidden}.gu-bar i{display:block;height:100%;background:var(--accent);border-radius:3px}
+.gu-r .mono{font-size:12px;color:var(--muted);text-align:right;min-width:92px}
 .gt-x{border:0;background:none;color:inherit;font-size:20px;line-height:1;padding:0 2px;margin-left:-4px;opacity:.7;flex:none}
 .gt-x:hover{opacity:1}
 .gt-undo:hover{background:color-mix(in srgb,var(--bg) 18%,transparent)}
@@ -1858,12 +1864,19 @@ function requestLive(A,B,prof){
     .finally(()=>{delete livePending[k]});
 }
 // Google routes: real paths and travel times (including transit), kept for 30 days
+// Spending guard: every Google request is counted on this device and stops well under Google's free monthly allowances
+const G_LIMIT={load:{d:60,m:1500,free:10000,label:'Map opens'},route:{d:200,m:3000,free:5000,label:'Route lookups'},auto:{d:200,m:3000,free:10000,label:'Search suggestions'},
+  details:{d:40,m:800,free:5000,label:'Places picked'},info:{d:15,m:300,free:1000,label:'Hours and ratings'},photo:{d:15,m:300,free:1000,label:'Photos'}};
+function gUsage(){let u={};try{u=JSON.parse(localStorage.getItem('waypoint-gusage')||'{}')}catch(e){}const dk=new Date().toISOString().slice(0,10),mk=dk.slice(0,7);
+  if(u.mk!==mk){u.mk=mk;u.m={}}if(u.dk!==dk){u.dk=dk;u.d={}}u.m=u.m||{};u.d=u.d||{};return u}
+const gAllow=k=>{const u=gUsage(),l=G_LIMIT[k];return (u.d[k]||0)<l.d&&(u.m[k]||0)<l.m};
+function gUse(k){const u=gUsage();if(!((u.d[k]||0)<G_LIMIT[k].d&&(u.m[k]||0)<G_LIMIT[k].m))return false;u.d[k]=(u.d[k]||0)+1;u.m[k]=(u.m[k]||0)+1;try{localStorage.setItem('waypoint-gusage',JSON.stringify(u))}catch(e){}return true}
 const GKEY='waypoint-groutes-v1',G_TM={walk:'WALKING',bike:'BICYCLING',car:'DRIVING',transit:'TRANSIT'};
 let gCache={};try{gCache=JSON.parse(localStorage.getItem(GKEY))||{}}catch(e){}
 {const old=Date.now()-30*864e5;Object.keys(gCache).forEach(k=>{if(!(gCache[k].t>old))delete gCache[k]})}
 const gKey=(A,B,mode)=>mode+':'+A[0].toFixed(5)+','+A[1].toFixed(5)+';'+B[0].toFixed(5)+','+B[1].toFixed(5);
 const gPending={},gFail={},gQueue=[];let gActive=0,gRefreshT,gFails=0;
-function requestG(A,B,mode){const k=gKey(A,B,mode);if(gCache[k]||gPending[k]||gFail[k]||!G_TM[mode]||gFails>=6)return;gPending[k]=1;gQueue.push([k,A,B,mode]);gPump()}
+function requestG(A,B,mode){const k=gKey(A,B,mode);if(gCache[k]||gPending[k]||gFail[k]||!G_TM[mode]||gFails>=6)return;if(!gUse('route')){gFail[k]=1;return}gPending[k]=1;gQueue.push([k,A,B,mode]);gPump()}
 function gPump(){
   while(gActive<2&&gQueue.length){const [k,A,B,mode]=gQueue.shift();gActive++;
     GM.importLibrary('routes').then(({Route})=>Route.computeRoutes({origin:{lat:A[0],lng:A[1]},destination:{lat:B[0],lng:B[1]},travelMode:G_TM[mode],fields:['path','distanceMeters','durationMillis']}))
@@ -2438,6 +2451,7 @@ function detailHtml(x,open){
 // Looked up only when you ask (these details count against Google's smaller free allowance), and kept just for this session
 async function gInfo(gid){
   ui.ginfo=ui.ginfo||{};if(ui.ginfo[gid])return ui.ginfo[gid];
+  if(!gUse('info'))throw new Error('limit');
   const {Place}=await GM.importLibrary('places'),place=new Place({id:gid});
   const base=['rating','userRatingCount','websiteURI','nationalPhoneNumber','photos','googleMapsURI'];
   try{await place.fetchFields({fields:base.concat('regularOpeningHours')})}catch(e){await place.fetchFields({fields:base.concat('openingHours')})}
@@ -2445,7 +2459,7 @@ async function gInfo(gid){
   let open=null;try{if(place.isOpen)open=await place.isOpen()}catch(e){}
   const info={rating:place.rating,count:place.userRatingCount,web:place.websiteURI,phone:place.nationalPhoneNumber,url:place.googleMapsURI,open,
     hours:oh&&oh.weekdayDescriptions?oh.weekdayDescriptions:null,
-    photo:ph?ph.getURI({maxWidth:640,maxHeight:400}):null,credit:ph&&ph.authorAttributions?ph.authorAttributions.map(a=>({name:a.displayName,uri:a.uri})):[]};
+    photo:ph&&gUse('photo')?ph.getURI({maxWidth:640,maxHeight:400}):null,credit:ph&&ph.authorAttributions?ph.authorAttributions.map(a=>({name:a.displayName,uri:a.uri})):[]};
   ui.ginfo[gid]=info;return info}
 function giHtml(g){
   const today=(new Date().getDay()+6)%7,hrs=g.hours&&g.hours[today];
@@ -2457,9 +2471,10 @@ function giHtml(g){
   return h+'<div class="gi-g">Google Maps</div></div></div>'}
 function showGInfo(p){const box=$('gi-'+p.id);if(!box||!p.gid)return;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
   gInfo(p.gid).then(g=>{const b=$('gi-'+p.id);if(b){b.innerHTML=giHtml(g);if(!reduced)b.animate([{opacity:0},{opacity:1}],{duration:200})}})
-    .catch(()=>{const b=$('gi-'+p.id);if(b)b.innerHTML='<p class="dt-sub">Couldn\u2019t get details from Google right now. If this keeps happening, you may have hit today\u2019s free limit.</p>'})}
+    .catch(e=>{const b=$('gi-'+p.id);if(b)b.innerHTML='<p class="dt-sub">'+(e&&e.message==='limit'?'You\u2019ve reached today\u2019s limit for place details, which keeps Google free. It resets tomorrow.':'Couldn\u2019t get details from Google right now.')+'</p>'})}
 // Tap a place on the Google map to add it
 function openPoi(placeId,at){
+  if(!gAllow('details')){toast('You\u2019ve reached today\u2019s limit for looking up places on the map. It resets tomorrow.');return}gUse('details');
   ML.popup({maxWidth:290,minWidth:240,className:'qpop'}).setLatLng(at).setContent('<div class="pop"><div class="si-note"><span class="spin"></span>Loading\u2026</div></div>').openOn(map);
   GM.importLibrary('places').then(async({Place})=>{const place=new Place({id:placeId});await place.fetchFields({fields:['id','displayName','location','formattedAddress','addressComponents','types','primaryType']});
     const name=(place.displayName&&place.displayName.text)||place.displayName||'Place',loc=place.location;
@@ -2863,6 +2878,7 @@ function gTagFor(types,name){
 function gComp(place,kinds){const a=place.addressComponents||[];for(const k of kinds){const c=a.find(x=>(x.types||[]).includes(k));if(c)return c.longText||c.long_name||''}return ''}
 // Turn a picked Google suggestion into a full result (one Place Details call, which also closes the search session)
 async function gResolve(r){
+  if(!gUse('details'))throw new Error('limit');
   const place=r.pred.toPlace();
   await place.fetchFields({fields:['id','displayName','location','formattedAddress','addressComponents','types','primaryType']});
   ui.gToken=null;
@@ -2887,8 +2903,8 @@ function gSearch(q,seq,mode,b){
 }
 function searchOnline(){
   clearTimeout(srchT);const q=ui.srch.q.trim();
-  if(GL){if(q.length<2){ui.srch.online=[];ui.srch.status='';renderSearch();return}
-    srchT=setTimeout(()=>{const seq=++srchSeq;ui.srch.status='loading';renderSearch();gSearch(q,seq,ui.srch.mode,srchBias())},260);return}
+  if(GL&&gAllow('auto')&&gAllow('details')){if(q.length<2){ui.srch.online=[];ui.srch.status='';renderSearch();return}
+    srchT=setTimeout(()=>{if(!gUse('auto'))return;const seq=++srchSeq;ui.srch.status='loading';renderSearch();gSearch(q,seq,ui.srch.mode,srchBias())},260);return}
   if(q.length<3||onlineOK===false){ui.srch.online=[];ui.srch.status=onlineOK===false&&q.length>=3?'offline':'';renderSearch();return}
   srchT=setTimeout(()=>{
     const seq=++srchSeq,b=srchBias(),mode=ui.srch.mode;
@@ -3864,22 +3880,27 @@ function appSetup(){
   try{if(!APP.standalone&&mq.matches&&!localStorage.getItem('waypoint-install-hint'))setTimeout(()=>{
     gtoast('Add Waypoint to your home screen to use it like an app.',()=>{localStorage.setItem('waypoint-install-hint','1');APP.prompt?installApp():setView('settings')},{label:APP.prompt?'Install':'How',stay:true,close:()=>localStorage.setItem('waypoint-install-hint','1')})},4000)}catch(e){}
 }
-function gCfg(){try{return JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){return null}}
+function gCfg(){let c=null;try{c=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
+  const b=window.WAYPOINT_CONFIG||{};if(b.googleKey&&(!c||!c.key))c={key:b.googleKey,mapId:b.googleMapId||'',on:!(c&&c.on===false),built:true};return c}
 function gSaveCfg(){const k=($('f-gkey')||{}).value||'',id=($('f-gmid')||{}).value||'';
   if(!k.trim()){gtoast('Paste your API key first.');return}
   try{localStorage.setItem('waypoint-google',JSON.stringify({key:k.trim(),mapId:id.trim(),on:true}))}catch(e){}
   location.reload()}
-function gSetOn(on){const c=gCfg();if(!c)return;c.on=on;try{localStorage.setItem('waypoint-google',JSON.stringify(c))}catch(e){}location.reload()}
+function gSetOn(on){const c=gCfg();if(!c)return;const o=c.built?{on}:Object.assign({},c,{on});delete o.built;try{localStorage.setItem('waypoint-google',JSON.stringify(o))}catch(e){}location.reload()}
+function gUsageHtml(){const u=gUsage();
+  return '<div class="gusage"><div class="gu-h">This month on this device <small>(the app stops itself at its limit, well under Google’s free amount)</small></div>'+Object.keys(G_LIMIT).map(k=>{const l=G_LIMIT[k],n=u.m[k]||0;
+    return '<div class="gu-r"><span>'+l.label+'</span><span class="gu-bar"><i style="width:'+Math.min(100,n/l.m*100).toFixed(1)+'%"></i></span><span class="mono">'+n.toLocaleString()+' / '+l.m.toLocaleString()+'</span></div>'}).join('')+'</div>'}
 function googleCard(){
   const c=gCfg(),st=GL?'<span class="gst ok">Connected</span>':c&&c.on?'<span class="gst bad">Not loading</span>':c?'<span class="gst">Off</span>':'<span class="gst">Not set up</span>';
   let h='<section class="card set"><div class="card-h"><h2>Google Maps</h2>'+st+'</div>';
-  if(GL)h+='<p class="muted">Search, directions with transit, and place details come from Google. Free monthly allowances cover personal use, and the limits you set in Google Cloud keep it free.</p>';
-  else if(c&&c.on)h+='<p class="muted">'+(window.GAUTHFAIL?'Google turned down the key. Check that the key allows this site\u2019s address and has the three APIs turned on.':window.GFAIL==='offline'||window.GFAIL==='timeout'?'Google Maps couldn\u2019t load (you may be offline), so the built-in map is showing. It will try again next time you open the app.':'Google Maps couldn\u2019t start. Check the key, then reload.')+'</p>';
+  if(GL)h+='<p class="muted">Search, directions with transit, and place details come from Google. Google gives a free amount every month, and the app stops itself well before it, so it stays free.</p>';
+  else if(c&&c.on)h+='<p class="muted">'+(window.GFAIL==='limit'?'You\u2019ve reached the app\u2019s limit for opening Google Maps (60 a day, 1,500 a month), so the built-in map is showing until it resets.':window.GAUTHFAIL?'Google turned down the key. Check that the key allows this site\u2019s address and has the three APIs turned on.':window.GFAIL==='offline'||window.GFAIL==='timeout'?'Google Maps couldn\u2019t load (you may be offline), so the built-in map is showing. It will try again next time you open the app.':'Google Maps couldn\u2019t start. Check the key, then reload.')+'</p>';
   else h+='<p class="muted">Use Google\u2019s map, place search (with photos, ratings and hours) and real directions, including transit. You need a free Google Maps API key. See the README for the 10-minute setup.</p>';
-  h+='<div class="field"><label for="f-gkey">API key</label><input class="inp mono" id="f-gkey" value="'+esc(c?c.key:'')+'" placeholder="AIza\u2026" autocomplete="off" spellcheck="false"></div>'+
+  if(c&&c.built)h+='<p class="muted small-note">Your key is built into this copy of the app (in config.js), so every device uses it automatically. To use a different key on just this device, paste it below.</p>';
+  h+='<div class="field"><label for="f-gkey">API key</label><input class="inp mono" id="f-gkey" value="'+esc(c&&!c.built?c.key:'')+'" placeholder="'+(c&&c.built?'Using the built-in key':'AIza\u2026')+'" autocomplete="off" spellcheck="false"></div>'+
     '<div class="field"><label for="f-gmid">Map ID <small class="muted">(optional)</small></label><input class="inp mono" id="f-gmid" value="'+esc(c&&c.mapId||'')+'" placeholder="Leave blank to use Google\u2019s demo map ID" autocomplete="off" spellcheck="false"></div>'+
     '<div class="inline"><button class="btn primary" data-act="g-save">'+(c?'Save and reload':'Connect')+'</button>'+(c?(c.on?'<button class="btn" data-act="g-off">Use the built-in map</button>':'<button class="btn" data-act="g-on">Turn Google Maps on</button>'):'')+'</div>'+
-    '<p class="muted small-note">The key is stored only on this device. It isn\u2019t part of the code you put on GitHub. Without a connection, the app switches to the built-in map automatically.</p>';
+    (c?gUsageHtml():'')+'<p class="muted small-note">'+(c&&c.built?'':'A key you paste here is stored only on this device. ')+'Without a connection, the app switches to the built-in map automatically.</p>';
   return h+'</section>'}
 function installCard(){
   let body;
@@ -4144,7 +4165,7 @@ renderAll();fitVisible();
 applyTheme();applyMotion();renderRail();
 {const qv=new URLSearchParams(location.search).get('view');setView(VIEWS.some(v=>v.id===qv)?qv:SET.start==='last'?SET.view:SET.start)}
 sheetInit();appSetup();
-if(window.GFAIL&&gCfg()&&gCfg().on)setTimeout(()=>toast(window.GFAIL==='offline'||window.GFAIL==='timeout'?'You\u2019re offline, so the built-in map is showing.':'Google Maps couldn\u2019t load, so the built-in map is showing. Check Settings > Google Maps.'),800);
+if(window.GFAIL&&gCfg()&&gCfg().on)setTimeout(()=>toast(window.GFAIL==='limit'?'You\u2019ve reached today\u2019s Google Maps limit, so the built-in map is showing until tomorrow.':window.GFAIL==='offline'||window.GFAIL==='timeout'?'You\u2019re offline, so the built-in map is showing.':'Google Maps couldn\u2019t load, so the built-in map is showing. Check Settings > Google Maps.'),800);
 if(window.GAUTHFAIL)window.onGoogleAuthFail();
 })();
 </script>
@@ -4153,9 +4174,16 @@ if(window.GAUTHFAIL)window.onGoogleAuthFail();
 (function(){
   var started=false,run=function(){if(started)return;started=true;var s=document.createElement('script');s.textContent=document.getElementById('app-js').textContent;document.body.appendChild(s)};
   var cfg=null;try{cfg=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
+  var built=window.WAYPOINT_CONFIG||{};
+  if(built.googleKey&&(!cfg||!cfg.key)){cfg={key:built.googleKey,mapId:built.googleMapId||'',on:!(cfg&&cfg.on===false),built:true}}
   window.GMODE=null;window.GFAIL=null;
   if(!cfg||!cfg.on||!cfg.key||(window.top!==window.self)){run();return}
   if(navigator.onLine===false){window.GFAIL='offline';run();return}
+  // the app's own spending guard: map opens per day and per month on this device
+  try{var u=JSON.parse(localStorage.getItem('waypoint-gusage')||'{}'),now=new Date(),dk=now.toISOString().slice(0,10),mk=dk.slice(0,7);
+    if(u.mk!==mk){u.mk=mk;u.m={}}if(u.dk!==dk){u.dk=dk;u.d={}}
+    if((u.d.load||0)>=60||(u.m.load||0)>=1500){window.GFAIL='limit';run();return}
+    u.d.load=(u.d.load||0)+1;u.m.load=(u.m.load||0)+1;localStorage.setItem('waypoint-gusage',JSON.stringify(u))}catch(e){}
   var to=setTimeout(function(){window.GFAIL='timeout';run()},9000);
   window.gm_authFailure=function(){window.GAUTHFAIL=true;if(window.onGoogleAuthFail)window.onGoogleAuthFail()};
   window.__wpGoogleReady=function(){

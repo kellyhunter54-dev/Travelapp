@@ -68,7 +68,7 @@ Without a connection the app switches to the built-in map automatically, and goe
 
 ### Setting it up (about 10 minutes)
 
-Google asks for a credit card on the billing account even when usage stays free. The daily limits in step 5 keep you inside Google's free monthly allowances, so it can't charge you.
+Google asks for a credit card on the billing account even when usage stays free. The app's built-in limits (step 5) keep you far inside Google's free monthly amounts.
 
 1. Go to the [Google Cloud console](https://console.cloud.google.com/), create a project (for example "Waypoint"), and add a billing account when asked.
 2. Under **APIs & Services > Library**, turn on these three APIs: **Maps JavaScript API**, **Places API (New)** and **Routes API**.
@@ -76,21 +76,13 @@ Google asks for a credit card on the billing account even when usage stays free.
    - **Application restrictions:** choose **Websites** and add `https://<your-username>.github.io/*`.
    - **API restrictions:** choose **Restrict key** and tick the three APIs from step 2.
 4. Optional but recommended: under **Google Maps Platform > Map management**, create a **Map ID** (type JavaScript, Vector). Without one, the app uses Google's demo map ID, which is meant for testing.
-5. **Cap daily usage so it stays free.** Open each API under **APIs & Services**, go to its **Quotas** tab, and lower the per-day limits:
+5. **Usage limits are built into the app.** Google doesn't let you lower most Maps limits yourself (they show "Quota is not adjustable"), so the app counts every Google request on each device and stops well under Google's free monthly amounts. Map opens are capped at 60 a day and 1,500 a month (Google's free amount is 10,000), and route lookups, search, place details and photos have similar limits. When a limit is reached, the app quietly falls back (built-in map, estimated travel times, built-in search) until the next day or month. **Settings > Google Maps** shows this month's usage.
+6. Set a budget alert under **Billing > Budgets & alerts** (for example $1) so you'd hear about any charge right away.
+7. Put the key in the app, one of two ways:
+   - **For every device (recommended):** open `config.js` and paste the key between the quotes after `googleKey:` (and the Map ID after `googleMapId:` if you made one). Commit it to GitHub. Every phone and computer that opens the app uses Google Maps automatically. The key is visible to anyone who looks at the file, which is normal for Google Maps websites; the website restriction from step 3 is what stops others using it.
+   - **For one device only:** in the app, open **Settings > Google Maps**, paste the key and tap **Connect**. It's saved only on that device.
 
-   | API | Limit (per day) | Why |
-   |---|---|---|
-   | Maps JavaScript API: map loads | 300 | Free allowance is 10,000 a month |
-   | Routes API: compute routes | 150 | Keeps you under the smallest routes allowance (5,000 a month) |
-   | Places API (New): autocomplete | 300 | Free allowance is 10,000 a month |
-   | Places API (New): get place (details) | 30 | Covers place details with ratings and hours (1,000 a month free) |
-   | Places API (New): photos | 30 | 1,000 a month free |
-
-   If a limit is reached, that feature just stops for the rest of the day and the app falls back (estimated times, no photo) until the next day.
-6. Also set a budget alert under **Billing > Budgets & alerts** (for example $1) so you'd hear about any charge right away.
-7. In the app, open **Settings > Google Maps**, paste the key (and Map ID if you made one), and tap **Connect**.
-
-The key is saved only on the device where you paste it. It isn't in the code on GitHub. On a new phone or after reinstalling, paste it again.
+**Settings > Google Maps > Use the built-in map** turns Google off on that device without touching `config.js`.
 
 ## Installing it as an app
 
@@ -110,6 +102,7 @@ What works offline: everything you've planned, the Illustrated map, and Street m
 ## Files
 
 - `index.html`: the app
+- `config.js`: your settings (the Google Maps key goes here)
 - `manifest.webmanifest`: the app's name, colors, icons and shortcuts
 - `sw.js`: the service worker that makes it open offline and handles updates
 - `icons/`: the app icon in the sizes phones need

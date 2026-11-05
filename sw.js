@@ -1,5 +1,5 @@
 /* Waypoint Planner service worker: makes the app open offline and keeps it up to date. */
-const VERSION = 'waypoint-20261105-1227';
+const VERSION = 'waypoint-20261105-1301';
 const RUNTIME = 'waypoint-runtime';
 const TILES = 'waypoint-tiles';
 const MAX_TILES = 1500;
@@ -8,6 +8,7 @@ const CORE = [
   './',
   './index.html',
   './manifest.webmanifest',
+  './config.js',
   './icons/icon-192.png',
   './icons/icon-512.png',
   './icons/apple-touch-icon.png',
@@ -37,6 +38,11 @@ self.addEventListener('fetch', event => {
   // The app itself: newest version when online, saved copy when offline
   if (req.mode === 'navigate') {
     event.respondWith(networkFirst(req, './index.html'));
+    return;
+  }
+  // Your settings file: always the newest copy when online, so a key change applies right away
+  if (url.origin === self.location.origin && url.pathname.endsWith('/config.js')) {
+    event.respondWith(networkFirst(req, req.url));
     return;
   }
   // Map tiles for the Street map: keep the ones you've looked at for offline use
