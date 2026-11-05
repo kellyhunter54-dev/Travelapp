@@ -1,5 +1,5 @@
 /* Waypoint Planner service worker: makes the app open offline and keeps it up to date. */
-const VERSION = 'waypoint-20261105-1403';
+const VERSION = 'waypoint-20261105-1409';
 const RUNTIME = 'waypoint-runtime';
 const TILES = 'waypoint-tiles';
 const MAX_TILES = 1500;
@@ -37,7 +37,7 @@ self.addEventListener('fetch', event => {
 
   // The app itself: newest version when online, saved copy when offline
   if (req.mode === 'navigate') {
-    event.respondWith(networkFirst(req, './index.html'));
+    event.respondWith(networkFirst(new Request(req.url, { cache: 'no-cache', credentials: 'same-origin' }), './index.html'));
     return;
   }
   // Your settings file: always the newest copy when online, so a key change applies right away

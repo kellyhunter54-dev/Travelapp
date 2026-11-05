@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051403"></script>
+<script src="config.js?v=202611051409"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -697,7 +697,9 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 .pin{transition:scale .32s var(--spring)}
 .pin.in{animation:pinIn .55s var(--spring) backwards;animation-delay:var(--d,0ms)}
 .leaflet-marker-icon:hover .pin{scale:1.1}
-.pin.sel,.leaflet-marker-icon:hover .pin.sel{scale:1.24}
+.pin.sel,.leaflet-marker-icon:hover .pin.sel{scale:1}
+.pin-main.sel{width:42px;height:42px;margin:-4px}
+.pin-extra.sel{width:30px;height:30px;margin:-3px}
 .pin-extra{position:relative}
 .pin.sel::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:2.5px solid var(--c);animation:ring 1.8s ease-out infinite;pointer-events:none}
 .pin-extra.sel::after{border-radius:9px}
@@ -942,7 +944,7 @@ html{-webkit-tap-highlight-color:transparent}
 #basesw button.dim{opacity:.55}
 .gm-pin.gm-noint{pointer-events:none}
 .gm-pin:hover .pin{scale:1.1}
-.gm-pin .pin.sel,.gm-pin:hover .pin.sel{scale:1.24}
+.gm-pin .pin.sel,.gm-pin:hover .pin.sel{scale:1}
 .gm-pin .rt-out,.gm-pin.rt-out{animation:fadeOut .22s ease forwards}
 .gm-pop.leaflet-popup{position:relative;margin-bottom:20px;cursor:auto;font:inherit}
 .gm-pop .leaflet-popup-tip-container{position:relative;margin-top:-1px}
@@ -1817,10 +1819,10 @@ function iconFor(p,anim){
   if(p.main){
     const n=p.order;
     return ML.divIcon({className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-14],
-      html:'<div class="pin pin-main'+cls+'" style="--c:'+dayColor(p.day)+dl+'">'+emo(t.icon,16)+'<span class="pin-num">'+n+'</span>'+(atHotel(p)?'<span class="pin-hb" title="Your hotel">'+SVG.home+'</span>':'')+'</div>'});
+      html:'<div class="pin pin-main'+cls+'" style="--c:'+dayColor(p.day)+dl+'">'+emo(t.icon,ui.open===p.id?20:16)+'<span class="pin-num">'+n+'</span>'+(atHotel(p)?'<span class="pin-hb" title="Your hotel">'+SVG.home+'</span>':'')+'</div>'});
   }
   return ML.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12],
-    html:'<div class="pin pin-extra'+(p.day?'':' loose')+cls+'" style="--c:'+esc(t.color)+dl+'">'+emo(t.icon,13)+'</div>'});
+    html:'<div class="pin pin-extra'+(p.day?'':' loose')+cls+'" style="--c:'+esc(t.color)+dl+'">'+emo(t.icon,ui.open===p.id?16:13)+'</div>'});
 }
 /* ---------- Routing ---------- */
 function km(a,b){const R=6371,r=Math.PI/180,dLat=(b[0]-a[0])*r,x=(b[1]-a[1])*r*Math.cos((a[0]+b[0])/2*r);return R*Math.sqrt(dLat*dLat+x*x)}
@@ -3971,7 +3973,8 @@ function appSetup(){
     gtoast('Add Waypoint to your home screen to use it like an app.',()=>{localStorage.setItem('waypoint-install-hint','1');APP.prompt?installApp():setView('settings')},{label:APP.prompt?'Install':'How',stay:true,close:()=>localStorage.setItem('waypoint-install-hint','1')})},4000)}catch(e){}
 }
 function gCfg(){let c=null;try{c=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
-  const b=window.WAYPOINT_CONFIG||{};if(b.googleKey&&(!c||!c.key))c={key:b.googleKey,mapId:(c&&c.mapId)||b.googleMapId||'',cleanMapId:(c&&c.cleanMapId)||b.googleCleanMapId||'',on:!(c&&c.on===false),built:true};return c}
+  const b=window.WAYPOINT_CONFIG||{};if(b.googleKey&&(!c||!c.key))c={key:b.googleKey,mapId:(c&&c.mapId)||b.googleMapId||'',cleanMapId:(c&&c.cleanMapId)||b.googleCleanMapId||'',on:!(c&&c.on===false),built:true};
+  if(c&&!c.cleanMapId&&b.googleCleanMapId)c.cleanMapId=b.googleCleanMapId;if(c&&!c.mapId&&b.googleMapId)c.mapId=b.googleMapId;return c}
 function gSaveCfg(){const k=($('f-gkey')||{}).value||'',id=($('f-gmid')||{}).value||'',cid=(($('f-gcid')||{}).value||'').trim(),c0=gCfg();
   if(!k.trim()&&!(c0&&c0.built)){gtoast('Paste your API key first.');return}
   try{localStorage.setItem('waypoint-google',JSON.stringify(k.trim()?{key:k.trim(),mapId:id.trim(),cleanMapId:cid,on:true}:{on:true,cleanMapId:cid,mapId:id.trim()}))}catch(e){}
@@ -4267,6 +4270,7 @@ if(window.GAUTHFAIL)window.onGoogleAuthFail();
   var cfg=null;try{cfg=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
   var built=window.WAYPOINT_CONFIG||{};
   if(built.googleKey&&(!cfg||!cfg.key)){cfg={key:built.googleKey,mapId:(cfg&&cfg.mapId)||built.googleMapId||'',cleanMapId:(cfg&&cfg.cleanMapId)||built.googleCleanMapId||'',on:!(cfg&&cfg.on===false),built:true}}
+  if(cfg&&!cfg.cleanMapId&&built.googleCleanMapId)cfg.cleanMapId=built.googleCleanMapId;if(cfg&&!cfg.mapId&&built.googleMapId)cfg.mapId=built.googleMapId;
   window.GMODE=null;window.GFAIL=null;
   if(!cfg||!cfg.on||!cfg.key||(window.top!==window.self)){run();return}
   if(navigator.onLine===false){window.GFAIL='offline';run();return}
