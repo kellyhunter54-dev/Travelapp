@@ -54,6 +54,44 @@ The itinerary is built for phones. The map fills the screen, and the plan sits i
 
 The app opens with a sample 9-day trip (3 days each in Lisbon, Porto and Madrid, with a train and a flight between them), complete with bookings, a budget, a packing list and notes, so you can try everything right away. Use **Trip settings > Replace with the sample trip** to restore it.
 
+## Google Maps (optional)
+
+With your own Google Maps API key, the app uses Google's map and data instead of the built-in map:
+
+- **Search** suggests real places as you type, near the city you're planning.
+- **Directions** are real routes with real travel times for walking, cycling, driving and **transit**, cached for 30 days so each trip leg is only looked up once.
+- **Place details:** tap **Hours, rating and photo** on a stop to see its rating, today's hours, website, phone and a photo.
+- **Tap any place on the map** (a restaurant, a museum) to add it to the day you're viewing or save it for later.
+- **Map / Satellite** switch, and the map follows your light or dark theme.
+
+Without a connection the app switches to the built-in map automatically, and goes back to Google next time it opens online.
+
+### Setting it up (about 10 minutes)
+
+Google asks for a credit card on the billing account even when usage stays free. The daily limits in step 5 keep you inside Google's free monthly allowances, so it can't charge you.
+
+1. Go to the [Google Cloud console](https://console.cloud.google.com/), create a project (for example "Waypoint"), and add a billing account when asked.
+2. Under **APIs & Services > Library**, turn on these three APIs: **Maps JavaScript API**, **Places API (New)** and **Routes API**.
+3. Under **APIs & Services > Credentials**, choose **Create credentials > API key**. Then edit the key:
+   - **Application restrictions:** choose **Websites** and add `https://<your-username>.github.io/*`.
+   - **API restrictions:** choose **Restrict key** and tick the three APIs from step 2.
+4. Optional but recommended: under **Google Maps Platform > Map management**, create a **Map ID** (type JavaScript, Vector). Without one, the app uses Google's demo map ID, which is meant for testing.
+5. **Cap daily usage so it stays free.** Open each API under **APIs & Services**, go to its **Quotas** tab, and lower the per-day limits:
+
+   | API | Limit (per day) | Why |
+   |---|---|---|
+   | Maps JavaScript API: map loads | 300 | Free allowance is 10,000 a month |
+   | Routes API: compute routes | 150 | Keeps you under the smallest routes allowance (5,000 a month) |
+   | Places API (New): autocomplete | 300 | Free allowance is 10,000 a month |
+   | Places API (New): get place (details) | 30 | Covers place details with ratings and hours (1,000 a month free) |
+   | Places API (New): photos | 30 | 1,000 a month free |
+
+   If a limit is reached, that feature just stops for the rest of the day and the app falls back (estimated times, no photo) until the next day.
+6. Also set a budget alert under **Billing > Budgets & alerts** (for example $1) so you'd hear about any charge right away.
+7. In the app, open **Settings > Google Maps**, paste the key (and Map ID if you made one), and tap **Connect**.
+
+The key is saved only on the device where you paste it. It isn't in the code on GitHub. On a new phone or after reinstalling, paste it again.
+
 ## Installing it as an app
 
 Waypoint is an installable web app. Once it's on GitHub Pages, open the link on your phone:
@@ -101,7 +139,8 @@ Trips are saved in the browser's local storage. That means:
 - [Leaflet](https://leafletjs.com/) 1.9.4 for the map (bundled in `lib/`)
 - Live street map tiles (the *Street* style) from [CARTO](https://carto.com/basemaps/) using [OpenStreetMap](https://www.openstreetmap.org/copyright) data
 - Real street routes (the *Street* style) from the [FOSSGIS routing service](https://routing.openstreetmap.de/), free for light use
-- Place search from [Photon](https://photon.komoot.io/) by komoot, using OpenStreetMap data, free for light use
+- With your own key: map, place search, place details and routes (including transit) from [Google Maps Platform](https://mapsplatform.google.com/)
+- Place search from [Photon](https://photon.komoot.io/) by komoot, using OpenStreetMap data, free for light use (when Google Maps isn't set up)
 - Travel times are estimates based on route distance and typical speeds for each mode (with intercity speeds for long transit and car trips)
 - Fonts from Google Fonts (Bricolage Grotesque, Figtree, JetBrains Mono)
 

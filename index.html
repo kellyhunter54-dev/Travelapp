@@ -427,7 +427,7 @@ path.rt-transit{stroke:var(--transit)}
 .linkbtn{border:0;background:none;color:var(--accent);font-weight:600;font-size:13px;white-space:nowrap;padding:4px}
 
 .mapwrap{position:relative;flex:1;min-height:0;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:var(--land)}
-#map{position:absolute;inset:0;background:var(--land)}
+#map{position:absolute!important;inset:0;width:100%;height:100%;background:var(--land)}
 
 #map.placing,#map.placing .leaflet-grab{cursor:crosshair}
 .legend{position:absolute;left:10px;bottom:10px;z-index:1000;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:7px 10px;display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted);box-shadow:var(--shadow);max-width:calc(100% - 20px)}
@@ -936,6 +936,34 @@ body.grabbing,body.grabbing *{cursor:grabbing!important;user-select:none!importa
 html{-webkit-tap-highlight-color:transparent}
 .row,.cityhead,.rail,.tabs,.chip,.btn,.ib{-webkit-touch-callout:none}
 @media (max-width:820px){body{padding-top:calc(16px + env(safe-area-inset-top,0px))}}
+.gm-pin{transform:translateY(50%);cursor:pointer}
+.gm-pin.gm-noint{pointer-events:none}
+.gm-pin:hover .pin{scale:1.1}
+.gm-pin .pin.sel,.gm-pin:hover .pin.sel{scale:1.24}
+.gm-pin .rt-out,.gm-pin.rt-out{animation:fadeOut .22s ease forwards}
+.gm-pop.leaflet-popup{position:relative;margin-bottom:20px;cursor:auto;font:inherit}
+.gm-pop .leaflet-popup-tip-container{position:relative;margin-top:-1px}
+.gm-pop .leaflet-popup-close-button{cursor:pointer}
+.gst{font-size:12px;font-weight:700;padding:3px 9px;border-radius:999px;background:var(--surface-2);color:var(--muted)}
+.gst.ok{background:color-mix(in srgb,#16A34A 16%,transparent);color:#15803D}
+.gst.bad{background:color-mix(in srgb,#DC2626 14%,transparent);color:#B91C1C}
+.gi{margin-top:10px}
+.gi-card{border-radius:12px;background:var(--surface-2);overflow:hidden}
+.gi-ph{position:relative}
+.gi-ph img{display:block;width:100%;height:150px;object-fit:cover}
+.gi-cr{position:absolute;left:0;right:0;bottom:0;padding:14px 8px 4px;font-size:10.5px;color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.55))}
+.gi-cr a{color:#fff}
+.gi-b{padding:10px 12px;display:grid;gap:6px}
+.gi-r{display:flex;align-items:center;gap:6px;font-size:13px}
+.gi-r span{color:var(--muted)}
+.gi-open{margin-left:auto;font-weight:600;font-size:12px}
+.gi-open.y{color:#15803D}.gi-open.n{color:#B91C1C}
+.gi-h summary{cursor:pointer;font-size:12.5px;color:var(--muted)}
+.gi-h ul{margin:6px 0 0;padding-left:16px;font-size:12px;color:var(--muted);display:grid;gap:2px}
+.gi-h li.on{color:var(--fg);font-weight:600}
+.gi-l{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:13px}
+.gi-l a{color:var(--accent);font-weight:600;text-decoration:none}
+.gi-g{font-size:10.5px;color:var(--muted);text-align:right}
 .gt-x{border:0;background:none;color:inherit;font-size:20px;line-height:1;padding:0 2px;margin-left:-4px;opacity:.7;flex:none}
 .gt-x:hover{opacity:1}
 .gt-undo:hover{background:color-mix(in srgb,var(--bg) 18%,transparent)}
@@ -1087,7 +1115,7 @@ html{-webkit-tap-highlight-color:transparent}
 <div class="dlg" id="dlg" hidden><div class="dlg-card" id="dlg-card" role="dialog" aria-modal="true"></div></div>
 
 <script src="lib/leaflet-1.9.4.js"></script>
-<script>
+<script type="text/x-waypoint" id="app-js">
 (function(){
 const KEY='waypoint-planner-v1';
 const DAY_COLORS=['#2F6FDE','#E8590C','#2B8A3E','#AE3EC9','#0C8599','#C2255C','#5F3DC4','#A07800','#E03131','#5C940D'];
@@ -1403,6 +1431,7 @@ function pill(box,selector,key){
 // Re-render a container and glide rows that moved (FLIP)
 // Smooth camera move: pans and zooms together on a straight path (no zoom-out arc)
 function glideTo(center,zoom,dur,done){
+  if(GL){map.glide(center,Math.min(zoom,18),dur||640,done);return}
   let fired=false;const fin=()=>{if(!fired){fired=true;done&&done()}};
   center=L.latLng(center);zoom=map._limitZoom(zoom);
   if(reduced){map.setView(center,zoom,{animate:false});fin();return}
@@ -1426,6 +1455,7 @@ function glideTo(center,zoom,dur,done){
   setTimeout(fin,T+200);
 }
 function glideBounds(pts,opts,done){
+  if(GL){const t=map.view(pts,opts||{});if(!t){done&&done();return}map.glide(t.center,t.zoom,(opts&&opts.duration)||640,done);return}
   const b=L.latLngBounds(pts);if(!b.isValid()){done&&done();return}
   const t=map._getBoundsCenterZoom(b,opts||{});glideTo(t.center,t.zoom,opts&&opts.duration,done);
 }
@@ -1473,7 +1503,114 @@ const SVG={
 };
 
 /* ---------- Map ---------- */
-const map=L.map('map',{zoomControl:true,attributionControl:true}).setView([38.71,-9.16],13);
+const GM=window.GMODE?google.maps:null;
+const toLL=x=>Array.isArray(x)?{lat:+x[0],lng:+x[1]}:x&&typeof x.lat==='function'?{lat:x.lat(),lng:x.lng()}:{lat:+x.lat,lng:+x.lng};
+const MERC={px(lat,lng,z){const s=256*Math.pow(2,z),sn=Math.min(Math.max(Math.sin(lat*Math.PI/180),-.9999),.9999);return {x:(lng+180)/360*s,y:(.5-Math.log((1+sn)/(1-sn))/(4*Math.PI))*s}},
+  ll(x,y,z){const s=256*Math.pow(2,z),n=Math.PI-2*Math.PI*y/s;return {lat:180/Math.PI*Math.atan(.5*(Math.exp(n)-Math.exp(-n))),lng:x/s*360-180}}};
+const gColor=c=>{c=String(c||'#2F6FDE').trim();const m=/^var\((--[\w-]+)\)$/.exec(c);return m?(getComputedStyle(document.documentElement).getPropertyValue(m[1]).trim()||'#475569'):c};
+const GL=GM&&(()=>{
+  const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+  class Evt{on(n,f){(this._ev=this._ev||{})[n]=(this._ev[n]||[]).concat(f);return this}fire(n,e){((this._ev||{})[n]||[]).forEach(f=>f(e))}}
+  class Group{constructor(){this.items=new Set();this.map=null}
+    addTo(m){this.map=m;this.items.forEach(l=>l._show(m));return this}
+    addLayer(l){this.items.add(l);l._group=this;if(this.map)l._show(this.map);return this}
+    removeLayer(l){if(this.items.delete(l))l._hide();return this}
+    eachLayer(f){this.items.forEach(f)}
+    clearLayers(){this.items.forEach(l=>l._hide());this.items.clear();return this}
+    remove(){this.items.forEach(l=>l._hide());this.map=null}}
+  class Marker extends Evt{
+    constructor(ll,o){super();this.ll=toLL(ll);this.options=o||{};this.z=this.options.zIndexOffset||0;
+      this.wrap=document.createElement('div');this.wrap.className='gm-pin'+(this.options.interactive===false?' gm-noint':'');
+      if(this.options.icon)this.wrap.innerHTML=this.options.icon.html;
+      this.wrap.addEventListener('click',e=>{if(this.options.interactive===false)return;e.stopPropagation();this.fire('click',{target:this});if(this.pop)this.openPopup()});}
+    addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
+    _show(m){if(this.m)return;this.map=m;
+      this.m=new GM.marker.AdvancedMarkerElement({map:m.g,position:this.ll,content:this.wrap,zIndex:this.z,title:this.options.title||'',gmpDraggable:!!this.options.draggable});
+      if(this.options.draggable)this.m.addListener('dragend',()=>{this.ll=toLL(this.m.position);this.fire('dragend',{target:this})})}
+    _hide(){if(this.m){this.m.map=null;this.m=null}}
+    remove(){if(this._group)this._group.items.delete(this);this._hide();return this}
+    setIcon(ic){this.wrap.innerHTML=ic?ic.html:'';return this}
+    getLatLng(){return {lat:this.ll.lat,lng:this.ll.lng}}
+    setLatLng(ll){this.ll=toLL(ll);if(this.m)this.m.position=this.ll;return this}
+    setZIndexOffset(z){this.z=z;if(this.m)this.m.zIndex=z;return this}
+    getElement(){return this.wrap}
+    bindPopup(c,o){this.pop={c,o};return this}
+    openPopup(){if(!this.map)return;const c=typeof this.pop.c==='function'?this.pop.c():this.pop.c;if(c)new Popup(this.pop.o).setLatLng(this.ll).setContent(c).openOn(this.map)}}
+  class Line{
+    constructor(path,o){this.path=path.map(toLL);this.o=o||{}}
+    addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
+    _show(m){if(this.line)return;const o=this.o,cls=o.className||'',w=o.weight||3,op=o.opacity==null?1:o.opacity;
+      const col=/plane-gap/.test(cls)?gColor('var(--surface)'):gColor(o.color);
+      const opts={path:this.path,clickable:false,strokeColor:col,strokeWeight:w,strokeOpacity:op,zIndex:/leg-glow/.test(cls)?1:/plane-gap|leg-flow/.test(cls)?3:2,map:m.g};
+      if(o.dashArray){const [d,g]=String(o.dashArray).split(/[ ,]+/).map(Number);opts.strokeOpacity=0;
+        opts.icons=[d<=1?{icon:{path:GM.SymbolPath.CIRCLE,fillColor:col,fillOpacity:op,strokeOpacity:0,scale:w/2},offset:'0',repeat:(d+g)+'px'}
+          :{icon:{path:'M 0,-1 0,1',strokeColor:col,strokeOpacity:op,strokeWeight:w,scale:d/2},offset:'0',repeat:(d+g)+'px'}];
+        this.cycle=d+g}
+      this.base={so:opts.strokeOpacity,icons:opts.icons};this.line=new GM.Polyline(opts);
+      if(/leg-flow/.test(cls)&&opts.icons&&!reduced){let off=0;this.timer=setInterval(()=>{if(!this.line)return;off=(off+1)%this.cycle;const ic=this.base.icons.map(x=>Object.assign({},x,{offset:off+'px'}));this.line.set('icons',ic)},45)}
+      else if(/rt-in/.test(cls)&&!reduced)this.fade(0,1,360)}
+    setF(f){if(!this.line)return;this.line.setOptions({strokeOpacity:this.base.so*f,icons:this.base.icons?this.base.icons.map(x=>Object.assign({},x,{icon:Object.assign({},x.icon,{strokeOpacity:(x.icon.strokeOpacity||0)*f,fillOpacity:(x.icon.fillOpacity||0)*f})})):undefined})}
+    fade(a,b,T,done){const t0=performance.now(),step=()=>{const t=Math.min(1,(performance.now()-t0)/T);this.setF(a+(b-a)*t);if(t<1&&this.line)requestAnimationFrame(step);else done&&done()};this.setF(a);requestAnimationFrame(step)}
+    fadeOut(){this.fade(1,0,200)}
+    _hide(){clearInterval(this.timer);if(this.line){this.line.setMap(null);this.line=null}}
+    remove(){if(this._group)this._group.items.delete(this);this._hide()}
+    getElement(){return null}}
+  class Popup{
+    constructor(o){this.o=o||{};this.el=document.createElement('div');this.el.className='gm-pop leaflet-popup '+(this.o.className||'')}
+    setLatLng(ll){this.ll=toLL(ll);return this}
+    setContent(h){this.html=h;return this}
+    openOn(map){map.closePopup();this.map=map;const st=(this.o.minWidth?'min-width:'+this.o.minWidth+'px;':'')+(this.o.maxWidth?'max-width:'+this.o.maxWidth+'px;':'');
+      this.el.innerHTML='<div class="leaflet-popup-content-wrapper"><div class="leaflet-popup-content" style="'+st+'">'+this.html+'</div></div><div class="leaflet-popup-tip-container"><div class="leaflet-popup-tip"></div></div><button type="button" class="leaflet-popup-close-button" aria-label="Close">\u00d7</button>';
+      this.el.querySelector('.leaflet-popup-close-button').addEventListener('click',e=>{e.stopPropagation();map.closePopup()});
+      ['click','pointerdown','mousedown','touchstart','wheel','dblclick','contextmenu'].forEach(t=>this.el.addEventListener(t,e=>e.stopPropagation()));
+      this.m=new GM.marker.AdvancedMarkerElement({map:map.g,position:this.ll,content:this.el,zIndex:1e6});
+      map.popup=this;map.fire('popupopen',{popup:this});requestAnimationFrame(()=>this.autopan());return this}
+    getElement(){return this.el}
+    autopan(){if(!this.m||!this.map)return;const r=this.el.getBoundingClientRect(),m=this.map.el.getBoundingClientRect(),pad=24,top=sheetOn&&sheetOn()?150:pad;let dx=0,dy=0;
+      if(r.top<m.top+top)dy=r.top-m.top-top;else if(r.bottom>m.bottom-pad)dy=r.bottom-m.bottom+pad;
+      if(r.left<m.left+pad)dx=r.left-m.left-pad;else if(r.right>m.right-pad)dx=r.right-m.right+pad;
+      if(dx||dy)this.map.g.panBy(dx,dy)}
+    remove(){if(this.m){this.m.map=null;this.m=null}}}
+  class Map extends Evt{
+    constructor(id){super();this.el=document.getElementById(id);this.popup=null;this.attributionControl={setPrefix(){}};
+      const th=SET.theme==='dark'?'DARK':SET.theme==='light'?'LIGHT':'FOLLOW_SYSTEM';
+      const o={center:{lat:38.71,lng:-9.16},zoom:13,mapId:window.GMODE.mapId||'DEMO_MAP_ID',disableDefaultUI:true,zoomControl:!matchMedia('(max-width:820px)').matches,fullscreenControl:false,streetViewControl:false,mapTypeControl:false,clickableIcons:true,gestureHandling:'greedy',isFractionalZoomEnabled:true};
+      if(GM.ColorScheme)o.colorScheme=GM.ColorScheme[th];
+      if(GM.RenderingType)o.renderingType=GM.RenderingType.VECTOR;
+      this.g=new GM.Map(this.el,o);
+      let zt;this.g.addListener('zoom_changed',()=>{if(this.gliding)return;clearTimeout(zt);zt=setTimeout(()=>this.fire('zoomend',{}),180)});
+      this.g.addListener('click',e=>{const ll=e.latLng?{lat:e.latLng.lat(),lng:e.latLng.lng()}:null;
+        if(e.placeId&&!ui.placing){if(e.stop)e.stop();this.fire('poiclick',{placeId:e.placeId,latlng:ll});return}
+        if(e.placeId&&e.stop)e.stop();
+        this.closePopup();if(ll)this.fire('click',{latlng:ll})})}
+    setView(c,z){c=toLL(c);this.g.moveCamera({center:c,zoom:z});return this}
+    getZoom(){return this.g.getZoom()||0}
+    getCenter(){const c=this.g.getCenter();return c?{lat:c.lat(),lng:c.lng()}:{lat:0,lng:0}}
+    view(pts,o){o=o||{};pts=pts.map(toLL);if(!pts.length)return null;
+      let s=90,n=-90,w=180,e=-180;pts.forEach(p=>{s=Math.min(s,p.lat);n=Math.max(n,p.lat);w=Math.min(w,p.lng);e=Math.max(e,p.lng)});
+      const tl=o.paddingTopLeft||o.padding||[0,0],br=o.paddingBottomRight||o.padding||[0,0],W=Math.max(40,this.el.clientWidth-tl[0]-br[0]),H=Math.max(40,this.el.clientHeight-tl[1]-br[1]);
+      const a=MERC.px(n,w,0),b=MERC.px(s,e,0),dx=Math.max(b.x-a.x,1e-7),dy=Math.max(b.y-a.y,1e-7);
+      let z=Math.min(Math.log2(W/dx),Math.log2(H/dy));z=Math.floor(z*4)/4;z=Math.max(2,Math.min(z,o.maxZoom||18));
+      const k=Math.pow(2,z),cx=(a.x+b.x)/2*k+(br[0]-tl[0])/2,cy=(a.y+b.y)/2*k+(br[1]-tl[1])/2;
+      return {center:MERC.ll(cx,cy,z),zoom:z}}
+    fitBounds(pts,o){const t=this.view(pts,o);if(t)this.setView(t.center,t.zoom);return this}
+    glide(center,zoom,T,done){center=toLL(center);cancelAnimationFrame(this.raf);
+      const z0=this.getZoom(),c=this.getCenter(),p0=MERC.px(c.lat,c.lng,z0),p1=MERC.px(center.lat,center.lng,z0);
+      if(reduced||(Math.abs(z0-zoom)<.01&&Math.hypot(p1.x-p0.x,p1.y-p0.y)<1)){this.setView(center,zoom);done&&done();return}
+      const s1=Math.pow(2,zoom-z0),t0=performance.now();this.gliding=true;
+      const frame=()=>{const t=Math.min(1,(performance.now()-t0)/T),e=ease(t),sc=Math.pow(s1,e),k=s1===1?e:(sc-1)/(s1-1),kk=isFinite(k)?k:e;
+        this.g.moveCamera({center:MERC.ll(p0.x+(p1.x-p0.x)*kk,p0.y+(p1.y-p0.y)*kk,z0),zoom:z0+Math.log2(sc)});
+        if(t<1)this.raf=requestAnimationFrame(frame);else{this.gliding=false;this.fire('zoomend',{});done&&done()}};
+      this.raf=requestAnimationFrame(frame)}
+    closePopup(){if(this.popup){this.popup.remove();this.popup=null}}
+    removeLayer(l){if(l&&l.remove)l.remove()}
+    invalidateSize(){}
+    createPane(){return {style:{}}}
+    setCursor(on){this.g.setOptions({draggableCursor:on?'crosshair':null})}}
+  return {map:id=>new Map(id),marker:(ll,o)=>new Marker(ll,o),divIcon:o=>({html:o.html||''}),polyline:(p,o)=>new Line(p,o),popup:o=>new Popup(o),layerGroup:()=>new Group()};
+})();
+const ML=GL||L;
+const map=ML.map('map',{zoomControl:true,attributionControl:true}).setView([38.71,-9.16],13);
 map.attributionControl.setPrefix(false);
 /* Basemap: an illustrated city map drawn locally (no map service), plus an optional live street map */
 const cssVar=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
@@ -1609,14 +1746,17 @@ tiles.on('tileerror',()=>{if(!tileOk&&S.view.basemap==='street'){setBasemap('ill
 let toastT;
 function toast(msg){const t=$('toast');t.textContent=msg;t.hidden=false;clearTimeout(toastT);toastT=setTimeout(()=>{t.hidden=true},6000)}
 function setBasemap(kind){
+  if(GL){if(kind==='street'||kind==='sat'){S.view.gtype=kind;save()}const sat=S.view.gtype==='sat';map.g.setMapTypeId(sat?'hybrid':'roadmap');
+    $('basesw').innerHTML=[['street','Map'],['sat','Satellite']].map(([k,l])=>'<button data-act="basemap" data-kind="'+k+'" aria-pressed="'+((k==='sat')===sat)+'">'+l+'</button>').join('');
+    pill($('basesw'),'[aria-pressed="true"]','base');return}
   S.view.basemap=kind;save();
   if(kind==='street'){map.removeLayer(illus);tiles.addTo(map);setTimeout(()=>{if(!tileOk&&S.view.basemap==='street')tiles.fire('tileerror')},4500)}
   else{map.removeLayer(tiles);illus.addTo(map)}
   $('basesw').innerHTML=[['illustrated','Illustrated'],['street','Street']].map(([k,l])=>'<button data-act="basemap" data-kind="'+k+'" aria-pressed="'+(S.view.basemap===k)+'">'+l+'</button>').join('');
   pill($('basesw'),'[aria-pressed="true"]','base');
 }
-let routeLayer=L.layerGroup().addTo(map);
-const markerLayer=L.layerGroup().addTo(map);
+let routeLayer=ML.layerGroup().addTo(map);
+const markerLayer=ML.layerGroup().addTo(map);
 let markers={};
 
 // Emoji fonts sit their pictures off-center by different amounts; measure each one and nudge it to the true middle
@@ -1637,10 +1777,10 @@ function iconFor(p,anim){
   const t=tagOf(p);
   if(p.main){
     const n=p.order;
-    return L.divIcon({className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-14],
+    return ML.divIcon({className:'',iconSize:[34,34],iconAnchor:[17,17],popupAnchor:[0,-14],
       html:'<div class="pin pin-main'+cls+'" style="--c:'+dayColor(p.day)+dl+'">'+emo(t.icon,16)+'<span class="pin-num">'+n+'</span>'+(atHotel(p)?'<span class="pin-hb" title="Your hotel">'+SVG.home+'</span>':'')+'</div>'});
   }
-  return L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12],
+  return ML.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],popupAnchor:[0,-12],
     html:'<div class="pin pin-extra'+(p.day?'':' loose')+cls+'" style="--c:'+esc(t.color)+dl+'">'+emo(t.icon,13)+'</div>'});
 }
 /* ---------- Routing ---------- */
@@ -1717,13 +1857,35 @@ function requestLive(A,B,prof){
     .catch(()=>{liveFail[k]=1;liveFails++})
     .finally(()=>{delete livePending[k]});
 }
+// Google routes: real paths and travel times (including transit), kept for 30 days
+const GKEY='waypoint-groutes-v1',G_TM={walk:'WALKING',bike:'BICYCLING',car:'DRIVING',transit:'TRANSIT'};
+let gCache={};try{gCache=JSON.parse(localStorage.getItem(GKEY))||{}}catch(e){}
+{const old=Date.now()-30*864e5;Object.keys(gCache).forEach(k=>{if(!(gCache[k].t>old))delete gCache[k]})}
+const gKey=(A,B,mode)=>mode+':'+A[0].toFixed(5)+','+A[1].toFixed(5)+';'+B[0].toFixed(5)+','+B[1].toFixed(5);
+const gPending={},gFail={},gQueue=[];let gActive=0,gRefreshT,gFails=0;
+function requestG(A,B,mode){const k=gKey(A,B,mode);if(gCache[k]||gPending[k]||gFail[k]||!G_TM[mode]||gFails>=6)return;gPending[k]=1;gQueue.push([k,A,B,mode]);gPump()}
+function gPump(){
+  while(gActive<2&&gQueue.length){const [k,A,B,mode]=gQueue.shift();gActive++;
+    GM.importLibrary('routes').then(({Route})=>Route.computeRoutes({origin:{lat:A[0],lng:A[1]},destination:{lat:B[0],lng:B[1]},travelMode:G_TM[mode],fields:['path','distanceMeters','durationMillis']}))
+      .then(res=>{const r=res&&res.routes&&res.routes[0];if(!r||!r.path)throw new Error('no route');
+        let pts=r.path.map(q=>{const la=typeof q.lat==='function'?q.lat():q.lat,ln=typeof q.lng==='function'?q.lng():q.lng;return [+(+la).toFixed(5),+(+ln).toFixed(5)]});
+        if(pts.length>300){const st=Math.ceil(pts.length/300);pts=pts.filter((_,i)=>i%st===0||i===pts.length-1)}
+        gCache[k]={t:Date.now(),km:(r.distanceMeters||0)/1000,min:Math.max(1,Math.round((r.durationMillis||0)/60000)),path:pts};
+        const keys=Object.keys(gCache);if(keys.length>500)keys.sort((a,b)=>gCache[a].t-gCache[b].t).slice(0,keys.length-500).forEach(x=>delete gCache[x]);
+        try{localStorage.setItem(GKEY,JSON.stringify(gCache))}catch(e){}
+        clearTimeout(gRefreshT);gRefreshT=setTimeout(()=>{renderPanel();renderRoutes()},250)})
+      .catch(()=>{gFail[k]=1;gFails++})
+      .finally(()=>{delete gPending[k];gActive--;gPump()})}
+}
+const legMins=(r,mode)=>r.min!=null?r.min:minsFor(mode,r.km);
 const gridCache=new Map();
 function hav(A,B){const r=Math.PI/180,dLat=(B[0]-A[0])*r,dLng=(B[1]-A[1])*r,h=Math.sin(dLat/2)**2+Math.cos(A[0]*r)*Math.cos(B[0]*r)*Math.sin(dLng/2)**2;return 12742*Math.asin(Math.sqrt(h))}
 function arcPath(A,B){const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2,dx=B[0]-A[0],dy=B[1]-A[1],c=[mx-dy*.28,my+dx*.28],out=[];
   for(let i=0;i<=40;i++){const t=i/40,u=1-t;out.push([u*u*A[0]+2*u*t*c[0]+t*t*B[0],u*u*A[1]+2*u*t*c[1]+t*t*B[1]])}return out}
-function legRoute(a,b,mode){
+function legRoute(a,b,mode,peek){
   const A=[a.lat,a.lng],B=[b.lat,b.lng];
   if(mode==='plane')return {path:arcPath(A,B),km:hav(A,B),live:false,air:true};
+  if(GL){const c=gCache[gKey(A,B,mode)];if(c)return {path:c.path,km:c.km,min:c.min,live:true};if(!peek)requestG(A,B,mode);return {path:[A,B],km:hav(A,B)*1.25,live:false}}
   if(S.view.basemap!=='street'&&hav(A,B)>30){const d=hav(A,B);return {path:[A,B],km:d*1.15,live:false}}
   if(S.view.basemap==='street'){const prof=MODES[mode].profile,c=liveCache[liveKey(A,B,prof)];if(c)return {path:c.path,km:c.km,live:true};requestLive(A,B,prof)}
   const gk=A.join()+'|'+B.join();let r=gridCache.get(gk);
@@ -1746,7 +1908,7 @@ function hotelLeg(dayId,part){
   const from=part==='m'?st:ms[ms.length-1],to=part==='m'?ms[0]:st,k=part==='m'?'mmode':'emode';
   const mode=d[k]&&MODES[d[k]]?d[k]:legMode(from,{lat:to.lat,lng:to.lng});
   const r=legRoute(from,to,mode);
-  return {from,to,stay:st,part,mode,auto:!d[k],km:r.km,min:minsFor(mode,r.km),path:r.path,live:r.live,day:dayId};
+  return {from,to,stay:st,part,mode,auto:!d[k],km:r.km,min:legMins(r,mode),path:r.path,live:r.live,day:dayId};
 }
 function nightsText(st){const n=st.co-st.ci,o={month:'short',day:'numeric'};return n+' night'+(n===1?'':'s')+' · '+fmt(dayDate(st.ci),o)+' to '+fmt(dayDate(st.co),o)}
 function firstFreeNight(){for(let n=-1;n<S.days.length;n++)if(!stayForNight(n))return n;return Math.max(0,S.days.length-1)}
@@ -1758,7 +1920,7 @@ function transferOf(i){
   const from=a[a.length-1],to=b[0];
   const mode=d.tmode&&MODES[d.tmode]?d.tmode:legMode(from,{lat:to.lat,lng:to.lng});
   const r=legRoute(from,to,mode);
-  return {from,to,mode,auto:!d.tmode,when:d.twhen==='end'?'end':'start',km:r.km,min:minsFor(mode,r.km),path:r.path,live:r.live,day:d.id,prevDay:pd.id,owner:d.twhen==='end'?pd.id:d.id};
+  return {from,to,mode,auto:!d.tmode,when:d.twhen==='end'?'end':'start',km:r.km,min:legMins(r,mode),path:r.path,live:r.live,day:d.id,prevDay:pd.id,owner:d.twhen==='end'?pd.id:d.id};
 }
 function dayPlan(dayId){
   const d=S.days.find(x=>x.id===dayId);if(!d)return [];
@@ -1772,7 +1934,7 @@ function dayPlan(dayId){
     let leg=null;
     if(i>0){const a=ms[i-1];
       if(jrTimed(a)){const mode=JK[a.jr.kind].mode,r=legRoute(a,p,mode),at=jrArrMin(a.jr,base);leg={from:a,mode,auto:false,km:r.km,min:Math.max(0,at-t),path:r.path,live:r.live,jr:a.jr};t=Math.max(t,at)}
-      else{const mode=legMode(a,p),r=legRoute(a,p,mode);leg={from:a,mode,auto:!p.mode,km:r.km,min:minsFor(mode,r.km),path:r.path,live:r.live};t+=leg.min}}
+      else{const mode=legMode(a,p),r=legRoute(a,p,mode);leg={from:a,mode,auto:!p.mode,km:r.km,min:legMins(r,mode),path:r.path,live:r.live};t+=leg.min}}
     let fixed=false,early=false;
     if(p.at){const want=toMin(p.at);early=want<t;t=want;fixed=true}
     const stay=p.stay||60;let leave=t+stay,dep=null,late=false;
@@ -1819,7 +1981,7 @@ function cityTransition(dayId){
     // Not enough of the plan yet for a day-to-day leg: use any place we know in each city
     const {from,to}=cityEnds(di),cm=(d.tmode&&MODES[d.tmode])?d.tmode:((d.mmode&&MODES[d.mmode])?d.mmode:null);
     if(from&&to){const m=cm||legMode(from,{lat:to.lat,lng:to.lng}),r=legRoute(from,to,m);
-      return {lg:{mode:m,km:r.km,min:minsFor(m,r.km),path:r.path,live:r.live,from,to},kind:'g',day:dayId,date:di,leave:toMin(d.start),fromName:from.name,toName:to.name}}
+      return {lg:{mode:m,km:r.km,min:legMins(r,m),path:r.path,live:r.live,from,to},kind:'g',day:dayId,date:di,leave:toMin(d.start),fromName:from.name,toName:to.name}}
     const pc=S.cities.find(c=>c.id===pd.city),nc=S.cities.find(c=>c.id===d.city);
     return {lg:null,kind:'g',mode:cm,day:dayId,date:di,leave:toMin(d.start),need:!from?(pc?pc.name:'the earlier city'):(nc?nc.name:'the next city')};
   }
@@ -1857,22 +2019,22 @@ function saveCtr(){const d=S.days.find(x=>x.id===ui.form.ctr);if(!d)return;const
 function ctrOptions(dayId,attr){
   const di=dayIdx(dayId),t=cityTransition(dayId);if(!t)return '';
   const ends=t.lg?{from:t.lg.from,to:t.lg.to}:cityEnds(di),cur=t.lg?t.lg.mode:t.mode;
-  return MODE_KEYS.map(m=>{const r=ends.from&&ends.to?legRoute(ends.from,ends.to,m):null;
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(cur===m)+'" '+attr+'="'+(attr==='data-pact'?'cmode':'ctr-mode')+'" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+(r?dur(minsFor(m,r.km)):'')+'</span>'+CHECK+'</button>'}).join('');
+  return MODE_KEYS.map(m=>{const r=ends.from&&ends.to?legRoute(ends.from,ends.to,m,true):null;
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(cur===m)+'" '+attr+'="'+(attr==='data-pact'?'cmode':'ctr-mode')+'" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+(r?dur(legMins(r,m)):'')+'</span>'+CHECK+'</button>'}).join('');
 }
 function cityPair(dayId){const di=dayIdx(dayId),a=S.cities.find(c=>c.id===S.days[di-1].city),b=S.cities.find(c=>c.id===S.days[di].city);return (a?a.name:'')+' to '+(b?b.name:'')}
 function drawLeg(lg,dc,p,isNew,isSel,onBadge,title,cls){
   const st={interactive:false,lineCap:'round',lineJoin:'round',color:dc,className:(isNew?'rt-in':'')+(cls?' '+cls:'')};
-  if(isSel)L.polyline(lg.path,{interactive:false,lineCap:'round',lineJoin:'round',color:dc,weight:16,opacity:.22,className:'leg-glow'}).addTo(routeLayer);
-  if(lg.mode==='transit'){L.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.9})).addTo(routeLayer);L.polyline(lg.path,Object.assign({},st,{color:'#ffffff',weight:2,dashArray:'5 6',opacity:.95,className:isNew?'rt-in':''})).addTo(routeLayer)}
-  else if(lg.mode==='car')L.polyline(lg.path,Object.assign({},st,{weight:5,opacity:.85})).addTo(routeLayer);
-  else if(lg.mode==='bike')L.polyline(lg.path,Object.assign({},st,{weight:4,opacity:.9,dashArray:'9 7',lineCap:'butt'})).addTo(routeLayer);
-  else if(lg.mode==='plane'){L.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.95,lineCap:'butt'})).addTo(routeLayer);L.polyline(lg.path,Object.assign({},st,{weight:2.6,opacity:1,lineCap:'butt',className:(isNew?'rt-in ':'')+'plane-gap'})).addTo(routeLayer)}
-  else L.polyline(lg.path,Object.assign({},st,{weight:5,opacity:.9,dashArray:'0.5 9'})).addTo(routeLayer);
-  if(isSel&&!reduced)L.polyline(lg.path,{interactive:false,lineCap:'round',color:'#ffffff',weight:2.5,opacity:.95,dashArray:'2 14',className:'leg-flow'}).addTo(routeLayer);
+  if(isSel)ML.polyline(lg.path,{interactive:false,lineCap:'round',lineJoin:'round',color:dc,weight:16,opacity:.22,className:'leg-glow'}).addTo(routeLayer);
+  if(lg.mode==='transit'){ML.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.9})).addTo(routeLayer);ML.polyline(lg.path,Object.assign({},st,{color:'#ffffff',weight:2,dashArray:'5 6',opacity:.95,className:isNew?'rt-in':''})).addTo(routeLayer)}
+  else if(lg.mode==='car')ML.polyline(lg.path,Object.assign({},st,{weight:5,opacity:.85})).addTo(routeLayer);
+  else if(lg.mode==='bike')ML.polyline(lg.path,Object.assign({},st,{weight:4,opacity:.9,dashArray:'9 7',lineCap:'butt'})).addTo(routeLayer);
+  else if(lg.mode==='plane'){ML.polyline(lg.path,Object.assign({},st,{weight:7,opacity:.95,lineCap:'butt'})).addTo(routeLayer);ML.polyline(lg.path,Object.assign({},st,{weight:2.6,opacity:1,lineCap:'butt',className:(isNew?'rt-in ':'')+'plane-gap'})).addTo(routeLayer)}
+  else ML.polyline(lg.path,Object.assign({},st,{weight:5,opacity:.9,dashArray:'0.5 9'})).addTo(routeLayer);
+  if(isSel&&!reduced)ML.polyline(lg.path,{interactive:false,lineCap:'round',color:'#ffffff',weight:2.5,opacity:.95,dashArray:'2 14',className:'leg-flow'}).addTo(routeLayer);
   if(isSel||lg.mode==='plane'||S.view.day!=='all'||map.getZoom()>=15){
     const mid=midpoint(lg.path);
-    L.marker(mid,{keyboard:false,zIndexOffset:isSel?400:-1000,icon:L.divIcon({className:'',iconSize:null,html:'<div class="legb'+(isSel?' sel':'')+(isNew?' in':'')+'" style="--dc:'+dc+'" title="'+esc(title||MODES[lg.mode].label+' to '+p.name)+'">'+MODES[lg.mode].icon+' '+dur(lg.min)+'</div>'})})
+    ML.marker(mid,{keyboard:false,zIndexOffset:isSel?400:-1000,icon:ML.divIcon({className:'',iconSize:null,html:'<div class="legb'+(isSel?' sel':'')+(isNew?' in':'')+'" style="--dc:'+dc+'" title="'+esc(title||MODES[lg.mode].label+' to '+p.name)+'">'+MODES[lg.mode].icon+' '+dur(lg.min)+'</div>'})})
       .on('click',()=>{if(onBadge){onBadge(mid);return}const q=S.places.find(x=>x.id===p.id);if(q)openLegPopup(q,mid)}).addTo(routeLayer);
   }
 }
@@ -1972,12 +2134,12 @@ function closeDetail(){
 const CHECK='<svg class="qc" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
 function quickOptions(p,attr){
   const x=planOf(p);if(!x||!x.leg)return '';
-  return MODE_KEYS.map(m=>{const r=legRoute(x.leg.from,p,m);
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.leg.mode===m)+'" '+attr+'="'+(attr==='data-pact'?'mode':'quick-mode')+'" data-id="'+p.id+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(minsFor(m,r.km))+'</span>'+CHECK+'</button>'}).join('');
+  return MODE_KEYS.map(m=>{const r=legRoute(x.leg.from,p,m,true);
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.leg.mode===m)+'" '+attr+'="'+(attr==='data-pact'?'mode':'quick-mode')+'" data-id="'+p.id+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(legMins(r,m))+'</span>'+CHECK+'</button>'}).join('');
 }
 function openLegPopup(p,at){
   const x=planOf(p);if(!x||!x.leg)return;
-  L.popup({maxWidth:280,minWidth:240,className:'qpop'}).setLatLng(at).setContent(
+  ML.popup({maxWidth:280,minWidth:240,className:'qpop'}).setLatLng(at).setContent(
     '<div class="pop" style="--dc:'+dayColor(p.day)+'"><div class="pop-tag">'+esc(x.leg.from.name)+' to '+esc(p.name)+'</div>'+quickOptions(p,'data-pact')+'</div>').openOn(map);
 }
 const qm={el:null,btn:null};
@@ -2014,12 +2176,12 @@ function xferOptions(dayId,attr){
   const i=dayIdx(dayId),x=transferOf(i);if(!x)return '';
   const pre=attr==='data-pact'?'x':'xfer-';
   const when='<div class="whenseg" role="group" aria-label="When"><button type="button" '+attr+'="'+pre+'when" data-day="'+dayId+'" data-when="end" aria-pressed="'+(x.when==='end')+'">End of Day '+i+'</button><button type="button" '+attr+'="'+pre+'when" data-day="'+dayId+'" data-when="start" aria-pressed="'+(x.when==='start')+'">Start of Day '+(i+1)+'</button></div>';
-  return when+MODE_KEYS.map(m=>{const r=legRoute(x.from,x.to,m);
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(minsFor(m,r.km))+'</span>'+CHECK+'</button>'}).join('');
+  return when+MODE_KEYS.map(m=>{const r=legRoute(x.from,x.to,m,true);
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(legMins(r,m))+'</span>'+CHECK+'</button>'}).join('');
 }
 function openXferPopup(dayId,at){
   const i=dayIdx(dayId),x=transferOf(i);if(!x)return;
-  L.popup({maxWidth:300,minWidth:260,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:'+dayColor(x.owner)+'"><div class="pop-tag">Day '+i+' to Day '+(i+1)+' · '+fmtKm(x.km)+'</div>'+xferOptions(dayId,'data-pact')+'</div>').openOn(map);
+  ML.popup({maxWidth:300,minWidth:260,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:'+dayColor(x.owner)+'"><div class="pop-tag">Day '+i+' to Day '+(i+1)+' · '+fmtKm(x.km)+'</div>'+xferOptions(dayId,'data-pact')+'</div>').openOn(map);
 }
 function showQuick(btn,head,html,color){
   if(qm.btn===btn){closeQuick();return}
@@ -2036,14 +2198,14 @@ function showQuick(btn,head,html,color){
 }
 function hlegOptions(dayId,part,attr){
   const lg=hotelLeg(dayId,part);if(!lg)return '';const pre=attr==='data-pact'?'h':'hleg-';
-  return MODE_KEYS.map(m=>{const r=legRoute(lg.from,lg.to,m);
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(lg.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-part="'+part+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(minsFor(m,r.km))+'</span>'+CHECK+'</button>'}).join('');
+  return MODE_KEYS.map(m=>{const r=legRoute(lg.from,lg.to,m,true);
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(lg.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-part="'+part+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(legMins(r,m))+'</span>'+CHECK+'</button>'}).join('');
 }
 function hlegHead(lg){return (lg.part==='m'?'From ':'To ')+esc(lg.stay.name)+' · '+fmtKm(lg.km)}
 function openHleg(btn,dayId,part){const lg=hotelLeg(dayId,part);if(lg)showQuick(btn,hlegHead(lg),hlegOptions(dayId,part,'data-act'),dayColor(dayId))}
 function openHlegPopup(dayId,part,at){
   const lg=hotelLeg(dayId,part);if(!lg)return;
-  L.popup({maxWidth:300,minWidth:250,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:'+dayColor(dayId)+'"><div class="pop-tag">'+hlegHead(lg)+'</div>'+hlegOptions(dayId,part,'data-pact')+'</div>').openOn(map);
+  ML.popup({maxWidth:300,minWidth:250,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:'+dayColor(dayId)+'"><div class="pop-tag">'+hlegHead(lg)+'</div>'+hlegOptions(dayId,part,'data-pact')+'</div>').openOn(map);
 }
 function setHleg(dayId,part,mode){
   const d=S.days.find(x=>x.id===dayId);if(!d)return;
@@ -2091,9 +2253,9 @@ document.addEventListener('keydown',e=>{
 },true);
 window.addEventListener('resize',()=>closeQuick(true));
 function renderRoutes(){
-  const old=routeLayer;routeLayer=L.layerGroup().addTo(map);
+  const old=routeLayer;routeLayer=ML.layerGroup().addTo(map);
   const fadeOld=ui.routeHold&&!reduced;
-  if(fadeOld){old.eachLayer(l=>{const el=l.getElement&&l.getElement();if(el)el.classList.add('rt-out')});setTimeout(()=>map.removeLayer(old),240)}
+  if(fadeOld){old.eachLayer(l=>{if(l.fadeOut){l.fadeOut();return}const el=l.getElement&&l.getElement();if(el)el.classList.add('rt-out')});setTimeout(()=>map.removeLayer(old),240)}
   else map.removeLayer(old);
   if(ui.routeHold){ui.prevLegs=new Set();return}
   const days=S.days.filter(d=>inView(d.id));
@@ -2110,7 +2272,7 @@ function renderRoutes(){
     const isT=S.days[i-1].city!==S.days[i].city;
     drawLeg(x,isT?'var(--transit)':dayColor(x.owner),x.to,!reduced&&!ui.prevLegs.has(key),false,at=>openXferPopup(x.day,at),MODES[x.mode].label+' from Day '+i+' to Day '+(i+1),isT?'rt-transit':'');
     if(v!=='all'&&!(inView(x.day)&&inView(x.prevDay))){const g=inView(x.day)?x.from:x.to,gd=inView(x.day)?x.prevDay:x.day,t=tagOf(g);
-      L.marker([g.lat,g.lng],{keyboard:false,title:g.name+' (Day '+(dayIdx(gd)+1)+')',zIndexOffset:300,icon:L.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],
+      ML.marker([g.lat,g.lng],{keyboard:false,title:g.name+' (Day '+(dayIdx(gd)+1)+')',zIndexOffset:300,icon:ML.divIcon({className:'',iconSize:[26,26],iconAnchor:[13,13],
         html:'<div class="pin pin-ghost" style="--c:'+dayColor(gd)+'">'+emo(t.icon,13)+'</div>'})})
         .on('click',()=>{const btn=document.querySelector('.seg [data-day="'+gd+'"]');if(btn)btn.click()}).addTo(routeLayer)}
   }
@@ -2119,7 +2281,7 @@ function renderRoutes(){
     if(S.days[i].city===S.days[i-1].city||!inView(S.days[i].id))continue;
     const t=cityTransition(S.days[i].id);if(!t||t.kind!=='g'||!t.lg)continue;
     const key='g|'+S.days[i].id+'|'+t.lg.mode+'|'+(t.lg.live?1:0);now.add(key);const did=S.days[i].id;
-    drawLeg(t.lg,'var(--transit)',t.lg.to,!reduced&&!ui.prevLegs.has(key),false,at=>{L.popup({maxWidth:280,minWidth:240,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:var(--transit)"><div class="pop-tag">'+esc(cityPair(did))+'</div>'+ctrOptions(did,'data-pact')+'</div>').openOn(map)},MODES[t.lg.mode].label+' '+cityPair(did),'rt-transit');
+    drawLeg(t.lg,'var(--transit)',t.lg.to,!reduced&&!ui.prevLegs.has(key),false,at=>{ML.popup({maxWidth:280,minWidth:240,className:'qpop'}).setLatLng(at).setContent('<div class="pop" style="--dc:var(--transit)"><div class="pop-tag">'+esc(cityPair(did))+'</div>'+ctrOptions(did,'data-pact')+'</div>').openOn(map)},MODES[t.lg.mode].label+' '+cityPair(did),'rt-transit');
   }
   // hotels, and the legs to and from them
   const vd=S.view.day,shownStays=new Set();
@@ -2135,7 +2297,7 @@ function renderRoutes(){
   // a visible stop at the hotel already marks it (with a small house badge), so skip the second pin underneath
   S.places.filter(p=>visible(p)&&p.main).forEach(p=>shownStays.forEach(st=>{if(p.stayRef===st.id||hav([p.lat,p.lng],[st.lat,st.lng])<.04)shownStays.delete(st)}));
   shownStays.forEach(st=>{
-    const m=L.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:L.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
+    const m=ML.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:ML.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
     m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">Edit</button></div></div>',{maxWidth:260});
     m.on('dragend',e=>{const ll=e.target.getLatLng();st.lat=+ll.lat.toFixed(6);st.lng=+ll.lng.toFixed(6);S.places.forEach(p=>{if(p.stayRef===st.id){p.lat=st.lat;p.lng=st.lng}});commit()});
     m.addTo(routeLayer);
@@ -2179,7 +2341,7 @@ function renderMap(){
       return;
     }
     const id=p.id,delay=reduced?null:Math.min(base+k++*26,base+360);
-    m=L.marker([p.lat,p.lng],{icon:iconFor(p,delay),draggable:true,title:p.name,zIndexOffset:p.main?800:0,riseOnHover:true});
+    m=ML.marker([p.lat,p.lng],{icon:iconFor(p,delay),draggable:true,title:p.name,zIndexOffset:p.main?800:0,riseOnHover:true});
     m._wk=key;
     m.bindPopup(()=>{const q=S.places.find(x=>x.id===id);return q?popupHtml(q):''},{maxWidth:270,autoPanPadding:[30,30]});
     m.on('dragend',e=>{const q=S.places.find(x=>x.id===id);if(!q)return;const ll=e.target.getLatLng();q.lat=+ll.lat.toFixed(6);q.lng=+ll.lng.toFixed(6);save();renderPanel();renderMap()});
@@ -2205,6 +2367,10 @@ map.on('popupopen',e=>{
     if(a==='cmode'){map.closePopup();const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.tmode=d.mmode=b.dataset.mode;commit()}return}
     if(a==='hmode'){map.closePopup();setHleg(b.dataset.day,b.dataset.part,b.dataset.mode);return}
     if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)openStay(st);return}
+    if(a==='poi-add'||a==='poi-save'){map.closePopup();const q=ui.poi;if(!q)return;
+      if(a==='poi-save'){ui.libReturn='plan';openLib(Object.assign(blankLib(),{gid:q.gid,name:q.name,lat:q.lat,lng:q.lng,city:q.city,country:q.country,tag:q.tag}));return}
+      const d=S.days.some(x=>x.id===S.view.day)?S.view.day:(isCity(S.view.day)?(cityDays(S.view.day)[0]||{}).id||null:null);
+      openPlace(null,{lat:q.lat,lng:q.lng,day:d,name:q.name,tag:q.tag,main:!!d,gid:q.gid});return}
     if(a==='xmode'||a==='xwhen'){map.closePopup();setXfer(b.dataset.day,a==='xmode'?'tmode':'twhen',a==='xmode'?b.dataset.mode:b.dataset.when);return}
     const p=S.places.find(x=>x.id===b.dataset.id);if(!p)return;
     map.closePopup();
@@ -2218,6 +2384,7 @@ map.on('popupopen',e=>{
     }
   }));
 });
+if(GL)map.on('poiclick',e=>openPoi(e.placeId,e.latlng));
 map.on('click',e=>{
   if(!ui.placing)return;
   const kind=ui.placeKind;setPlacing(false);
@@ -2228,7 +2395,7 @@ map.on('click',e=>{
   const d=S.days.some(x=>x.id===S.view.day)?S.view.day:(isCity(S.view.day)?(cityDays(S.view.day)[0]||{}).id||null:null);
   openPlace(null,{lat:+e.latlng.lat.toFixed(6),lng:+e.latlng.lng.toFixed(6),day:ui.placeDay||d,name:ui.placeName||'',main:!!ui.placeMain});ui.placeName='';ui.placeDay=null;ui.placeMain=false;
 });
-function setPlacing(on,kind){ui.placing=on;ui.placeKind=kind||'place';$('banner').firstChild.textContent=ui.placeKind==='stay'?'Click the map where your hotel is ':ui.placeKind==='lib'?'Click the map where '+((ui.libDraft&&ui.libDraft.name)||'the place')+' is ':'Click the map where the place is ';$('banner').hidden=!on;$('map').classList.toggle('placing',on)}
+function setPlacing(on,kind){ui.placing=on;if(map.setCursor)map.setCursor(on);ui.placeKind=kind||'place';$('banner').firstChild.textContent=ui.placeKind==='stay'?'Click the map where your hotel is ':ui.placeKind==='lib'?'Click the map where '+((ui.libDraft&&ui.libDraft.name)||'the place')+' is ':'Click the map where the place is ';$('banner').hidden=!on;$('map').classList.toggle('placing',on)}
 
 /* ---------- Sidebar + toolbar ---------- */
 const countriesOf=()=>[...new Set(S.cities.map(c=>(c.country||'').trim()).filter(Boolean))];
@@ -2264,9 +2431,43 @@ function detailHtml(x,open){
   if(x.fixed)s+='<p class="dt-sub dt-fixed">'+(x.early?'<span class="bad">That\u2019s earlier than travel allows. </span>':'')+'The rest of the day follows this time. <button type="button" class="linkbtn sm" data-act="auto-arrive" data-id="'+p.id+'">Use travel time instead</button></p>';
   if(x.late)s+='<p class="dt-warn">You\u2019d get here after '+(p.jr.kind==='car'?'pick-up':'departure')+'. Start the day earlier or move this stop up.</p>';
   if(p.jr)s+=jrCard(p);else if(isHub(p))s+='<button class="linkbtn sm jr-add" data-act="edit" data-id="'+p.id+'">+ Add flight, train or bus details</button>';
+  if(GL&&p.gid)s+='<div class="gi" id="gi-'+p.id+'">'+(ui.ginfo&&ui.ginfo[p.gid]?giHtml(ui.ginfo[p.gid]):'<button type="button" class="linkbtn sm" data-act="g-info" data-id="'+p.id+'">Hours, rating and photo</button>')+'</div>';
   if(p.notes)s+='<p class="dt-notes">'+esc(p.notes)+'</p>';
   return s+'<div class="dt-acts"><button class="btn small" data-act="focus" data-id="'+p.id+'">Show on map</button><button class="btn small" data-act="edit" data-id="'+p.id+'">Edit place</button><button class="btn small ghost-rm" data-act="remove-place" data-id="'+p.id+'">Remove from day</button></div></div></div></li>';
 }
+// Looked up only when you ask (these details count against Google's smaller free allowance), and kept just for this session
+async function gInfo(gid){
+  ui.ginfo=ui.ginfo||{};if(ui.ginfo[gid])return ui.ginfo[gid];
+  const {Place}=await GM.importLibrary('places'),place=new Place({id:gid});
+  const base=['rating','userRatingCount','websiteURI','nationalPhoneNumber','photos','googleMapsURI'];
+  try{await place.fetchFields({fields:base.concat('regularOpeningHours')})}catch(e){await place.fetchFields({fields:base.concat('openingHours')})}
+  const oh=place.regularOpeningHours||place.openingHours,ph=place.photos&&place.photos[0];
+  let open=null;try{if(place.isOpen)open=await place.isOpen()}catch(e){}
+  const info={rating:place.rating,count:place.userRatingCount,web:place.websiteURI,phone:place.nationalPhoneNumber,url:place.googleMapsURI,open,
+    hours:oh&&oh.weekdayDescriptions?oh.weekdayDescriptions:null,
+    photo:ph?ph.getURI({maxWidth:640,maxHeight:400}):null,credit:ph&&ph.authorAttributions?ph.authorAttributions.map(a=>({name:a.displayName,uri:a.uri})):[]};
+  ui.ginfo[gid]=info;return info}
+function giHtml(g){
+  const today=(new Date().getDay()+6)%7,hrs=g.hours&&g.hours[today];
+  let h='<div class="gi-card">'+(g.photo?'<div class="gi-ph"><img src="'+esc(g.photo)+'" alt="" loading="lazy"><span class="gi-cr">'+(g.credit.length?'Photo: '+g.credit.map(a=>a.uri?'<a href="'+esc(a.uri)+'" target="_blank" rel="noopener">'+esc(a.name)+'</a>':esc(a.name)).join(', '):'')+'</span></div>':'');
+  h+='<div class="gi-b">';
+  if(g.rating)h+='<div class="gi-r"><b>\u2605 '+g.rating.toFixed(1)+'</b>'+(g.count?'<span>('+g.count.toLocaleString()+')</span>':'')+(g.open!=null?'<span class="gi-open '+(g.open?'y':'n')+'">'+(g.open?'Open now':'Closed now')+'</span>':'')+'</div>';
+  if(hrs)h+='<details class="gi-h"><summary>'+esc(hrs)+'</summary><ul>'+g.hours.map((x,i)=>'<li'+(i===today?' class="on"':'')+'>'+esc(x)+'</li>').join('')+'</ul></details>';
+  h+='<div class="gi-l">'+(g.web?'<a href="'+esc(g.web)+'" target="_blank" rel="noopener">Website</a>':'')+(g.phone?'<a href="tel:'+esc(g.phone.replace(/[^\d+]/g,''))+'">'+esc(g.phone)+'</a>':'')+(g.url?'<a href="'+esc(g.url)+'" target="_blank" rel="noopener">Open in Google Maps</a>':'')+'</div>';
+  return h+'<div class="gi-g">Google Maps</div></div></div>'}
+function showGInfo(p){const box=$('gi-'+p.id);if(!box||!p.gid)return;box.innerHTML='<div class="si-note"><span class="spin"></span>Looking it up\u2026</div>';
+  gInfo(p.gid).then(g=>{const b=$('gi-'+p.id);if(b){b.innerHTML=giHtml(g);if(!reduced)b.animate([{opacity:0},{opacity:1}],{duration:200})}})
+    .catch(()=>{const b=$('gi-'+p.id);if(b)b.innerHTML='<p class="dt-sub">Couldn\u2019t get details from Google right now. If this keeps happening, you may have hit today\u2019s free limit.</p>'})}
+// Tap a place on the Google map to add it
+function openPoi(placeId,at){
+  ML.popup({maxWidth:290,minWidth:240,className:'qpop'}).setLatLng(at).setContent('<div class="pop"><div class="si-note"><span class="spin"></span>Loading\u2026</div></div>').openOn(map);
+  GM.importLibrary('places').then(async({Place})=>{const place=new Place({id:placeId});await place.fetchFields({fields:['id','displayName','location','formattedAddress','addressComponents','types','primaryType']});
+    const name=(place.displayName&&place.displayName.text)||place.displayName||'Place',loc=place.location;
+    ui.poi={gid:place.id,name,lat:+loc.lat().toFixed(6),lng:+loc.lng().toFixed(6),city:gComp(place,['locality','postal_town','administrative_area_level_3','administrative_area_level_2']),country:gComp(place,['country']),tag:gTagFor([place.primaryType].concat(place.types||[]),name)};
+    const t=TAGS.find(x=>x.id===ui.poi.tag),d=S.days.find(x=>x.id===S.view.day);
+    ML.popup({maxWidth:290,minWidth:240,className:'qpop'}).setLatLng(at).setContent('<div class="pop">'+(t?'<div class="pop-tag" style="--c:'+esc(t.color)+'"><i></i>'+esc(t.icon)+' '+esc(t.name)+'</div>':'')+'<h3>'+esc(name)+'</h3><p class="pop-meta">'+esc(place.formattedAddress||'')+'</p>'+
+      '<div class="pop-acts"><button class="btn small primary" data-pact="poi-add">'+(d?'Add to Day '+(dayIdx(d.id)+1):'Add to trip')+'</button><button class="btn small" data-pact="poi-save">Save for later</button></div></div>').openOn(map)})
+  .catch(()=>{map.closePopup();toast('Couldn\u2019t load that place from Google right now.')})}
 function jrCard(p,base){return jrCardJ(p.jr,base||(p.day?isoOf(dayDate(dayIdx(p.day))):null))}
 function jrCardJ(j,base){
   const k=JK[j.kind]||JK.flight,lab=key=>(k.f.find(x=>x[0]===key)||[])[1];
@@ -2510,7 +2711,7 @@ function openPlace(p,preset){
   preset=preset||{};
   const isNew=!p;
   ui.dlg='place';
-  ui.form={id:p?p.id:null,tag:p?p.tag:(preset.tag||guessTag(preset.name)||(S.tags[0]||{}).id),main:p?p.main:!!preset.main,lat:p?p.lat:preset.lat,lng:p?p.lng:preset.lng,mode:p&&p.mode&&MODES[p.mode]?p.mode:(preset.mode||null),libRef:p?null:(preset.libRef||null)};
+  ui.form={id:p?p.id:null,tag:p?p.tag:(preset.tag||guessTag(preset.name)||(S.tags[0]||{}).id),main:p?p.main:!!preset.main,lat:p?p.lat:preset.lat,lng:p?p.lng:preset.lng,mode:p&&p.mode&&MODES[p.mode]?p.mode:(preset.mode||null),libRef:p?null:(preset.libRef||null),gid:p?p.gid||null:(preset.gid||null)};
   const day=p?p.day:(preset.day||null);
   ui.form.jr=p&&p.jr?Object.assign({},p.jr):{kind:guessJk(p?p.name:preset.name)};ui.form.jrBase=day?isoOf(dayDate(dayIdx(day))):null;
   openDlg('<h2>'+(isNew?'New place':'Edit place')+'</h2>'+
@@ -2650,8 +2851,44 @@ function localResults(){
   return out;
 }
 let srchT,srchSeq=0,onlineOK=null;
+function gTagFor(types,name){
+  const T=(types||[]).join(' ');const by=n=>tagByNames(n);
+  const tbl=[[/airport/,'airport|travel hub'],[/train_station|subway_station|transit_station|light_rail/,'train station|travel hub'],[/bus_station/,'travel hub'],[/ferry/,'ferry|travel hub'],
+    [/lodging|hotel|hostel/,'hotel'],[/cafe|coffee/,'cafe|treats'],[/bakery|dessert|ice_cream|confectionery/,'treats|cafe'],[/bar\b|night_club|pub|wine_bar/,'bar|nightlife'],[/restaurant|food|meal/,'restaurant|food'],
+    [/museum|art_gallery/,'museum'],[/aquarium/,'aquarium'],[/zoo/,'zoo'],[/amusement_park/,'theme park'],[/movie_theater/,'cinema'],[/church|place_of_worship/,'church'],
+    [/hindu_temple|buddhist/,'buddhist temple'],[/shopping_mall/,'mall|shopping'],[/store|shop|market/,'shop|shopping'],[/park/,'park|green space'],[/garden/,'garden|green space'],
+    [/beach/,'beach'],[/hiking|national_park/,'hiking|park'],[/post_office/,'post office'],[/historical|monument/,'historic site|monument'],[/tourist_attraction|point_of_interest/,'attraction|must-see']];
+  for(const [rx,n] of tbl)if(rx.test(T)){const id=by(n);if(id)return id}
+  return guessTag(name)}
+function gComp(place,kinds){const a=place.addressComponents||[];for(const k of kinds){const c=a.find(x=>(x.types||[]).includes(k));if(c)return c.longText||c.long_name||''}return ''}
+// Turn a picked Google suggestion into a full result (one Place Details call, which also closes the search session)
+async function gResolve(r){
+  const place=r.pred.toPlace();
+  await place.fetchFields({fields:['id','displayName','location','formattedAddress','addressComponents','types','primaryType']});
+  ui.gToken=null;
+  const loc=place.location;
+  return Object.assign({},r,{name:(place.displayName&&place.displayName.text)||place.displayName||r.name,lat:+loc.lat().toFixed(6),lng:+loc.lng().toFixed(6),
+    city:gComp(place,['locality','postal_town','administrative_area_level_3','administrative_area_level_2']),country:gComp(place,['country']),
+    tag:gTagFor([place.primaryType].concat(place.types||[]),r.name),gid:place.id,pred:null})}
+function gSearch(q,seq,mode,b){
+  GM.importLibrary('places').then(({AutocompleteSuggestion,AutocompleteSessionToken})=>{
+    ui.gToken=ui.gToken||new AutocompleteSessionToken();
+    const req={input:q,sessionToken:ui.gToken};
+    if(mode==='city')req.includedPrimaryTypes=['locality','administrative_area_level_3','postal_town'];
+    else req.locationBias={center:{lat:b.lat,lng:b.lng},radius:50000};
+    if(mode==='stay')req.includedPrimaryTypes=['lodging'];
+    return AutocompleteSuggestion.fetchAutocompleteSuggestions(req)})
+  .then(res=>{if(seq!==srchSeq||!ui.srch)return;onlineOK=true;
+    ui.srch.online=(res.suggestions||[]).map(s=>s.placePrediction).filter(Boolean).map(pp=>{const main=pp.mainText?pp.mainText.text:pp.text.text,sec=pp.secondaryText?pp.secondaryText.text:'';
+      const ty=(pp.types||[]).find(t=>!/point_of_interest|establishment|political/.test(t))||'';
+      return {kind:mode==='city'?'city':'web',name:main,sub:sec,pred:pp,type:ty.replace(/_/g,' '),tag:gTagFor(pp.types,main),lat:null,lng:null}});
+    ui.srch.status='';renderSearch()})
+  .catch(()=>{if(seq!==srchSeq||!ui.srch)return;ui.srch.status='gerror';ui.srch.online=[];renderSearch()});
+}
 function searchOnline(){
   clearTimeout(srchT);const q=ui.srch.q.trim();
+  if(GL){if(q.length<2){ui.srch.online=[];ui.srch.status='';renderSearch();return}
+    srchT=setTimeout(()=>{const seq=++srchSeq;ui.srch.status='loading';renderSearch();gSearch(q,seq,ui.srch.mode,srchBias())},260);return}
   if(q.length<3||onlineOK===false){ui.srch.online=[];ui.srch.status=onlineOK===false&&q.length>=3?'offline':'';renderSearch();return}
   srchT=setTimeout(()=>{
     const seq=++srchSeq,b=srchBias(),mode=ui.srch.mode;
@@ -2671,27 +2908,30 @@ function searchOnline(){
 }
 function renderSearch(){
   const box=$('srch-res');if(!box||!ui.srch)return;
-  const loc=localResults(),web=ui.srch.online.filter(w=>(ui.srch.mode!=='city'||w.kind==='city')&&!loc.some(l=>normTxt(l.name)===normTxt(w.name)&&Math.abs(l.lat-w.lat)<.003));
+  const loc=localResults(),web=ui.srch.online.filter(w=>(ui.srch.mode!=='city'||w.kind==='city')&&!loc.some(l=>normTxt(l.name)===normTxt(w.name)&&(w.lat==null||Math.abs(l.lat-w.lat)<.003)));
   const list=ui.srch.list=loc.concat(web);if(ui.srch.sel>=list.length)ui.srch.sel=0;
   const row=(r,i)=>{const t=r.tag&&TAGS.find(x=>x.id===r.tag),ic=r.kind==='city'?'🏙️':t?t.icon:'📍';
     return '<button type="button" class="srch-item'+(i===ui.srch.sel?' on':'')+'" role="option" aria-selected="'+(i===ui.srch.sel)+'" data-act="srch-pick" data-i="'+i+'"><span class="si-ico">'+esc(ic)+'</span><span class="si-t"><b>'+esc(r.name)+'</b><small>'+esc(r.sub||'')+'</small></span>'+(r.kind==='mine'?'<span class="si-badge">Yours</span>':r.type&&r.kind==='web'?'<span class="si-badge soft">'+esc(r.type)+'</span>':'')+'</button>'};
   let h='',i=0;const q=ui.srch.q.trim();
   const grp=(label,arr)=>{if(!arr.length)return;h+='<div class="si-h">'+label+'</div>'+arr.map(r=>row(r,i++)).join('')};
   if(ui.srch.mode==='city'){grp(q?'Cities':'',list)}
-  else{grp(q?'Your places':'Saved in this city',loc.filter(r=>r.kind==='mine'));grp('Cities',loc.filter(r=>r.kind==='city'));grp('From the map',web)}
+  else{grp(q?'Your places':'Saved in this city',loc.filter(r=>r.kind==='mine'));grp('Cities',loc.filter(r=>r.kind==='city'));grp(GL?'From Google Maps':'From the map',web)}
   if(ui.srch.status==='loading')h+='<div class="si-note"><span class="spin"></span>Searching the map…</div>';
+  else if(ui.srch.status==='gerror')h+='<div class="si-note">Google search didn\u2019t answer. Check your connection, or your Google Maps setup in Settings.</div>';
   else if(ui.srch.status==='offline'&&q.length>=3)h+='<div class="si-note">Online search isn’t available here, so only places the app already knows are shown. It works when the app is opened in a regular browser.</div>';
   if(!h)h='<div class="si-note">'+(q?(q.length<3&&ui.srch.mode!=='city'?'Keep typing…':'No matches yet. Try another spelling, or add it manually.'):(ui.srch.mode==='city'?'Start typing a city name.':'Start typing a name, landmark or address.'))+'</div>';
   box.innerHTML=h;
 }
 function pickSearch(r){
+  if(r.pred){const box=$('srch-res');if(box)box.insertAdjacentHTML('beforeend','<div class="si-note"><span class="spin"></span>Getting '+esc(r.name)+'\u2026</div>');
+    gResolve(r).then(pickSearch).catch(()=>{if(ui.srch){ui.srch.status='gerror';renderSearch()}});return}
   const m=ui.srch.mode,ctx=ui.srch.ctx;closeDlg();
   if(m==='city'){openCity(null,{name:r.name,country:r.country||guessCountry(r.name),lat:r.lat,lng:r.lng});return}
-  if(m==='lib'){ui.libReturn=ctx.ret||'saved';openLib(Object.assign(blankLib(),ctx.draft||{},{name:r.name,lat:r.lat,lng:r.lng,city:r.city||(ctx.draft&&ctx.draft.city)||'',country:r.country||(ctx.draft&&ctx.draft.country)||'',tag:r.tag||(TAGS[0]||{}).id}));return}
+  if(m==='lib'){ui.libReturn=ctx.ret||'saved';openLib(Object.assign(blankLib(),ctx.draft||{},{gid:r.gid||null,name:r.name,lat:r.lat,lng:r.lng,city:r.city||(ctx.draft&&ctx.draft.city)||'',country:r.country||(ctx.draft&&ctx.draft.country)||'',tag:r.tag||(TAGS[0]||{}).id}));return}
   if(SET.view!=='plan')setView('plan');
   glideTo([r.lat,r.lng],Math.max(map.getZoom(),15));
   if(m==='stay'){openStay(null,{lat:r.lat,lng:r.lng,ci:ctx.ci,name:r.name});return}
-  openPlace(null,{lat:r.lat,lng:r.lng,day:ctx.day||null,name:r.name,tag:r.tag||undefined,main:!!ctx.main,libRef:r.lib||null});
+  openPlace(null,{lat:r.lat,lng:r.lng,day:ctx.day||null,name:r.name,tag:r.tag||undefined,main:!!ctx.main,libRef:r.lib||null,gid:r.gid||null});
 }
 function searchFallback(kind){
   const m=ui.srch.mode,ctx=ui.srch.ctx,q=ui.srch.q.trim();closeDlg();
@@ -2748,7 +2988,7 @@ function renderModeField(){
   const pt={lat:f.lat,lng:f.lng};
   if(!prev){box.innerHTML='<span>How you\u2019ll get here</span><div class="modehint">'+(day?'This is the first stop of the day. To change travel from the previous day, tap its travel row in the itinerary.':'Pick a day to choose how you\u2019ll get here.')+'</div>';return}
   if(!f.mode)f.mode=legMode(prev,pt);
-  const legs={};if(prev)MODE_KEYS.forEach(m=>{legs[m]=legRoute(prev,pt,m)});
+  const legs={};if(prev)MODE_KEYS.forEach(m=>{legs[m]=legRoute(prev,pt,m,true)});
   box.innerHTML='<span>How you’ll get here</span><div class="modes" style="--dc:'+(day?dayColor(day):'var(--accent)')+'">'+MODE_KEYS.map(m=>'<button type="button" data-act="pick-mode" data-mode="'+m+'" aria-pressed="'+(f.mode===m)+'"><span class="mi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="mt">'+(prev?dur(minsFor(m,legs[m].km)):'&nbsp;')+'</span></button>').join('')+'</div>'+
     '<div class="modehint">'+(prev?'From '+esc(prev.name)+' · '+fmtKm(legs[f.mode].km):day?'First stop of the day. This applies if another stop comes before it.':'Pick a day to see travel times.')+'</div>';
 }
@@ -2764,7 +3004,7 @@ function savePlace(){
   let p=S.places.find(x=>x.id===f.id);
   if(!day){
     const near=nearestCity(f.lat,f.lng);
-    STORE.library.push({id:uid('l'),name,lat:f.lat,lng:f.lng,tag:f.tag,notes,country:near?near.country||'':'',city:near?near.name:''});
+    STORE.library.push({id:uid('l'),gid:f.gid||undefined,name,lat:f.lat,lng:f.lng,tag:f.tag,notes,country:near?near.country||'':'',city:near?near.name:''});
     if(p){S.places=S.places.filter(x=>x!==p);if(p.day)renumber(p.day)}
     closeDlg();commit();gtoast('Saved '+name+' to Saved places');return;
   }
@@ -2773,6 +3013,7 @@ function savePlace(){
   Object.assign(p,{name,tag:f.tag,day,notes,main:f.main,stay:+$('f-stay').value||60});
   if(f.main&&f.mode)p.mode=f.mode;
   if(f.libRef&&!p.libRef)p.libRef=f.libRef;
+  if(f.gid)p.gid=f.gid;
   const jb=$('f-jr');
   if(jb&&!jb.hidden&&f.jr){const o=jrCollect();if(o)p.jr=o;else delete p.jr}
   else delete p.jr;
@@ -2918,6 +3159,10 @@ document.addEventListener('click',e=>{
     case 'leg-menu':if(p)openQuick(b,p);break;
     case 'xfer-menu':openXfer(b,b.dataset.day);break;
     case 'install-app':installApp();break;
+    case 'g-info':if(p)showGInfo(p);break;
+    case 'g-save':gSaveCfg();break;
+    case 'g-off':gSetOn(false);break;
+    case 'g-on':gSetOn(true);break;
     case 'tab-more':openTabMore(b);break;
     case 'toggle-key':{const lg=document.querySelector('.legend'),on=!lg.classList.contains('show');lg.classList.toggle('show',on);b.setAttribute('aria-expanded',on);b.textContent=on?'Hide key':'Map key';break}
     case 'ctr-toggle':{const id=b.dataset.day,box=b.closest('.trans'),now=!ui.ctrOpen.has(id);if(now)ui.ctrOpen.add(id);else ui.ctrOpen.delete(id);
@@ -3433,7 +3678,7 @@ function readLibForm(){const d=ui.libDraft||{};d.name=$('f-ln').value.trim();d.c
 function saveLib(){
   const d=readLibForm();if(!d.name){$('f-err').textContent='Give the place a name.';$('f-err').hidden=false;return}
   let l=d.id&&STORE.library.find(x=>x.id===d.id);if(!l){l={id:uid('l')};STORE.library.push(l)}
-  Object.assign(l,{name:d.name,city:d.city,country:d.country,notes:d.notes,tag:d.tag,lat:d.lat,lng:d.lng});delete l.draft;
+  Object.assign(l,{name:d.name,city:d.city,country:d.country,notes:d.notes,tag:d.tag,lat:d.lat,lng:d.lng});if(d.gid)l.gid=d.gid;delete l.draft;
   Object.values(STORE.trips).forEach(T=>T.places.forEach(p=>{if(p.libRef===l.id){p.name=l.name;p.tag=l.tag}}));
   ui.libDraft=null;closeDlg();commit();gtoast(SET.view==='plan'?'Saved '+l.name+' to Saved places. Add it to a day from there.':'Saved '+l.name);
 }
@@ -3463,7 +3708,7 @@ function addToTrip(){
     let pts=T.places.filter(p=>p.day===day);if(!pts.length)pts=T.places.filter(p=>T.days.some(d=>d.id===p.day&&d.city===cid));if(!pts.length)pts=T.stays;
     if(pts.length){lat=pts.reduce((a,p)=>a+p.lat,0)/pts.length+.0012;lng=pts.reduce((a,p)=>a+p.lng,0)/pts.length+.0012}else{const c=map.getCenter();lat=c.lat;lng=c.lng}}
   const main=ui.form.main,order=main?T.places.filter(p=>p.day===day&&p.main).reduce((a,p)=>Math.max(a,p.order||0),0)+1:0;
-  T.places.push({id:uid('p'),name:l.name,lat:+(+lat).toFixed(6),lng:+(+lng).toFixed(6),tag:l.tag,day,main,order,stay:60,notes:l.notes||'',libRef:l.id});
+  T.places.push({id:uid('p'),name:l.name,lat:+(+lat).toFixed(6),lng:+(+lng).toFixed(6),tag:l.tag,day,main,order,stay:60,notes:l.notes||'',libRef:l.id,gid:l.gid||undefined});
   const di=T.days.findIndex(d=>d.id===day);closeDlg();
   if(T===S){ui.needFit=true;commit()}else{save();renderPage(false)}
   gtoast('Added '+l.name+' to Day '+(di+1)+' of '+T.trip.name);
@@ -3602,6 +3847,7 @@ const swOK=()=>{try{return 'serviceWorker' in navigator&&(location.protocol==='h
 addEventListener('beforeinstallprompt',e=>{e.preventDefault();APP.prompt=e;if(SET.view==='settings')renderPage()});
 addEventListener('appinstalled',()=>{APP.prompt=null;gtoast('Waypoint is installed. Open it from your home screen.');if(SET.view==='settings')renderPage()});
 function installApp(){const e=APP.prompt;if(!e)return;e.prompt();e.userChoice.then(()=>{APP.prompt=null;if(SET.view==='settings')renderPage()}).catch(()=>{})}
+window.onGoogleAuthFail=()=>{try{toast('Google Maps turned down your API key. Check it in Settings > Google Maps.')}catch(e){}};
 function appSetup(){
   if(!swOK())return;
   navigator.serviceWorker.register('sw.js').then(reg=>{
@@ -3618,6 +3864,23 @@ function appSetup(){
   try{if(!APP.standalone&&mq.matches&&!localStorage.getItem('waypoint-install-hint'))setTimeout(()=>{
     gtoast('Add Waypoint to your home screen to use it like an app.',()=>{localStorage.setItem('waypoint-install-hint','1');APP.prompt?installApp():setView('settings')},{label:APP.prompt?'Install':'How',stay:true,close:()=>localStorage.setItem('waypoint-install-hint','1')})},4000)}catch(e){}
 }
+function gCfg(){try{return JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){return null}}
+function gSaveCfg(){const k=($('f-gkey')||{}).value||'',id=($('f-gmid')||{}).value||'';
+  if(!k.trim()){gtoast('Paste your API key first.');return}
+  try{localStorage.setItem('waypoint-google',JSON.stringify({key:k.trim(),mapId:id.trim(),on:true}))}catch(e){}
+  location.reload()}
+function gSetOn(on){const c=gCfg();if(!c)return;c.on=on;try{localStorage.setItem('waypoint-google',JSON.stringify(c))}catch(e){}location.reload()}
+function googleCard(){
+  const c=gCfg(),st=GL?'<span class="gst ok">Connected</span>':c&&c.on?'<span class="gst bad">Not loading</span>':c?'<span class="gst">Off</span>':'<span class="gst">Not set up</span>';
+  let h='<section class="card set"><div class="card-h"><h2>Google Maps</h2>'+st+'</div>';
+  if(GL)h+='<p class="muted">Search, directions with transit, and place details come from Google. Free monthly allowances cover personal use, and the limits you set in Google Cloud keep it free.</p>';
+  else if(c&&c.on)h+='<p class="muted">'+(window.GAUTHFAIL?'Google turned down the key. Check that the key allows this site\u2019s address and has the three APIs turned on.':window.GFAIL==='offline'||window.GFAIL==='timeout'?'Google Maps couldn\u2019t load (you may be offline), so the built-in map is showing. It will try again next time you open the app.':'Google Maps couldn\u2019t start. Check the key, then reload.')+'</p>';
+  else h+='<p class="muted">Use Google\u2019s map, place search (with photos, ratings and hours) and real directions, including transit. You need a free Google Maps API key. See the README for the 10-minute setup.</p>';
+  h+='<div class="field"><label for="f-gkey">API key</label><input class="inp mono" id="f-gkey" value="'+esc(c?c.key:'')+'" placeholder="AIza\u2026" autocomplete="off" spellcheck="false"></div>'+
+    '<div class="field"><label for="f-gmid">Map ID <small class="muted">(optional)</small></label><input class="inp mono" id="f-gmid" value="'+esc(c&&c.mapId||'')+'" placeholder="Leave blank to use Google\u2019s demo map ID" autocomplete="off" spellcheck="false"></div>'+
+    '<div class="inline"><button class="btn primary" data-act="g-save">'+(c?'Save and reload':'Connect')+'</button>'+(c?(c.on?'<button class="btn" data-act="g-off">Use the built-in map</button>':'<button class="btn" data-act="g-on">Turn Google Maps on</button>'):'')+'</div>'+
+    '<p class="muted small-note">The key is stored only on this device. It isn\u2019t part of the code you put on GitHub. Without a connection, the app switches to the built-in map automatically.</p>';
+  return h+'</section>'}
 function installCard(){
   let body;
   if(APP.standalone)body='<p class="muted">You’re using the installed app. It works offline and updates itself when you’re online.</p>';
@@ -3634,6 +3897,7 @@ function pgSettings(){
   const ids=Object.keys(STORE.trips),kb=Math.max(1,Math.round(((()=>{try{return (localStorage.getItem(TKEY)||'').length}catch(e){return 0}})())/1024));
   let h=pageHead('Settings','These apply to the whole app. Each trip has its own settings too.','<button class="btn" data-act="trip-settings">'+ico('<path d="M5.5 3h6.5l3.5 3.5v9A1.5 1.5 0 0 1 14 17H5.5A1.5 1.5 0 0 1 4 15.5v-11A1.5 1.5 0 0 1 5.5 3z"/>')+'Settings for '+esc(S.trip.name)+'</button>','Waypoint');
   h+=installCard();
+  h+=googleCard();
   h+='<section class="card set"><div class="card-h"><h2>Appearance</h2></div>'+
     row('Theme','',seg('set-theme',SET.theme,[['system','System'],['light','Light'],['dark','Dark']]))+
     row('Motion','Turn off animations if they feel too busy',seg('set-motion',SET.motion,[['system','Full'],['reduce','Reduced']]))+'</section>';
@@ -3880,6 +4144,29 @@ renderAll();fitVisible();
 applyTheme();applyMotion();renderRail();
 {const qv=new URLSearchParams(location.search).get('view');setView(VIEWS.some(v=>v.id===qv)?qv:SET.start==='last'?SET.view:SET.start)}
 sheetInit();appSetup();
+if(window.GFAIL&&gCfg()&&gCfg().on)setTimeout(()=>toast(window.GFAIL==='offline'||window.GFAIL==='timeout'?'You\u2019re offline, so the built-in map is showing.':'Google Maps couldn\u2019t load, so the built-in map is showing. Check Settings > Google Maps.'),800);
+if(window.GAUTHFAIL)window.onGoogleAuthFail();
+})();
+</script>
+<script>
+/* Starts the app. With a Google Maps key saved in Settings, Google Maps loads first; if it can't (offline, bad key), the built-in map is used. */
+(function(){
+  var started=false,run=function(){if(started)return;started=true;var s=document.createElement('script');s.textContent=document.getElementById('app-js').textContent;document.body.appendChild(s)};
+  var cfg=null;try{cfg=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
+  window.GMODE=null;window.GFAIL=null;
+  if(!cfg||!cfg.on||!cfg.key||(window.top!==window.self)){run();return}
+  if(navigator.onLine===false){window.GFAIL='offline';run();return}
+  var to=setTimeout(function(){window.GFAIL='timeout';run()},9000);
+  window.gm_authFailure=function(){window.GAUTHFAIL=true;if(window.onGoogleAuthFail)window.onGoogleAuthFail()};
+  window.__wpGoogleReady=function(){
+    Promise.all(['maps','marker','places','routes'].map(function(l){return google.maps.importLibrary(l)}))
+      .then(function(){if(started)return;clearTimeout(to);window.GMODE=cfg;run()})
+      .catch(function(e){clearTimeout(to);window.GFAIL=String(e&&e.message||e);run()});
+  };
+  var sc=document.createElement('script');
+  sc.src='https://maps.googleapis.com/maps/api/js?key='+encodeURIComponent(cfg.key)+'&v=weekly&loading=async&callback=__wpGoogleReady';
+  sc.async=true;sc.onerror=function(){clearTimeout(to);window.GFAIL='load';run()};
+  document.head.appendChild(sc);
 })();
 </script>
 </body>
