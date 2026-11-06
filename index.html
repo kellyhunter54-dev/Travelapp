@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051719"></script>
+<script src="config.js?v=202611051722"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -2201,18 +2201,34 @@ function gUsage(){let u={};try{u=JSON.parse(localStorage.getItem('waypoint-gusag
   if(u.mk!==mk){u.mk=mk;u.m={}}if(u.dk!==dk){u.dk=dk;u.d={}}u.m=u.m||{};u.d=u.d||{};return u}
 const gAllow=k=>{const u=gUsage(),l=G_LIMIT[k];return (u.d[k]||0)<l.d&&(u.m[k]||0)<l.m};
 function gUse(k){const u=gUsage();if(!((u.d[k]||0)<G_LIMIT[k].d&&(u.m[k]||0)<G_LIMIT[k].m))return false;u.d[k]=(u.d[k]||0)+1;u.m[k]=(u.m[k]||0)+1;try{localStorage.setItem('waypoint-gusage',JSON.stringify(u))}catch(e){}return true}
-const GKEY='waypoint-groutes-v1',G_TM={walk:'WALKING',bike:'BICYCLING',car:'DRIVING',transit:'TRANSIT'};
+const GKEY='waypoint-groutes-v2',G_TM={walk:'WALKING',bike:'BICYCLING',car:'DRIVING',transit:'TRANSIT'};
+try{localStorage.removeItem('waypoint-groutes-v1')}catch(e){}
 let gCache={};try{gCache=JSON.parse(localStorage.getItem(GKEY))||{}}catch(e){}
 {const old=Date.now()-30*864e5;Object.keys(gCache).forEach(k=>{if(!(gCache[k].t>old))delete gCache[k]})}
 const gKey=(A,B,mode)=>mode+':'+A[0].toFixed(5)+','+A[1].toFixed(5)+';'+B[0].toFixed(5)+','+B[1].toFixed(5);
 const gPending={},gFail={},gQueue=[];let gActive=0,gRefreshT,gFails=0;
-function requestG(A,B,mode){const k=gKey(A,B,mode);if(gCache[k]||gPending[k]||gFail[k]||!G_TM[mode]||gFails>=6)return;if(!gUse('route')){gFail[k]=1;return}gPending[k]=1;gQueue.push([k,A,B,mode]);gPump()}
+function requestG(A,B,mode,ga,gb){const k=gKey(A,B,mode);if(gCache[k]||gPending[k]||gFail[k]||!G_TM[mode]||gFails>=6)return;if(!gUse('route')){gFail[k]=1;return}gPending[k]=1;gQueue.push([k,A,B,mode,ga,gb]);gPump()}
+// keep the shape of a long route while cutting it to about 300 points (Douglas-Peucker)
+function simplifyPath(pts,max){if(pts.length<=max)return pts;let eps=0.00002,out=pts;
+  const dp=(a,b,keep)=>{let m=-1,mi=0;const [ax,ay]=pts[a],[bx,by]=pts[b],dx=bx-ax,dy=by-ay,L=dx*dx+dy*dy||1e-12;
+    for(let i=a+1;i<b;i++){const [px,py]=pts[i];let t=((px-ax)*dx+(py-ay)*dy)/L;t=Math.max(0,Math.min(1,t));const ex=ax+t*dx-px,ey=ay+t*dy-py,d=ex*ex+ey*ey;if(d>m){m=d;mi=i}}
+    if(m>eps*eps){keep[mi]=1;dp(a,mi,keep);dp(mi,b,keep)}};
+  for(let n=0;n<12&&out.length>max;n++){const keep=new Uint8Array(pts.length);keep[0]=keep[pts.length-1]=1;dp(0,pts.length-1,keep);out=pts.filter((_,i)=>keep[i]);eps*=1.6}
+  return out}
 function gPump(){
-  while(gActive<2&&gQueue.length){const [k,A,B,mode]=gQueue.shift();gActive++;
-    GM.importLibrary('routes').then(({Route})=>Route.computeRoutes({origin:{lat:A[0],lng:A[1]},destination:{lat:B[0],lng:B[1]},travelMode:G_TM[mode],fields:['path','distanceMeters','durationMillis']}))
-      .then(res=>{const r=res&&res.routes&&res.routes[0];if(!r||!r.path)throw new Error('no route');
+  while(gActive<2&&gQueue.length){const [k,A,B,mode,ga,gb]=gQueue.shift();gActive++;
+    Promise.all([GM.importLibrary('routes'),(ga||gb)?GM.importLibrary('places').catch(()=>null):null]).then(([{Route},pl])=>{
+      // a place's Google ID routes to its real entrance instead of the nearest bit of road to the pin
+      const end=(P,g)=>g&&pl&&pl.Place?new pl.Place({id:g}):{lat:P[0],lng:P[1]};
+      const base={travelMode:G_TM[mode],fields:['path','distanceMeters','durationMillis']};
+      if(mode==='car'){base.computeAlternativeRoutes=true;base.routingPreference='TRAFFIC_UNAWARE'}
+      const plain=()=>Route.computeRoutes(Object.assign({origin:{lat:A[0],lng:A[1]},destination:{lat:B[0],lng:B[1]}},base));
+      return (ga||gb)?Route.computeRoutes(Object.assign({origin:end(A,ga),destination:end(B,gb)},base)).catch(plain):plain()})
+      .then(res=>{const rs=(res&&res.routes||[]).filter(x=>x&&x.path&&x.path.length);
+        // quickest of the routes Google offers
+        const r=rs.sort((a,b)=>(a.durationMillis||9e15)-(b.durationMillis||9e15))[0];if(!r)throw new Error('no route');
         let pts=r.path.map(q=>{const la=typeof q.lat==='function'?q.lat():q.lat,ln=typeof q.lng==='function'?q.lng():q.lng;return [+(+la).toFixed(5),+(+ln).toFixed(5)]});
-        if(pts.length>300){const st=Math.ceil(pts.length/300);pts=pts.filter((_,i)=>i%st===0||i===pts.length-1)}
+        pts=simplifyPath(pts,300);
         gCache[k]={t:Date.now(),km:(r.distanceMeters||0)/1000,min:Math.max(1,Math.round((r.durationMillis||0)/60000)),path:pts};
         const keys=Object.keys(gCache);if(keys.length>500)keys.sort((a,b)=>gCache[a].t-gCache[b].t).slice(0,keys.length-500).forEach(x=>delete gCache[x]);
         try{localStorage.setItem(GKEY,JSON.stringify(gCache))}catch(e){}
@@ -2228,7 +2244,7 @@ function arcPath(A,B){const mx=(A[0]+B[0])/2,my=(A[1]+B[1])/2,dx=B[0]-A[0],dy=B[
 function legRoute(a,b,mode,peek){
   const A=[a.lat,a.lng],B=[b.lat,b.lng];
   if(mode==='plane')return {path:arcPath(A,B),km:hav(A,B),live:false,air:true};
-  if(GL){const c=gCache[gKey(A,B,mode)];if(c)return {path:c.path,km:c.km,min:c.min,live:true};if(!peek)requestG(A,B,mode);return {path:[A,B],km:hav(A,B)*1.25,live:false}}
+  if(GL){const c=gCache[gKey(A,B,mode)];if(c)return {path:c.path,km:c.km,min:c.min,live:true};if(!peek)requestG(A,B,mode,a.gid,b.gid);return {path:[A,B],km:hav(A,B)*1.25,live:false}}
   if(S.view.basemap!=='street'&&hav(A,B)>30){const d=hav(A,B);return {path:[A,B],km:d*1.15,live:false}}
   if(S.view.basemap==='street'){const prof=MODES[mode].profile,c=liveCache[liveKey(A,B,prof)];if(c)return {path:c.path,km:c.km,live:true};requestLive(A,B,prof)}
   const gk=A.join()+'|'+B.join();let r=gridCache.get(gk);
@@ -4558,7 +4574,7 @@ document.addEventListener('click',e=>{
     case 'backup-all':save();copyText(JSON.stringify({waypointBackup:1,trips:STORE.trips,tags:TAGS,library:STORE.library}),'Backup copied');break;
     case 'wipe-all':{const mode=b.dataset.mode==='blank'?'blank':'sample',ak='wipe-'+mode;
       if(ui.armed!==ak){ui.armed=ak;renderPage(false);clearTimeout(ui.wipeT);ui.wipeT=setTimeout(()=>{if(ui.armed===ak){ui.armed=null;if(SET.view==='settings')renderPage(false)}},5000);break}ui.armed=null;
-      try{[KEY,TKEY,SKEY,RKEY,'waypoint-groutes-v1'].forEach(k=>localStorage.removeItem(k))}catch(x){}
+      try{[KEY,TKEY,SKEY,RKEY,'waypoint-groutes-v1',GKEY].forEach(k=>localStorage.removeItem(k))}catch(x){}
       gCache={};ui.ginfo={};
       SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'settings',map:'illustrated',motion:'system',start:'last'};saveSet();applyTheme();applyMotion();applyPins();
       TAGS=null;
