@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611052126"></script>
+<script src="config.js?v=202611052134"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -430,6 +430,12 @@ html .pin-extra,html .pin-ghost{background:var(--pin-other,#fff)}
 .pin-moving .pin{animation:pinWiggle 1.2s ease-in-out infinite;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.35)}
 @keyframes pinWiggle{0%,100%{translate:0 0}50%{translate:0 -4px}}
 .trans-li{list-style:none;margin:6px 0}
+.trans-day{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
+.trans-day .td-l{font-size:12.5px;font-weight:600;color:var(--muted)}
+.td-seg{display:flex;flex-wrap:wrap;gap:6px}
+.td-seg button{border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 12px;font:600 12.5px/1.2 var(--f-body);color:var(--fg);cursor:pointer}
+.td-seg button[aria-pressed="true"]{background:var(--accent-soft);border-color:color-mix(in srgb,var(--accent) 45%,var(--line))}
+.td-seg button[disabled]{opacity:.45;cursor:default}
 .trans-split{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
 .trans-split .ts-hint{flex:1 1 220px;font-size:12.5px;color:var(--muted)}
 .trans-split .ts-move{display:flex;gap:12px}
@@ -2282,7 +2288,7 @@ function hotelLeg(dayId,part){
   if((part==='m'?ms[0]:ms[ms.length-1]).stayRef===st.id)return null;
   const from=part==='m'?st:ms[ms.length-1],to=part==='m'?ms[0]:st,k=part==='m'?'mmode':'emode';
   // on a travel day the morning is still in the old city, so the trip's mode doesn't apply to the hotel walk
-  const pref=part==='m'&&splitIdx(d)>0&&d[k]===d.tmode?null:d[k];
+  const sx=splitIdx(d),pref=part==='m'&&sx>0&&d[k]===d.tmode?null:part==='e'&&sx>0&&sx>=ms.length&&d.tmode?d.tmode:d[k];
   const mode=pref&&MODES[pref]?pref:legMode(from,{lat:to.lat,lng:to.lng});
   const r=legRoute(from,to,mode);
   return {from,to,stay:st,part,mode,auto:!pref,km:r.km,min:legMins(r,mode),path:r.path,live:r.live,day:dayId};
@@ -2364,7 +2370,10 @@ function cityEnds(di){
 function cityTransition(dayId){
   const di=dayIdx(dayId),d=S.days[di];if(!d||di<1||S.days[di-1].city===d.city)return null;
   const pl=dayPlan(dayId),pd=S.days[di-1];
-  if(pl.split>0){const x=pl[pl.split],a=pl[pl.split-1];return {lg:x.leg,kind:'s',day:dayId,date:di,leave:x.leg.dep!=null?x.leg.dep:a.leave,fromName:a.p.name,toName:x.p.name}}
+  if(pl.split>0&&pl.split<pl.length){const x=pl[pl.split],a=pl[pl.split-1];return {lg:x.leg,kind:'s',day:dayId,date:di,leave:x.leg.dep!=null?x.leg.dep:a.leave,fromName:a.p.name,toName:x.p.name}}
+  if(pl.split>0){const a=pl[pl.length-1],ev=pl.evening,nc=S.cities.find(c=>c.id===d.city);
+    // every stop so far is in the old city: the trip ends the day
+    return {lg:ev,kind:'s',end:true,day:dayId,date:di,leave:a.leave,fromName:a.p.name,toName:ev?ev.stay.name:(nc?nc.name:''),need:ev?null:(nc?nc.name:'the next city')}}
   if(pl.morning&&stayCityId(pl.morning.stay)!==d.city){const lg=pl.morning;return {lg,kind:'h',day:dayId,date:di,leave:toMin(d.start),fromName:lg.stay.name,toName:lg.to.name}}
   const x=transferOf(di);
   if(!x){
@@ -2394,7 +2403,10 @@ function transitionCard(t,fromC,toC){
   else h+='<div class="trans-times"><span>Add a stop or hotel in '+esc(t.need)+' to see the distance and travel time.</span></div>';
   if(j)h+=jrCardJ(j,base);
   h+='<div class="trans-acts"><button type="button" class="linkbtn sm" data-act="ctr-edit" data-day="'+t.day+'">'+(j?'Edit travel details':'+ Add travel details')+'</button></div>';
-  if(d){const sp=!!d.split,n=mains(d.id).length,si=splitIdx(d);
+  if(d){const sp=!!d.split,n=mains(d.id).length,si=splitIdx(d),di=dayIdx(d.id),ce=canTravelEarly(d);
+    if(ce||d.early)h+='<div class="trans-day"><span class="td-l">Travel on</span><div class="seg td-seg" role="group">'+
+      '<button type="button" data-act="ctr-day" data-day="'+t.day+'" data-v="early" aria-pressed="'+!!d.early+'"'+(!d.early&&!ce?' disabled':'')+'>Day '+(d.early?di+1:di)+' · last day in '+esc(fromC.name)+'</button>'+
+      '<button type="button" data-act="ctr-day" data-day="'+t.day+'" data-v="late" aria-pressed="'+!d.early+'">Day '+(d.early?di+2:di+1)+' · first day in '+esc(toC.name)+'</button></div></div>';
     h+='<div class="trans-split"><button type="button" class="mini-toggle" data-act="ctr-split" data-day="'+t.day+'" aria-pressed="'+sp+'"><span class="sw2"></span>Travel during the day</button>'+
       '<span class="ts-hint">'+(sp?'Morning in '+esc(fromC.name)+', the rest of the day in '+esc(toC.name)+'.':'Turn on to see '+esc(fromC.name)+' in the morning and '+esc(toC.name)+' later the same day.')+'</span>'+
       (sp&&n?'<span class="ts-move"><button type="button" class="linkbtn sm" data-act="ctr-split-at" data-day="'+t.day+'" data-d="-1"'+(si<=0?' disabled':'')+'>Leave earlier</button><button type="button" class="linkbtn sm" data-act="ctr-split-at" data-day="'+t.day+'" data-d="1"'+(si>=n?' disabled':'')+'>Leave later</button></span>':'')+'</div>'}
@@ -2409,7 +2421,28 @@ function openCtr(dayId){
   updJdur();
 }
 function saveCtr(){const d=S.days.find(x=>x.id===ui.form.ctr);if(!d)return;const o=jrCollect();
-  if(o){d.cjr=o;d.tmode=d.mmode=JK[o.kind].mode}else delete d.cjr;ui.ctrOpen.add(d.id);closeDlg();commit()}
+  if(o){d.cjr=o;d.tmode=d.mmode=JK[o.kind].mode}else delete d.cjr;ui.ctrOpen.add(d.id);closeDlg();
+  // a departure on the last day in the earlier city moves the trip onto that day
+  const di=dayIdx(d.id);
+  if(o&&o.depDate&&di>0&&o.depDate===isoOf(dayDate(di-1))&&canTravelEarly(d)){const nd=moveTravel(d,true);if(nd){gtoast('Moved the trip to Day '+di+'. Morning in '+cityName(S.days[di-2]?S.days[di-2].city:null,nd)+', then '+cityName(nd.city)+'.');}}
+  else if(o&&o.depDate&&d.early&&o.depDate===isoOf(dayDate(di+1))){const nd=moveTravel(d,false);if(nd)gtoast('Moved the trip to Day '+(di+2)+'.')}
+  commit()}
+function cityName(cid,fallbackDay){const c=S.cities.find(x=>x.id===(cid||(fallbackDay&&S.days[dayIdx(fallbackDay.id)-1]||{}).city));return c?c.name:''}
+function canTravelEarly(d){const di=dayIdx(d.id);if(di<1)return false;const pd=S.days[di-1];return pd.city!==d.city&&cityDays(pd.city).length>1}
+// Move the trip between two cities one day earlier (onto the last day in the old city) or back again.
+// Day counts shift by one, the trip length stays the same, and hotel nights follow.
+function moveTravel(d,earlier){
+  const di=dayIdx(d.id);
+  if(earlier){const pd=S.days[di-1];if(!canTravelEarly(d))return null;const X=pd.city,Y=d.city;
+    S.stays.forEach(st=>{const c=stayCityId(st);if(c===X&&st.co===di&&st.ci<di-1)st.co=di-1;else if(c===Y&&st.ci===di)st.ci=di-1});
+    pd.city=Y;['cjr','tmode','mmode','twhen'].forEach(k=>{if(d[k]!=null){pd[k]=d[k];delete d[k]}});pd.split=true;pd.early=true;delete pd.splitAt;delete d.split;delete d.early;
+    const iso=isoOf(dayDate(di-1));if(pd.cjr){if(pd.cjr.depDate)pd.cjr.depDate=iso;if(pd.cjr.arrDate&&pd.cjr.arrDate===isoOf(dayDate(di)))pd.cjr.arrDate=iso}
+    ui.ctrOpen.add(pd.id);return pd}
+  const nx=S.days[di+1];if(!d.early||!nx||nx.city!==d.city)return null;const pd=S.days[di-1],X=pd?pd.city:null;if(!X)return null;
+  S.stays.forEach(st=>{if(st.ci===di&&stayCityId(st)===d.city)st.ci=di+1;else if(st.co===di&&st.ci<di)st.co=di+1});
+  d.city=X;['cjr','tmode','mmode','twhen'].forEach(k=>{if(d[k]!=null){nx[k]=d[k];delete d[k]}});delete d.split;delete d.early;delete d.splitAt;
+  const iso=isoOf(dayDate(di+1));if(nx.cjr){if(nx.cjr.depDate)nx.cjr.depDate=iso;if(nx.cjr.arrDate)nx.cjr.arrDate=iso}
+  ui.ctrOpen.add(nx.id);return nx}
 function ctrOptions(dayId,attr){
   const di=dayIdx(dayId),t=cityTransition(dayId);if(!t)return '';
   const ends=t.lg?{from:t.lg.from,to:t.lg.to}:cityEnds(di),cur=t.lg?t.lg.mode:t.mode;
@@ -3007,7 +3040,8 @@ function renderPanel(){
           if(open)h+=detailHtml(x,true);
         });
         if(plan.tout&&!nextNew)h+=xferRow(plan.tout,'out');
-        if(plan.evening)h+=hlegRow(plan.evening);
+        if(tr&&tr.kind==='s'&&tr.end){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}
+        else if(plan.evening)h+=hlegRow(plan.evening);
       }
       if(est&&!plan.endsHome)h+=hotelRow(est,'e',i,plan.length?clock(plan.end):'');
       h+='<li class="empty-li"><span class="add-btns"><button class="add-first" data-act="add-stop" data-day="'+d.id+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>Add a stop</button></span><span>or drag one here from another day</span></li></ol>';
@@ -3663,6 +3697,8 @@ document.addEventListener('click',e=>{
     case 'g-on':gSetOn(true);break;
     case 'tab-more':openTabMore(b);break;
     case 'toggle-key':{const lg=document.querySelector('.legend'),on=!lg.classList.contains('show');lg.classList.toggle('show',on);b.setAttribute('aria-expanded',on);b.textContent=on?'Hide key':'Map key';break}
+    case 'ctr-day':{const d=S.days.find(x=>x.id===b.dataset.day);if(!d)break;const want=b.dataset.v==='early';if(!!d.early===want)break;
+      const nd=moveTravel(d,want);if(nd){commit();gtoast(want?'The trip is now on Day '+(dayIdx(nd.id)+1)+', the last day in '+cityName(S.days[dayIdx(nd.id)-1].city)+'. Add your morning stops there.':'The trip is back to the first day in '+cityName(nd.city)+'.')}break}
     case 'ctr-split':{const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.split=!d.split;delete d.splitAt;ui.ctrOpen.add(d.id);commit()}break}
     case 'ctr-split-at':{const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.splitAt=Math.max(0,Math.min(mains(d.id).length,splitIdx(d)+(+b.dataset.d)));ui.ctrOpen.add(d.id);commit()}break}
     case 'ctr-toggle':{const id=b.dataset.day,box=b.closest('.trans'),now=!ui.ctrOpen.has(id);if(now)ui.ctrOpen.add(id);else ui.ctrOpen.delete(id);
