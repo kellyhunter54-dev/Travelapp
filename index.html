@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051629"></script>
+<script src="config.js?v=202611051631"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -3078,9 +3078,9 @@ function openCity(c,preset){
     '<div class="field" id="f-ccfield"'+(c?'':' hidden')+'><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':(preset.country||workingCountry()))+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
     (c&&!c.ph?(()=>{const cur=cityDays(c.id).length,max=Math.max(14,cur+7);ui.form.cur=cur;
       return '<div class="field"><label for="f-cdays2">Days in '+esc(c.name)+'</label><select class="inp" id="f-cdays2">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===cur?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint" id="f-cdhint">'+cityRangeText(c,cur)+'</div></div>'})():'')+
-    (c?'':(()=>{const open=openDays().length,max=Math.max(7,open),def=open?open:3;
+    (c?'':(()=>{const open=openDays().length,max=Math.max(7,open),def=open?Math.min(open,3):3;ui.form.open=open;
       return '<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===def?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">'+
-        (open?'You have '+open+' day'+(open>1?'s':'')+' without a city. This city fills the first ones, and any extra days are added at the end.':'Added after your last city. You can add more days later.')+'</div></div>'})())+
+        '<span id="f-cdnew">'+addDaysHint(open,def)+'</span></div></div>'})())+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
 }
@@ -3106,6 +3106,12 @@ function setCityDays(c,n){
     lost.forEach(d=>{S.places.filter(p=>p.day===d.id).forEach(p=>{p.day=to;if(p.main)p.order=9999})});renumber(to);
     lost.slice().reverse().forEach(d=>{removeDayAt(dayIdx(d.id));if(S.view.day===d.id)S.view.day='all';if(ph){d.city=ph.id;insertDayAt(S.days.length,d,true)}})}
 }
+function addDaysHint(open,n){
+  if(!open)return 'Added after your last city. You can add more days later.';
+  const left=open-n;
+  return left>0?'Uses '+n+' of your '+open+' open days. '+left+' day'+(left>1?'s':'')+' will still need a city.'
+    :left===0?'Uses your last '+open+' open day'+(open>1?'s':'')+'.'
+    :'Uses your '+open+' open day'+(open>1?'s':'')+' and adds '+(-left)+' more to the end of the trip.'}
 function openDays(){const ph=S.cities.find(x=>x.ph);return ph?S.days.filter(d=>d.city===ph.id):[]}
 function saveCity(){
   const name=$('f-cname').value.trim();
@@ -4306,6 +4312,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if((t.id==='f-ts'||t.id==='f-te')&&ui.dlg==='trip'){ntSync(e);return}
+  if(t.id==='f-cdays'&&ui.dlg==='city'){const h=$('f-cdnew');if(h)h.innerHTML=addDaysHint(ui.form.open||0,+t.value);return}
   if(t.id==='f-cdays2'&&ui.dlg==='city'){const c=S.cities.find(x=>x.id===ui.form.id);if(c)$('f-cdhint').innerHTML=cityRangeText(c,+t.value);return}
   if(t.id==='f-att'){const T=STORE.trips[t.value],l=STORE.library.find(x=>x.id===ui.form.id);if(T&&l){$('f-atd').innerHTML=tripDayOptions(T,bestDay(T,l));atHint()}return}
   if(t.id==='f-atd'){atHint();return}
