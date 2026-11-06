@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051722"></script>
+<script src="config.js?v=202611051727"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -426,6 +426,9 @@ html .pin-extra,html .pin-ghost{background:var(--pin-other,#fff)}
 @media (max-width:820px){.pk-row{justify-content:flex-start}}
 .pin-prev{display:flex;align-items:center;gap:16px;padding:14px 4px 6px;flex-wrap:wrap}
 .pin-prev .pin{flex:none}
+.pop-move{display:block;margin-top:8px;font-size:12.5px;color:var(--muted)}
+.pin-moving .pin{animation:pinWiggle 1.2s ease-in-out infinite;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.35)}
+@keyframes pinWiggle{0%,100%{translate:0 0}50%{translate:0 -4px}}
 .nt-days{margin:-4px 0 6px;font-size:14px;color:var(--muted)}
 .nt-days b{color:var(--fg)}
 .nt-days .bad{color:var(--danger)}
@@ -1837,11 +1840,13 @@ const GL=GM&&(()=>{
     addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
     _show(m){if(this.m)return;this.map=m;m.shown.add(this);
       this.m=new GM.marker.AdvancedMarkerElement({map:m.g,position:this.ll,content:this.wrap,zIndex:this.z,title:this.options.title||'',gmpDraggable:!!this.options.draggable,gmpClickable:this.options.interactive!==false});
+      this.m.addListener('dragend',()=>{this.ll=toLL(this.m.position);this.fire('dragend',{target:this})});
       try{this.m.addEventListener('gmp-click',()=>this._tap())}catch(e){try{this.m.addListener('click',()=>this._tap())}catch(x){}}
-      if(this.options.draggable)this.m.addListener('dragend',()=>{this.ll=toLL(this.m.position);this.fire('dragend',{target:this})})}
+}
     _hide(){if(this.map)this.map.shown.delete(this);if(this.m){this.m.map=null;this.m=null}}
     remove(){if(this._group)this._group.items.delete(this);this._hide();return this}
     setIcon(ic){this.wrap.innerHTML=ic?ic.html:'';return this}
+    setDraggable(v){this.options.draggable=!!v;if(this.m)this.m.gmpDraggable=!!v;return this}
     getLatLng(){return {lat:this.ll.lat,lng:this.ll.lng}}
     setLatLng(ll){this.ll=toLL(ll);if(this.m)this.m.position=this.ll;return this}
     setZIndexOffset(z){this.z=z;if(this.m)this.m.zIndex=z;return this}
@@ -2489,6 +2494,13 @@ function selectStop(p,fromMap){
     else glideTo([p.lat,p.lng],Math.max(map.getZoom(),15));
   }
 }
+const stayMarkers={};
+// pins stay put; "Move pin" unlocks one until you drop it
+function setMoving(m,on){
+  try{if(m.setDraggable)m.setDraggable(on);else if(m.dragging)on?m.dragging.enable():m.dragging.disable()}catch(e){}
+  const el=m.getElement&&m.getElement();if(el)el.classList.toggle('pin-moving',on);
+  if(on){ui.moving=m;gtoast('Drag the pin to its new spot',()=>setMoving(m,false),{label:'Done',stay:true})}
+  else if(ui.moving===m){ui.moving=null;const t=$('gtoast');if(t)t.hidden=true}}
 function closeDetail(){
   const was=ui.open;ui.open=null;collapseDom(was);refreshSel(was);renderRoutes();
 }
@@ -2658,9 +2670,9 @@ function renderRoutes(){
   // a visible stop at the hotel already marks it (with a small house badge), so skip the second pin underneath
   S.places.filter(p=>visible(p)&&p.main).forEach(p=>shownStays.forEach(st=>{if(p.stayRef===st.id||hav([p.lat,p.lng],[st.lat,st.lng])<.04)shownStays.delete(st)}));
   shownStays.forEach(st=>{
-    const m=ML.marker([st.lat,st.lng],{title:st.name,draggable:true,zIndexOffset:900,riseOnHover:true,icon:ML.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
-    m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">'+(GL?'Details':'Edit')+'</button></div></div>',{maxWidth:260});
-    m.on('dragend',e=>{const ll=e.target.getLatLng();st.lat=+ll.lat.toFixed(6);st.lng=+ll.lng.toFixed(6);S.places.forEach(p=>{if(p.stayRef===st.id){p.lat=st.lat;p.lng=st.lng}});commit()});
+    const m=ML.marker([st.lat,st.lng],{title:st.name,draggable:false,zIndexOffset:900,riseOnHover:true,icon:ML.divIcon({className:'',iconSize:[28,28],iconAnchor:[14,14],popupAnchor:[0,-14],html:'<div class="pin pin-home" style="--c:'+(vd!=='all'&&!isCity(vd)?dayColor(vd):'var(--fg)')+'">'+SVG.home+'</div>'})});
+    m.bindPopup(()=>'<div class="pop"><div class="pop-tag">🛏️ Hotel</div><h3>'+esc(st.name)+'</h3><p class="pop-meta">'+nightsText(st)+'</p>'+(st.notes?'<p class="pop-notes">'+esc(st.notes)+'</p>':'')+'<div class="pop-acts"><button class="btn small" data-pact="edit-stay" data-stay="'+st.id+'">'+(GL?'Details':'Edit')+'</button></div><button class="linkbtn sm pop-move" data-pact="move-stay" data-stay="'+st.id+'">Move pin</button></div>',{maxWidth:260});
+    stayMarkers[st.id]=m;m.on('dragend',e=>{setMoving(e.target,false);const ll=e.target.getLatLng();st.lat=+ll.lat.toFixed(6);st.lng=+ll.lng.toFixed(6);S.places.forEach(p=>{if(p.stayRef===st.id){p.lat=st.lat;p.lng=st.lng}});commit()});
     m.addTo(routeLayer);
   });
   ui.prevLegs=now;
@@ -2680,7 +2692,7 @@ function popupHtml(p){
     '<div class="pop-acts">'+(GL&&!p.gauto?'<button class="btn small primary" data-pact="gdet" data-id="'+p.id+'">Details</button>':'')+'<button class="btn small" data-pact="edit" data-id="'+p.id+'">Edit</button>'+
     (p.day?'<button class="btn small" data-pact="remove" data-id="'+p.id+'">Remove</button>':'')+(p.main?'<button class="btn small" data-pact="demote" data-id="'+p.id+'">Make it an extra</button>'
            :'<button class="btn small" data-pact="promote" data-id="'+p.id+'">Add to itinerary</button>')+
-    '</div></div>';
+    '</div><button class="linkbtn sm pop-move" data-pact="move" data-id="'+p.id+'">Move pin</button></div>';
 }
 function atHotel(p){return !!p.main&&S.stays.some(st=>p.stayRef===st.id||hav([p.lat,p.lng],[st.lat,st.lng])<.04)}
 function iconKey(p){const t=tagOf(p);return [atHotel(p),p.main,p.order,p.day,dayColor(p.day),t.icon,t.color,ui.open===p.id].join('|')}
@@ -2703,10 +2715,10 @@ function renderMap(){
       return;
     }
     const id=p.id,delay=reduced?null:Math.min(base+k++*26,base+360);
-    m=ML.marker([p.lat,p.lng],{icon:iconFor(p,delay),draggable:true,title:p.name,zIndexOffset:p.main?800:0,riseOnHover:true});
+    m=ML.marker([p.lat,p.lng],{icon:iconFor(p,delay),draggable:false,title:p.name,zIndexOffset:p.main?800:0,riseOnHover:true});
     m._wk=key;
     m.bindPopup(()=>{const q=S.places.find(x=>x.id===id);return q?popupHtml(q):''},{maxWidth:270,autoPanPadding:[30,30]});
-    m.on('dragend',e=>{const q=S.places.find(x=>x.id===id);if(!q)return;const ll=e.target.getLatLng();q.lat=+ll.lat.toFixed(6);q.lng=+ll.lng.toFixed(6);save();renderPanel();renderMap()});
+    m.on('dragend',e=>{setMoving(e.target,false);const q=S.places.find(x=>x.id===id);if(!q)return;const ll=e.target.getLatLng();q.lat=+ll.lat.toFixed(6);q.lng=+ll.lng.toFixed(6);save();renderPanel();renderMap()});
     m.on('click',()=>{const q=S.places.find(x=>x.id===id);if(q&&q.main)selectStop(q,true)});
     m.addTo(markerLayer);markers[id]=m;
   });
@@ -2738,6 +2750,8 @@ map.on('popupopen',e=>{
     const a=b.dataset.pact;
     if(a==='cmode'){map.closePopup();const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.tmode=d.mmode=b.dataset.mode;commit()}return}
     if(a==='hmode'){map.closePopup();setHleg(b.dataset.day,b.dataset.part,b.dataset.mode);return}
+    if(a==='move-stay'){const m=stayMarkers[b.dataset.stay];map.closePopup();if(m)setMoving(m,true);return}
+    if(a==='move'){const m=markers[b.dataset.id];map.closePopup();if(m)setMoving(m,true);return}
     if(a==='edit-stay'){map.closePopup();const st=S.stays.find(x=>x.id===b.dataset.stay);if(st)(GL?openStayView:openStay)(st);return}
     if(a==='poi-add'||a==='poi-save'){map.closePopup();const q=ui.poi;if(!q)return;
       if(a==='poi-save'){ui.libReturn='plan';openLib(Object.assign(blankLib(),{gid:q.gid,name:q.name,lat:q.lat,lng:q.lng,city:q.city,country:q.country,tag:q.tag}));return}
