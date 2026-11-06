@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051701"></script>
+<script src="config.js?v=202611051710"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -413,13 +413,17 @@ html .pin-extra,html .pin-ghost{background:var(--pin-other,#fff)}
 .icons-line.extra-icon-day .pin-extra .pin-ico,.icons-line.extra-icon-day .pin-ghost .pin-ico{color:var(--c)}
 .icons-line .pin-main .pin-ico:not(.has-line) i{filter:var(--pin-sil-main,grayscale(1) brightness(0) invert(1))}
 .icons-line .pin-extra .pin-ico:not(.has-line) i,.icons-line .pin-ghost .pin-ico:not(.has-line) i{filter:var(--pin-sil-extra,grayscale(1) brightness(0))}
-.swatches{display:flex;flex-wrap:wrap;gap:11px;align-items:center}
-.swatches .swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:var(--sw);cursor:pointer;padding:0;position:relative}
-.swatches .swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
-.swatches .swatch.txt{width:auto;border-radius:15px;padding:0 11px;background:var(--surface-2);font-size:12.5px;font-weight:600;color:var(--fg)}
-.swatches .swatch.day{background:conic-gradient(#2F6FDE 0 25%,#E8590C 0 50%,#2B8A3E 0 75%,#9C36B5 0)}
-.swatches .swatch.custom{overflow:hidden;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)}
-.swatch.custom input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer}
+.pk-row{display:flex;flex-wrap:wrap;gap:4px;justify-content:flex-end}
+.pk-row .pk-opt{display:flex;border-radius:8px!important;box-shadow:none!important;outline-offset:2px;flex-direction:column;align-items:center;gap:5px;border:0;background:none;padding:2px 3px;min-width:44px;cursor:pointer;color:var(--muted)}
+.pk-opt small{font-size:11px;font-weight:600;line-height:1}
+.pk-opt[aria-pressed="true"] small{color:var(--fg)}
+.pk-sw{position:relative;display:block;width:28px;height:28px;border-radius:50%;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18)}
+.pk-opt[aria-pressed="true"] .pk-sw{box-shadow:inset 0 0 0 1px rgba(0,0,0,.18),0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.pk-sw.auto{background:linear-gradient(135deg,#fff 50%,#2F6FDE 50%)}
+.pk-sw.day{background:conic-gradient(#2F6FDE 0 25%,#E8590C 0 50%,#2B8A3E 0 75%,#9C36B5 0)}
+.pk-sw.custom{background:conic-gradient(#f44,#fd4,#4d6,#4cf,#46f,#d4f,#f44);overflow:hidden}
+.pk-sw.custom input{position:absolute;inset:-8px;width:calc(100% + 16px);height:calc(100% + 16px);opacity:0;cursor:pointer;border:0;padding:0}
+@media (max-width:820px){.pk-row{justify-content:flex-start}}
 .pin-prev{display:flex;align-items:center;gap:16px;padding:14px 4px 6px;flex-wrap:wrap}
 .pin-prev .pin{flex:none}
 .nt-days{margin:-4px 0 6px;font-size:14px;color:var(--muted)}
@@ -979,7 +983,7 @@ gmp-advanced-marker,gmp-advanced-marker:focus,gmp-advanced-marker:focus-visible,
 #map [role="button"]:focus,#map [role="button"]:focus-visible{outline:none!important}
 #map [class*="marker-view"],#map [class*="marker-view"]:focus,#map [class*="marker-view"]:focus-visible{outline:none!important}
 .gm-style iframe+div{border:0!important}
-.gm-host{position:absolute;inset:0}
+.gm-host{position:absolute!important;inset:0;width:100%;height:100%}
 #basesw button.dim{opacity:.55}
 .gm-pin.gm-noint{pointer-events:none}
 @media (hover:hover){.gm-pin:hover .pin{scale:1.1}}
@@ -1693,9 +1697,10 @@ const sysReduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: re
 let reduced=sysReduced||SET.motion==='reduce';
 function swatchRow(act,cur,list,cid,withAuto){
   const custom=cur&&cur.startsWith('#')&&!list.some(x=>x[0].toLowerCase()===cur.toLowerCase());
-  return '<div class="swatches">'+(withAuto?'<button class="swatch txt" data-act="'+act+'" data-v="auto" aria-pressed="'+(cur==='auto')+'">Auto</button><button class="swatch day" data-act="'+act+'" data-v="day" aria-pressed="'+(cur==='day')+'" title="Day color" aria-label="Day color"></button>':'')+
-    list.map(([v,l])=>'<button class="swatch" style="--sw:'+v+'" data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(cur.toLowerCase()===v.toLowerCase())+'" title="'+l+'" aria-label="'+l+'"></button>').join('')+
-    '<label class="swatch custom" title="Pick any color" aria-pressed="'+custom+'"'+(custom?' style="background:'+cur+'"':'')+'><input type="color" id="'+cid+'" value="'+(cur.startsWith('#')?cur:'#2F6FDE')+'" aria-label="Pick any color"></label></div>'}
+  const opt=(v,l,cls,style)=>'<button class="pk-opt" data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(String(cur).toLowerCase()===v.toLowerCase())+'"><span class="pk-sw '+(cls||'')+'"'+(style?' style="'+style+'"':'')+'></span><small>'+l+'</small></button>';
+  return '<div class="pk-row">'+(withAuto?opt('auto','Auto','auto')+opt('day','Day','day'):'')+
+    list.map(([v,l])=>opt(v,l,'','background:'+v)).join('')+
+    '<label class="pk-opt" aria-pressed="'+custom+'"><span class="pk-sw custom"'+(custom?' style="background:'+cur+'"':'')+'><input type="color" id="'+cid+'" value="'+(cur.startsWith('#')?cur:'#2F6FDE')+'" aria-label="Pick any color"></span><small>Custom</small></label></div>'}
 function pinCfg(){
   // older setting: one "pin style" value
   if(SET.pinFill&&!SET.pinDay){const m={white:'#FFFFFF',grey:'#5B626B',black:'#15181C'};SET.pinDay=m[SET.pinFill]?'ring':'fill';SET.pinOther=m[SET.pinFill]||'#FFFFFF';delete SET.pinFill;saveSet()}
@@ -1821,10 +1826,12 @@ const GL=GM&&(()=>{
     constructor(ll,o){super();this.ll=toLL(ll);this.options=o||{};this.z=this.options.zIndexOffset||0;
       this.wrap=document.createElement('div');this.wrap.className='gm-pin'+(this.options.interactive===false?' gm-noint':'');
       if(this.options.icon)this.wrap.innerHTML=this.options.icon.html;
-      this.wrap.addEventListener('click',e=>{if(this.options.interactive===false)return;e.stopPropagation();this.fire('click',{target:this});if(this.pop)this.openPopup()});}
+      this._tap=()=>{if(this.options.interactive===false)return;const now=Date.now();if(now-(this._t||0)<400)return;this._t=now;this.fire('click',{target:this});if(this.pop)this.openPopup()};
+      this.wrap.addEventListener('click',e=>{e.stopPropagation();this._tap()});}
     addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
     _show(m){if(this.m)return;this.map=m;m.shown.add(this);
-      this.m=new GM.marker.AdvancedMarkerElement({map:m.g,position:this.ll,content:this.wrap,zIndex:this.z,title:this.options.title||'',gmpDraggable:!!this.options.draggable});
+      this.m=new GM.marker.AdvancedMarkerElement({map:m.g,position:this.ll,content:this.wrap,zIndex:this.z,title:this.options.title||'',gmpDraggable:!!this.options.draggable,gmpClickable:this.options.interactive!==false});
+      try{this.m.addEventListener('gmp-click',()=>this._tap())}catch(e){try{this.m.addListener('click',()=>this._tap())}catch(x){}}
       if(this.options.draggable)this.m.addListener('dragend',()=>{this.ll=toLL(this.m.position);this.fire('dragend',{target:this})})}
     _hide(){if(this.map)this.map.shown.delete(this);if(this.m){this.m.map=null;this.m=null}}
     remove(){if(this._group)this._group.items.delete(this);this._hide();return this}
