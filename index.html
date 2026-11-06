@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051631"></script>
+<script src="config.js?v=202611051646"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1411,6 +1411,212 @@ function sampleExtras(t){
   t.info='Emergency number: 112 (Portugal and Spain)\nTravel insurance: policy TI-4482910, 24 h line on the card\nPlugs: type F, 230 V';
   return t;
 }
+/* ---------- 20-day Japan demo trip (added once, alongside your own trips) ---------- */
+function demoJapan(){
+  const tg=(name,icon,color)=>{let t=TAGS.find(x=>normTxt(x.name)===normTxt(name));if(!t){t={id:'t'+Math.random().toString(36).slice(2,8),name,icon,color};TAGS.push(t)}return t.id};
+  const T={must:tg('Must-see','⭐','#D97706'),food:tg('Restaurant','🍴','#EA580C'),cafe:tg('Cafe','☕','#92400E'),view:tg('Scenic Spot','🏞️','#4F46E5'),
+    museum:tg('Museum','🏛️','#2563EB'),shop:tg('Shop','🛒','#F59E0B'),bar:tg('Bar','🍸','#C026D3'),garden:tg('Garden','🌷','#65A30D'),park:tg('Park','🌲','#15803D'),
+    temple:tg('Buddhist Temple','🛕','#9A3412'),shrine:tg('Shinto Shrine','⛩️','#B91C1C'),theme:tg('Theme Park','🎢','#A21CAF'),photo:tg('Photo spot','📸','#0891B2'),
+    hotel:tg('Hotel','🛏️','#334155'),air:tg('Airport','✈️','#0F172A'),rail:tg('Train Station','🚆','#334155'),ferry:tg('Ferry','⛴️','#1E40AF'),
+    monument:tg('Monument','🗽','#0284C7'),island:tg('Island','🏝️','#0E7490'),hike:tg('Hiking','🥾','#57534E')};
+  const iso=i=>{const d=new Date('2027-04-01T12:00:00');d.setDate(d.getDate()+i);return d.toISOString().slice(0,10)};
+  const D=n=>'jd'+n;
+  const days=[];const city=(c,n)=>{for(let i=0;i<n;i++)days.push({id:D(days.length+1),city:c,start:'09:00'})};
+  city('jc1',5);city('jc2',2);city('jc3',5);city('jc4',3);city('jc5',2);city('jc6',3);
+  const day=n=>days[n-1];
+  day(1).start='15:00';day(2).start='08:30';day(3).start='07:30';day(4).start='08:00';day(5).start='09:30';
+  day(7).start='08:30';day(9).start='07:00';day(10).start='07:30';day(11).start='08:30';day(12).start='08:30';
+  day(14).start='08:00';day(15).start='10:00';day(17).start='08:30';day(19).start='08:30';day(20).start='08:30';
+  // between-city journeys
+  const J=(n,o)=>{const d=day(n);d.cjr=Object.assign({depDate:iso(n-1),arrDate:iso(n-1)},o);d.tmode=d.mmode={flight:'plane',train:'transit',bus:'transit',ferry:'transit',car:'car'}[o.kind]};
+  J(6,{kind:'train',carrier:'Odakyu Romancecar',num:'Hakone 7',from:'Shinjuku',to:'Hakone-Yumoto',dep:'09:00',arr:'10:25',t1:'2',t2:'Car 4',seat:'5C, 5D',code:'ODK-48120'});
+  J(8,{kind:'train',carrier:'JR Tokaido Shinkansen',num:'Hikari 633',from:'Odawara',to:'Kyoto',dep:'10:41',arr:'12:46',t1:'13',t2:'Car 8 (reserved)',seat:'11D, 11E',code:'JRW7Q2M'});
+  J(13,{kind:'train',carrier:'JR Special Rapid',num:'Kyoto Line',from:'Kyoto',to:'Osaka',dep:'10:15',arr:'10:44',t1:'7',seat:'Unreserved'});
+  J(16,{kind:'train',carrier:'JR Sanyo Shinkansen',num:'Nozomi 15',from:'Shin-Osaka',to:'Hiroshima',dep:'09:30',arr:'10:52',t1:'24',t2:'Car 6',seat:'8A, 8B',code:'JRW9K3TT'});
+  J(18,{kind:'flight',carrier:'ANA',num:'NH 678',from:'HIJ, Hiroshima',to:'HND, Tokyo Haneda',dep:'10:20',arr:'11:45',board:'09:55',t1:'Domestic',t2:'4',seat:'21A, 21B',bags:'1 checked bag each',code:'ANA6WX2P'});
+  const pl=[];let k=0;
+  const P=(name,lat,lng,tag,d,main,o)=>{const p=Object.assign({id:'jp'+(++k),name,lat,lng,tag,day:d?D(d):null,main,order:0,stay:60,notes:''},o||{});pl.push(p);return p};
+  const M=(d,name,lat,lng,tag,o)=>P(name,lat,lng,tag,d,true,o),X=(d,name,lat,lng,tag,o)=>P(name,lat,lng,tag,d,false,o);
+  // Day 1, Tokyo arrival
+  M(1,'Haneda Airport',35.5494,139.7798,T.air,{stay:45,at:'15:35',notes:'Land 3:35 pm. Pick up the Suica cards and pocket wifi at the arrivals hall.'});
+  M(1,'Hotel Gracery Shinjuku',35.6956,139.7020,T.hotel,{stay:45,mode:'transit',stayRef:'js1',notes:'Keikyu line to Shinagawa, then the JR Yamanote line.'});
+  M(1,'Tokyo Metropolitan Government Building',35.6896,139.6921,T.view,{stay:45,mode:'walk',notes:'Free observatory on the 45th floor, open until 10 pm.'});
+  M(1,'Omoide Yokocho',35.6930,139.6995,T.food,{stay:90,mode:'walk',notes:'Yakitori in the tiny alley bars. Cash only.'});
+  X(1,'Shinjuku Golden Gai',35.6940,139.7046,T.bar,{notes:'Too tired tonight? Save it for Day 5.'});
+  // Day 2
+  M(2,'Meiji Jingu',35.6764,139.6993,T.shrine,{stay:75,mode:'transit',notes:'Go early, it is calm before 9.'});
+  M(2,'Takeshita Street',35.6716,139.7031,T.shop,{stay:45,mode:'walk'});
+  M(2,'Omotesando',35.6654,139.7121,T.shop,{stay:90,mode:'walk',notes:'Lunch at the Omotesando Hills food floor.'});
+  M(2,'Shibuya Crossing',35.6595,139.7005,T.photo,{stay:30,mode:'walk',notes:'Best view from the Starbucks upstairs or Magnet rooftop.'});
+  M(2,'Shibuya Sky',35.6584,139.7022,T.view,{stay:90,mode:'walk',at:'17:20',notes:'Timed tickets for sunset. Bags go in lockers.'});
+  M(2,'Uobei Shibuya',35.6604,139.6980,T.food,{stay:60,mode:'walk',notes:'Conveyor sushi ordered on tablets. Expect a short line.'});
+  X(2,'Nonbei Yokocho',35.6590,139.7030,T.bar,{});
+  X(2,'Ichiran Shibuya',35.6613,139.7013,T.food,{notes:'Solo booth ramen, open 24 hours.'});
+  // Day 3
+  M(3,'Tsukiji Outer Market',35.6655,139.7707,T.food,{stay:90,mode:'transit',notes:'Breakfast crawl: tamagoyaki, tuna, strawberries.'});
+  M(3,'teamLab Planets',35.6491,139.7898,T.museum,{stay:120,mode:'transit',at:'11:00',notes:'You walk barefoot in water, wear shorts or pants that roll up.'});
+  M(3,'Ginza',35.6717,139.7650,T.shop,{stay:120,mode:'transit',notes:'Itoya stationery and Ginza Six.'});
+  M(3,'Imperial Palace East Gardens',35.6852,139.7528,T.garden,{stay:75,mode:'walk',notes:'Closed Mondays and Fridays.'});
+  M(3,'Tokyo Station Ramen Street',35.6812,139.7671,T.food,{stay:60,mode:'walk'});
+  X(3,'Hamarikyu Gardens',35.6600,139.7633,T.garden,{notes:'Matcha in the teahouse on the pond.'});
+  // Day 4
+  M(4,'Senso-ji',35.7148,139.7967,T.temple,{stay:60,mode:'transit',notes:'Arrive before 8 for photos without crowds.'});
+  M(4,'Nakamise-dori',35.7120,139.7963,T.shop,{stay:45,mode:'walk'});
+  M(4,'Sumida River walk',35.7106,139.8020,T.photo,{stay:30,mode:'walk',notes:'Cherry blossoms along the river in early April.'});
+  M(4,'Tokyo Skytree',35.7101,139.8107,T.view,{stay:90,mode:'walk'});
+  M(4,'Ueno Park',35.7156,139.7745,T.park,{stay:90,mode:'transit',notes:'Peak hanami. Picnic snacks from the konbini.'});
+  M(4,'Ameyoko',35.7101,139.7745,T.shop,{stay:60,mode:'walk'});
+  X(4,'Tokyo National Museum',35.7188,139.7765,T.museum,{});
+  // Day 5
+  M(5,'Shinjuku Gyoen',35.6852,139.7101,T.garden,{stay:120,mode:'transit',notes:'Entry by timed ticket during sakura season.'});
+  M(5,'Shimokitazawa',35.6618,139.6681,T.shop,{stay:150,mode:'transit',notes:'Vintage shops and coffee.'});
+  M(5,'Bear Pond Espresso',35.6627,139.6687,T.cafe,{stay:30,mode:'walk'});
+  M(5,'Shinjuku Golden Gai',35.6940,139.7046,T.bar,{stay:120,mode:'transit',notes:'Some bars charge a seat fee, look for the signs.'});
+  X(5,'Kabukicho',35.6950,139.7020,T.photo,{});
+  // Day 6, Hakone
+  M(6,'Hakone-Yumoto Station',35.2324,139.1055,T.rail,{stay:20,notes:'Send big bags ahead with the luggage service.'});
+  M(6,'Hakone Open-Air Museum',35.2446,139.0507,T.museum,{stay:150,mode:'transit',notes:'Hakone Tozan railway, switchback ride up.'});
+  M(6,'Fujiya Hotel',35.2330,139.0937,T.hotel,{stay:30,mode:'transit',stayRef:'js2',notes:'Historic 1878 hotel. Onsen bath before dinner.'});
+  X(6,'Chokoku-no-Mori footbath',35.2446,139.0510,T.photo,{});
+  // Day 7
+  M(7,'Gora Station',35.2508,139.0480,T.rail,{stay:15,mode:'transit'});
+  M(7,'Owakudani',35.2441,139.0198,T.view,{stay:75,mode:'transit',notes:'Ropeway. Eat a black egg. Fuji views on clear mornings.'});
+  M(7,'Lake Ashi cruise',35.2563,139.0045,T.view,{stay:45,mode:'transit',notes:'Togendai to Moto-Hakone on the pirate ship.'});
+  M(7,'Hakone Shrine',35.2044,139.0256,T.shrine,{stay:60,mode:'walk',notes:'The red torii in the lake. Expect a line for the photo.'});
+  M(7,'Old Tokaido Road',35.1990,139.0270,T.hike,{stay:60,mode:'walk',notes:'Cedar avenue and the Amazake-chaya teahouse.'});
+  // Day 8, Kyoto
+  M(8,'Kyoto Station',34.9858,135.7588,T.rail,{stay:20});
+  M(8,'Hotel Granvia Kyoto',34.9853,135.7590,T.hotel,{stay:30,mode:'walk',stayRef:'js3',notes:'Inside the station. Rooms from 3 pm, drop bags first.'});
+  M(8,'Fushimi Inari Taisha',34.9671,135.7727,T.shrine,{stay:150,mode:'transit',notes:'Hike to the Yotsutsuji crossing for the view, about 45 min up.'});
+  M(8,'Pontocho',35.0050,135.7708,T.food,{stay:120,mode:'transit',notes:'Dinner on the riverside platforms.'});
+  // Day 9
+  M(9,'Kiyomizu-dera',34.9949,135.7850,T.temple,{stay:75,mode:'car',notes:'Taxi there at opening, 6 am.'});
+  M(9,'Sannenzaka',34.9965,135.7811,T.photo,{stay:45,mode:'walk'});
+  M(9,'Yasaka Shrine',35.0037,135.7785,T.shrine,{stay:30,mode:'walk'});
+  M(9,'Maruyama Park',35.0036,135.7810,T.park,{stay:45,mode:'walk',notes:'The famous weeping cherry tree.'});
+  M(9,'Nishiki Market',35.0050,135.7649,T.food,{stay:90,mode:'walk'});
+  M(9,'Gion Shirakawa',35.0057,135.7746,T.photo,{stay:60,mode:'walk',notes:'Lanterns and blossoms after dark.'});
+  X(9,'% Arabica Higashiyama',34.9982,135.7800,T.cafe,{});
+  // Day 10
+  M(10,'Arashiyama Bamboo Grove',35.0170,135.6713,T.must,{stay:45,mode:'transit',notes:'Before 8 am or it is shoulder to shoulder.'});
+  M(10,'Tenryu-ji',35.0158,135.6738,T.temple,{stay:60,mode:'walk'});
+  M(10,'Togetsukyo Bridge',35.0128,135.6779,T.photo,{stay:30,mode:'walk'});
+  M(10,'Kinkaku-ji',35.0394,135.7292,T.temple,{stay:60,mode:'car'});
+  M(10,'Ryoan-ji',35.0345,135.7183,T.temple,{stay:45,mode:'walk',notes:'The rock garden. Sit for a while.'});
+  X(10,'Okochi Sanso Villa',35.0179,135.6694,T.garden,{notes:'Ticket includes matcha and a sweet.'});
+  // Day 11, Nara day trip
+  M(11,'Nara Park',34.6851,135.8430,T.park,{stay:60,mode:'transit',notes:'Kintetsu line from Kyoto, 45 min. Deer crackers at the stands.'});
+  M(11,'Todai-ji',34.6890,135.8398,T.temple,{stay:75,mode:'walk',notes:'The giant Buddha hall.'});
+  M(11,'Kasuga Taisha',34.6812,135.8484,T.shrine,{stay:60,mode:'walk'});
+  M(11,'Naramachi',34.6770,135.8300,T.photo,{stay:90,mode:'walk',notes:'Lunch, then back to Kyoto mid-afternoon.'});
+  M(11,'Kyoto Station',34.9858,135.7588,T.rail,{stay:15,mode:'transit'});
+  // Day 12
+  M(12,'Ginkaku-ji',35.0270,135.7982,T.temple,{stay:60,mode:'transit'});
+  M(12,'Philosopher’s Path',35.0236,135.7943,T.photo,{stay:60,mode:'walk'});
+  M(12,'Nanzen-ji',35.0113,135.7932,T.temple,{stay:60,mode:'walk',notes:'Walk on top of the brick aqueduct.'});
+  M(12,'Camellia Tea Ceremony',34.9978,135.7804,T.cafe,{stay:60,mode:'car',at:'15:00'});
+  M(12,'Gion Karyo',35.0024,135.7752,T.food,{stay:120,mode:'walk',at:'18:30',notes:'Kaiseki dinner. Tell them about allergies when booking.'});
+  // Day 13, Osaka
+  M(13,'Osaka Station',34.7025,135.4959,T.rail,{stay:15});
+  M(13,'Cross Hotel Osaka',34.6700,135.5017,T.hotel,{stay:30,mode:'transit',stayRef:'js4'});
+  M(13,'Osaka Castle',34.6873,135.5262,T.must,{stay:120,mode:'transit'});
+  M(13,'Kuromon Market',34.6655,135.5065,T.food,{stay:60,mode:'transit'});
+  M(13,'Dotonbori',34.6687,135.5013,T.food,{stay:150,mode:'walk',notes:'Takoyaki, Glico sign, canal at night.'});
+  X(13,'Hozenji Yokocho',34.6683,135.5030,T.photo,{});
+  // Day 14
+  M(14,'Universal Studios Japan',34.6654,135.4323,T.theme,{stay:540,mode:'transit',notes:'Express Pass for Nintendo World. Be at the gate by 8.'});
+  M(14,'Mizuno Okonomiyaki',34.6688,135.5017,T.food,{stay:60,mode:'transit',notes:'Line moves fast.'});
+  // Day 15
+  M(15,'Shinsekai',34.6525,135.5063,T.food,{stay:90,mode:'transit',notes:'Kushikatsu. No double dipping in the sauce.'});
+  M(15,'Spa World',34.6510,135.5040,T.view,{stay:120,mode:'walk'});
+  M(15,'Den Den Town',34.6602,135.5053,T.shop,{stay:90,mode:'walk',notes:'Retro games and anime goods.'});
+  M(15,'Umeda Sky Building',34.7053,135.4906,T.view,{stay:75,mode:'transit',at:'17:30',notes:'Floating Garden at sunset.'});
+  X(15,'Shitenno-ji',34.6542,135.5165,T.temple,{});
+  // Day 16, Hiroshima
+  M(16,'Hiroshima Station',34.3978,132.4753,T.rail,{stay:15});
+  M(16,'Sheraton Grand Hiroshima',34.3975,132.4766,T.hotel,{stay:30,mode:'walk',stayRef:'js5'});
+  M(16,'Atomic Bomb Dome',34.3955,132.4536,T.monument,{stay:30,mode:'transit'});
+  M(16,'Peace Memorial Park',34.3929,132.4527,T.park,{stay:60,mode:'walk'});
+  M(16,'Peace Memorial Museum',34.3916,132.4520,T.museum,{stay:120,mode:'walk',notes:'Heavy but important. Allow time after.'});
+  M(16,'Okonomimura',34.3923,132.4621,T.food,{stay:75,mode:'transit',notes:'Hiroshima-style okonomiyaki with noodles.'});
+  X(16,'Shukkeien Garden',34.4006,132.4677,T.garden,{});
+  // Day 17, Miyajima
+  M(17,'Miyajimaguchi Ferry Terminal',34.3110,132.3036,T.ferry,{stay:15,mode:'transit',jr:{kind:'ferry',carrier:'JR Miyajima Ferry',num:'Every 15 min',from:'Miyajimaguchi',to:'Miyajima',dep:'09:30',depDate:iso(16),arr:'09:40',arrDate:iso(16),t2:'Upper deck, right side for the torii',seat:'Free seating'}});
+  M(17,'Itsukushima Shrine',34.2960,132.3198,T.shrine,{stay:75,mode:'walk',notes:'High tide makes the torii float. Check the tide table.'});
+  M(17,'Mount Misen',34.2794,132.3196,T.hike,{stay:180,mode:'transit',notes:'Ropeway up, short hike to the summit.'});
+  M(17,'Omotesando Shopping Street',34.2986,132.3225,T.food,{stay:60,mode:'walk',notes:'Grilled oysters and momiji manju.'});
+  X(17,'Daisho-in',34.2930,132.3210,T.temple,{});
+  // Day 18, back to Tokyo
+  M(18,'Mitsui Garden Hotel Ginza Premier',35.6676,139.7633,T.hotel,{stay:30,mode:'transit',stayRef:'js6'});
+  M(18,'Akihabara',35.6984,139.7731,T.shop,{stay:150,mode:'transit'});
+  M(18,'Yanaka Ginza',35.7277,139.7660,T.photo,{stay:75,mode:'transit',notes:'Old Tokyo, cats, croquettes.'});
+  M(18,'Kanda Matsuya',35.6950,139.7700,T.food,{stay:60,mode:'transit',notes:'Soba since 1884.'});
+  // Day 19, Kamakura day trip
+  M(19,'Tsurugaoka Hachimangu',35.3260,139.5563,T.shrine,{stay:60,mode:'transit',notes:'JR Yokosuka line, 1 hour.'});
+  M(19,'Komachi-dori',35.3209,139.5529,T.food,{stay:60,mode:'walk'});
+  M(19,'Kotoku-in Great Buddha',35.3167,139.5358,T.temple,{stay:45,mode:'transit',notes:'Enoden line from Kamakura.'});
+  M(19,'Hase-dera',35.3128,139.5331,T.temple,{stay:60,mode:'walk'});
+  M(19,'Enoshima',35.2994,139.4804,T.island,{stay:150,mode:'transit',notes:'Sunset, and Fuji views on a clear day.'});
+  // Day 20, fly home
+  M(20,'Itoya Ginza',35.6740,139.7672,T.shop,{stay:60,mode:'walk',notes:'Last souvenirs.'});
+  M(20,'Tokyo Station Character Street',35.6810,139.7660,T.shop,{stay:60,mode:'transit'});
+  M(20,'Haneda Airport',35.5494,139.7798,T.air,{stay:150,mode:'transit',notes:'Be there 3 hours before. Tax-free counter for receipts.',
+    jr:{kind:'flight',carrier:'Air Canada',num:'AC 4',from:'HND, Tokyo Haneda',to:'YVR, Vancouver',dep:'18:55',depDate:iso(19),arr:'11:25',arrDate:iso(19),board:'18:15',t1:'3',t2:'112',seat:'32A, 32C',bags:'2 checked bags each',code:'K7QXPL'}});
+  // order within each day
+  days.forEach(d=>{let o=0;pl.filter(p=>p.day===d.id&&p.main).forEach(p=>{p.order=++o})});
+  const t={id:'trip-demo-japan',trip:{name:'Japan in Spring (demo)',start:'2027-04-01'},
+    cities:[{id:'jc1',name:'Tokyo',country:'Japan',lat:35.6762,lng:139.6503},{id:'jc2',name:'Hakone',country:'Japan',lat:35.2324,lng:139.1069},
+      {id:'jc3',name:'Kyoto',country:'Japan',lat:35.0116,lng:135.7681},{id:'jc4',name:'Osaka',country:'Japan',lat:34.6937,lng:135.5023},
+      {id:'jc5',name:'Hiroshima',country:'Japan',lat:34.3853,lng:132.4553},{id:'jc6',name:'Tokyo',country:'Japan',lat:35.6762,lng:139.6503}],
+    days,tags:TAGS,places:pl,
+    stays:[
+      {id:'js1',name:'Hotel Gracery Shinjuku',lat:35.6956,lng:139.7020,ci:0,co:5,notes:'Check-in 2 pm. Godzilla terrace on the 8th floor.'},
+      {id:'js2',name:'Fujiya Hotel',lat:35.2330,lng:139.0937,ci:5,co:7,notes:'Ryokan-style dinner at 7 pm, breakfast 7 to 9:30.'},
+      {id:'js3',name:'Hotel Granvia Kyoto',lat:34.9853,lng:135.7590,ci:7,co:12,notes:'Club floor, breakfast included.'},
+      {id:'js4',name:'Cross Hotel Osaka',lat:34.6700,lng:135.5017,ci:12,co:15,notes:'Right by Dotonbori.'},
+      {id:'js5',name:'Sheraton Grand Hiroshima',lat:34.3975,lng:132.4766,ci:15,co:17,notes:'Connected to the Shinkansen exit.'},
+      {id:'js6',name:'Mitsui Garden Hotel Ginza Premier',lat:35.6676,lng:139.7633,ci:17,co:19,notes:'Ask for a high floor facing Tokyo Tower.'}],
+    view:{day:'all',mainOnly:false,hidden:[],basemap:'street',collapsed:[]},currency:'CAD',budget:15000,
+    expenses:[
+      {id:'je1',title:'Flights Vancouver to Tokyo (2 people)',cat:'transport',day:'before',amount:2380,paid:true},
+      {id:'je2',title:'Hotel Gracery Shinjuku (5 nights)',cat:'lodging',day:D(1),amount:1450,paid:true},
+      {id:'je3',title:'Suica cards and pocket wifi',cat:'transport',day:D(1),amount:140,paid:false},
+      {id:'je4',title:'Shibuya Sky tickets',cat:'activities',day:D(2),amount:72,paid:true},
+      {id:'je5',title:'teamLab Planets tickets',cat:'activities',day:D(3),amount:86,paid:true},
+      {id:'je6',title:'Romancecar to Hakone',cat:'transport',day:D(6),amount:62,paid:true},
+      {id:'je7',title:'Hakone Free Pass (2)',cat:'transport',day:D(6),amount:118,paid:true},
+      {id:'je8',title:'Fujiya Hotel (2 nights, dinner included)',cat:'lodging',day:D(6),amount:1260,paid:true},
+      {id:'je9',title:'Shinkansen Odawara to Kyoto',cat:'transport',day:D(8),amount:196,paid:true},
+      {id:'je10',title:'Hotel Granvia Kyoto (5 nights)',cat:'lodging',day:D(8),amount:1850,paid:true},
+      {id:'je11',title:'Camellia tea ceremony',cat:'activities',day:D(12),amount:90,paid:true},
+      {id:'je12',title:'Gion Karyo kaiseki dinner',cat:'food',day:D(12),amount:310,paid:false},
+      {id:'je13',title:'Cross Hotel Osaka (3 nights)',cat:'lodging',day:D(13),amount:780,paid:true},
+      {id:'je14',title:'Universal Studios Japan with Express Pass',cat:'activities',day:D(14),amount:640,paid:true},
+      {id:'je15',title:'Shinkansen Shin-Osaka to Hiroshima',cat:'transport',day:D(16),amount:210,paid:true},
+      {id:'je16',title:'Sheraton Grand Hiroshima (2 nights)',cat:'lodging',day:D(16),amount:620,paid:false},
+      {id:'je17',title:'Flight Hiroshima to Tokyo',cat:'transport',day:D(18),amount:240,paid:true},
+      {id:'je18',title:'Mitsui Garden Ginza (2 nights)',cat:'lodging',day:D(18),amount:560,paid:false},
+      {id:'je19',title:'Food and drinks (daily estimate)',cat:'food',day:'',amount:2000,paid:false},
+      {id:'je20',title:'Souvenirs and shopping',cat:'shopping',day:'',amount:600,paid:false},
+      {id:'je21',title:'Local trains, subways and taxis',cat:'transport',day:'',amount:350,paid:false}],
+    bookings:[
+      {id:'jb1',type:'flight',title:'Air Canada AC 5, Vancouver to Tokyo',day:'before',time:'13:05',code:'K7QXPL',notes:'Departs Mar 31, lands Apr 1 at 3:35 pm. Seats 32A and 32C.'},
+      {id:'jb2',type:'tickets',title:'Shibuya Sky',day:D(2),time:'17:20',code:'SSKY-30418',notes:'Show the QR code at the 14th floor.'},
+      {id:'jb3',type:'tickets',title:'teamLab Planets',day:D(3),time:'11:00',code:'TLP-88213',notes:''},
+      {id:'jb4',type:'train',title:'Romancecar Shinjuku to Hakone-Yumoto',day:D(6),time:'09:00',code:'ODK-48120',notes:'Car 4, seats 5C and 5D.'},
+      {id:'jb5',type:'train',title:'Shinkansen Hikari 633, Odawara to Kyoto',day:D(8),time:'10:41',code:'JRW7Q2M',notes:'Book the seats with the oversized luggage space.'},
+      {id:'jb6',type:'tickets',title:'Camellia tea ceremony',day:D(12),time:'15:00',code:'CAM-2204',notes:''},
+      {id:'jb7',type:'table',title:'Gion Karyo',day:D(12),time:'18:30',code:'GK-7731',notes:'Counter seats for 2.'},
+      {id:'jb8',type:'tickets',title:'Universal Studios Japan + Express Pass 4',day:D(14),time:'08:00',code:'USJ-5K29Q',notes:'Nintendo World entry is on the pass.'},
+      {id:'jb9',type:'train',title:'Shinkansen Nozomi 15, Shin-Osaka to Hiroshima',day:D(16),time:'09:30',code:'JRW9K3TT',notes:''},
+      {id:'jb10',type:'flight',title:'ANA NH 678, Hiroshima to Tokyo',day:D(18),time:'10:20',code:'ANA6WX2P',notes:'Limousine bus from Hiroshima Station, 50 min.'},
+      {id:'jb11',type:'flight',title:'Air Canada AC 4, Tokyo to Vancouver',day:'after',time:'18:55',code:'K7QXPL',notes:'Departs Apr 20 from Haneda Terminal 3.'}],
+    packing:packFromTemplate(['Passport','Travel insurance details','Booking confirmations','Credit cards','Walking shoes','Plug adapter','Power bank','Phone charger']).concat(
+      [['Japan extras','Coin purse (lots of coins)'],['Japan extras','Small towel for hand drying'],['Japan extras','Slip-on shoes for temples'],['Japan extras','Compact umbrella'],['Japan extras','Ziplock for trash, few public bins']].map(([cat,text],i)=>({id:'kj'+i,cat,text,done:i<2}))),
+    notes:'Ideas\n- Try a konbini breakfast: egg sando and onigiri\n- Ride the Shinkansen with ekiben lunch boxes\n- Look for sakura forecast updates the week before\n\nTo do\n- Buy Suica cards in the Apple Wallet before landing\n- Book USJ Express Pass the day it releases\n- Reserve Shinkansen seats with luggage space\n- Tell the bank we are travelling',
+    info:'Emergency: 110 police, 119 ambulance and fire\nJapan Visitor Hotline (24 h, English): 050-3816-2787\nTravel insurance: policy TI-7730215, call collect from the card\nPlugs: type A, 100 V (most chargers are fine)\nTipping: not expected'};
+  return t;
+}
 const COUNTRY_GUESS={lisbon:'Portugal',lisboa:'Portugal',porto:'Portugal',sintra:'Portugal',faro:'Portugal',lagos:'Portugal',coimbra:'Portugal',madeira:'Portugal',
   madrid:'Spain',barcelona:'Spain',seville:'Spain',sevilla:'Spain',valencia:'Spain',granada:'Spain',malaga:'Spain','málaga':'Spain',bilbao:'Spain','san sebastian':'Spain',ibiza:'Spain',mallorca:'Spain',
   paris:'France',nice:'France',lyon:'France',marseille:'France',bordeaux:'France',rome:'Italy',roma:'Italy',florence:'Italy',venice:'Italy',milan:'Italy',naples:'Italy',
@@ -1452,6 +1658,8 @@ function load(){try{const s=JSON.parse(localStorage.getItem(KEY));if(s&&Array.is
 let STORE=null;try{STORE=JSON.parse(localStorage.getItem(TKEY))}catch(e){}
 if(!STORE||!STORE.trips||!Object.keys(STORE.trips).length){const t=load()||sampleExtras(sample());normalize(t);STORE={current:t.id,trips:{[t.id]:t}}}
 initStore();
+// one time: add the 20-day Japan demo next to your trips (delete it any time, it won't come back)
+if(!STORE.demoJp){STORE.demoJp=1;try{if(!STORE.trips['trip-demo-japan']){const t=normalize(demoJapan());STORE.trips[t.id]=t}}catch(e){}try{localStorage.setItem(TKEY,JSON.stringify(STORE))}catch(e){}}
 let S=STORE.trips[STORE.current]||STORE.trips[Object.keys(STORE.trips)[0]];
 normalize(S);
 function save(){try{STORE.trips[S.id]=S;STORE.current=S.id;localStorage.setItem(TKEY,JSON.stringify(STORE))}catch(e){}}
@@ -4283,12 +4491,12 @@ document.addEventListener('click',e=>{
       TAGS=null;
       if(mode==='blank'){
         // a truly empty start: no sample trip, no sample saved places
-        STORE={current:null,trips:{},library:[],libv:2};initStore();
+        STORE={current:null,trips:{},library:[],libv:2,demoJp:1};initStore();
         const d=new Date();d.setDate(d.getDate()+30);const t={id:uid('trip'),trip:{name:'My trip',start:d.toISOString().slice(0,10)},cities:[],days:[{id:uid('d'),city:'c1',start:'09:00'}],tags:TAGS,places:[],stays:[],
           view:{day:'all',mainOnly:false,hidden:[],basemap:'illustrated',collapsed:[]},currency:SET.currency||'EUR'};
         normalize(t);STORE.trips[t.id]=t;STORE.current=t.id;S=t;save();ui.dropSample=t.id;openTrip(t.id,'overview');openNewTrip();
         toast('Everything was erased. Name your first trip to begin.');break}
-      STORE={current:null,trips:{}};const t=normalize(sampleExtras(sample()));STORE={current:t.id,trips:{[t.id]:t}};initStore();S=t;
+      STORE={current:null,trips:{}};const t=normalize(sampleExtras(sample()));STORE={current:t.id,trips:{[t.id]:t},demoJp:1};initStore();S=t;
       openTrip(t.id,'overview');gtoast('Everything was erased. Here\u2019s the sample trip.');break}
     case 'ts-sample':{if(ui.armed!=='ts-sample'){ui.armed='ts-sample';b.classList.add('armed');b.textContent='Click again to replace';break}
       ui.armed=null;const id=ui.form.id,t=normalize(sampleExtras(sample()));t.id=id;STORE.trips[id]=t;closeDlg();
