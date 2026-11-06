@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051650"></script>
+<script src="config.js?v=202611051653"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -409,6 +409,10 @@ path.rt-transit{stroke:var(--transit)}
 .pins-white .pin-main{background:#fff;border-color:var(--c);border-width:3.5px}
 .pins-white .pin-main.sel{box-shadow:0 0 0 2.5px #fff,0 0 0 5px var(--c),0 4px 14px rgba(0,0,0,.4)}
 .pins-white.icons-line .pin-main .pin-ico{color:var(--c)}
+.pins-grey{--pinbg:#5B626B}.pins-black{--pinbg:#15181C}
+.pins-dark .pin-main{background:var(--pinbg);border-color:var(--c);border-width:3.5px}
+.pins-dark .pin-main.sel{box-shadow:0 0 0 2.5px #fff,0 0 0 5px var(--c),0 4px 14px rgba(0,0,0,.4)}
+.pins-dark .pin-main .pin-num{border-color:var(--c)}
 .pins-white.icons-line .pin-main .pin-ico:not(.has-line) i{filter:grayscale(1) brightness(0);opacity:.8}
 .pin-prev{display:flex;align-items:center;gap:16px;padding:14px 4px 6px;flex-wrap:wrap}
 .pin-prev .pin{flex:none}
@@ -1681,7 +1685,7 @@ function save(){try{STORE.trips[S.id]=S;STORE.current=S.id;localStorage.setItem(
 const ui={ctrOpen:new Set(),open:null,tab:SET.panelTab==='sum'?'sum':'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
 const sysReduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
 let reduced=sysReduced||SET.motion==='reduce';
-function applyPins(){const r=document.documentElement.classList;r.toggle('pins-white',SET.pinFill==='white');r.toggle('icons-line',SET.icons==='line')}
+function applyPins(){const r=document.documentElement.classList,f=SET.pinFill;r.toggle('pins-white',f==='white');r.toggle('pins-dark',f==='grey'||f==='black');r.toggle('pins-grey',f==='grey');r.toggle('pins-black',f==='black');r.toggle('icons-line',SET.icons==='line')}
 function applyMotion(){reduced=sysReduced||SET.motion==='reduce';document.documentElement.classList.toggle('no-motion',SET.motion==='reduce')}
 const EASE='cubic-bezier(.2,.8,.2,1)';
 if(!Array.isArray(S.view.collapsed))S.view.collapsed=[];
@@ -4311,7 +4315,7 @@ function pgSettings(){
   {const pv=[['⭐','#2F6FDE',1],['🍴','#E8590C',2],['⛩️','#2B8A3E',3],['🛏️','#9C36B5',4]].map(([i,c,n])=>'<div class="pin pin-main" style="--c:'+c+'">'+emo(i,16)+'<span class="pin-num">'+n+'</span></div>').join('')+
      '<div class="pin pin-extra" style="--c:#0891B2">'+emo('📸',13)+'</div>';
    h+='<section class="card set"><div class="card-h"><h2>Map pins</h2></div><div class="pin-prev" aria-hidden="true">'+pv+'</div>'+
-    row('Pin style','White inside makes the icon easier to see; the day color moves to the ring',seg('set-pinfill',SET.pinFill==='white'?'white':'color',[['color','Colored'],['white','White inside']]))+
+    row('Pin style','White, Grey or Black fills the circle so the icon stands out; the day color moves to the ring',seg('set-pinfill',['white','grey','black'].includes(SET.pinFill)?SET.pinFill:'color',[['color','Colored'],['white','White'],['grey','Grey'],['black','Black']]))+
     row('Icons','Minimal swaps the colorful emoji for simple line icons',seg('set-icons',SET.icons==='line'?'line':'emoji',[['emoji','Colorful'],['line','Minimal']]))+'</section>'}
   h+='<section class="card set"><div class="card-h"><h2>Units and formats</h2></div>'+
     row('Distances','',seg('set-units',SET.units,[['km','Kilometres'],['mi','Miles']]))+
