@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051710"></script>
+<script src="config.js?v=202611051714"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1827,7 +1827,13 @@ const GL=GM&&(()=>{
       this.wrap=document.createElement('div');this.wrap.className='gm-pin'+(this.options.interactive===false?' gm-noint':'');
       if(this.options.icon)this.wrap.innerHTML=this.options.icon.html;
       this._tap=()=>{if(this.options.interactive===false)return;const now=Date.now();if(now-(this._t||0)<400)return;this._t=now;this.fire('click',{target:this});if(this.pop)this.openPopup()};
-      this.wrap.addEventListener('click',e=>{e.stopPropagation();this._tap()});}
+      this.wrap.addEventListener('click',e=>{e.stopPropagation();this._tap()});
+      // phones: Google cancels the browser's tap-to-click on the map, so read the finger lift directly
+      let down=null;
+      this.wrap.addEventListener('pointerdown',e=>{down={x:e.clientX,y:e.clientY,t:Date.now(),id:e.pointerId}},{passive:true});
+      this.wrap.addEventListener('pointerup',e=>{const d=down;down=null;if(!d||d.id!==e.pointerId)return;
+        if(Math.hypot(e.clientX-d.x,e.clientY-d.y)<12&&Date.now()-d.t<600){e.stopPropagation();this._tap()}});
+      this.wrap.addEventListener('pointercancel',()=>{down=null},{passive:true});}
     addTo(t){if(t instanceof Group)t.addLayer(this);else this._show(t);return this}
     _show(m){if(this.m)return;this.map=m;m.shown.add(this);
       this.m=new GM.marker.AdvancedMarkerElement({map:m.g,position:this.ll,content:this.wrap,zIndex:this.z,title:this.options.title||'',gmpDraggable:!!this.options.draggable,gmpClickable:this.options.interactive!==false});
@@ -4373,7 +4379,7 @@ function pgSettings(){
       '<button class="btn danger'+(arm('wipe-blank')?' armed':'')+'" data-act="wipe-all" data-mode="blank">'+(arm('wipe-blank')?'Tap again to erase everything':'Erase all and start empty')+'</button>'+
       '<button class="btn danger'+(arm('wipe-sample')?' armed':'')+'" data-act="wipe-all" data-mode="sample">'+(arm('wipe-sample')?'Tap again to erase everything':'Erase all and load the sample trip')+'</button>'+
     '</div></section>';
-  h+='<section class="card set about"><div class="card-h"><h2>About</h2></div><p class="muted">Waypoint Planner, version 1.0. Maps use Leaflet with OpenStreetMap and CARTO data, and street routes come from the FOSSGIS routing service. Travel times are estimates.</p></section>';
+  h+='<section class="card set about"><div class="card-h"><h2>About</h2></div><p class="muted">Waypoint Planner, version 1.0'+((()=>{const sc=document.querySelector('script[src*="config.js?v="]');return sc?' (build '+sc.getAttribute('src').split('v=')[1]+')':''})())+'. Maps use Leaflet with OpenStreetMap and CARTO data, and street routes come from the FOSSGIS routing service. Travel times are estimates.</p></section>';
   return h;
 }
 const CURRENCIES=['EUR','USD','CAD','GBP','AUD','NZD','JPY','CHF','MXN','SEK','NOK','DKK','THB','KRW','SGD'];
