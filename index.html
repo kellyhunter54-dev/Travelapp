@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051610"></script>
+<script src="config.js?v=202611051629"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -3076,18 +3076,43 @@ function openCity(c,preset){
     '<div class="field"><label for="f-cname">City name</label><input class="inp" id="f-cname" value="'+esc(c?c.name:(preset.name||''))+'" placeholder="e.g. Seville" autocomplete="off"></div>'+
     (c?'':'<p class="cc-line" id="f-ccline">In <b id="f-ccshow">'+esc(preset.country||workingCountry()||'no country yet')+'</b> <button type="button" class="linkbtn sm" data-act="cc-change">Change</button></p>')+
     '<div class="field" id="f-ccfield"'+(c?'':' hidden')+'><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':(preset.country||workingCountry()))+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
+    (c&&!c.ph?(()=>{const cur=cityDays(c.id).length,max=Math.max(14,cur+7);ui.form.cur=cur;
+      return '<div class="field"><label for="f-cdays2">Days in '+esc(c.name)+'</label><select class="inp" id="f-cdays2">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===cur?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint" id="f-cdhint">'+cityRangeText(c,cur)+'</div></div>'})():'')+
     (c?'':(()=>{const open=openDays().length,max=Math.max(7,open),def=open?open:3;
       return '<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===def?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">'+
         (open?'You have '+open+' day'+(open>1?'s':'')+' without a city. This city fills the first ones, and any extra days are added at the end.':'Added after your last city. You can add more days later.')+'</div></div>'})())+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
 }
+function cityRangeText(c,n){
+  const ds=cityDays(c.id);if(!ds.length)return '';const k0=dayIdx(ds[0].id),cur=ds.length,f=d=>d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  let h='<b>'+f(dayDate(k0))+(n>1?' to '+f(dayDate(k0+n-1)):'')+'</b>';
+  if(n!==cur){const ph=S.cities.find(x=>x.ph),open=ph?cityDays(ph.id).length:0,last=S.days.length-1;
+    if(n>cur){const take=Math.min(open,n-cur),grow=n-cur-take;
+      h+='<br>'+(take?'Uses '+take+' of your open day'+(take>1?'s':'')+'. ':'')+(grow?'Adds '+grow+' day'+(grow>1?'s':'')+', so later cities move '+grow+' day'+(grow>1?'s':'')+' later and the trip ends '+f(dayDate(last+grow))+'.':'')}
+    else{const lost=cityDays(c.id).slice(n),stops=S.places.filter(p=>p.main&&lost.some(d=>d.id===p.day)).length;
+      h+='<br>Removes '+(cur-n)+' day'+(cur-n>1?'s':'')+(ph?' (they become open days at the end of the trip)':', so later cities move earlier and the trip ends '+f(dayDate(last-(cur-n))))+'.'+(stops?' The '+stops+' stop'+(stops>1?'s':'')+' on '+(cur-n>1?'those days move':'that day moves')+' to '+f(dayDate(k0+n-1))+'.':'')}}
+  return h}
+function setCityDays(c,n){
+  const ds=cityDays(c.id),cur=ds.length;if(n===cur||n<1)return;
+  let ph=S.cities.find(x=>x.ph);
+  if(n>cur){let k=dayIdx(ds[cur-1].id)+1,add=n-cur;
+    while(add>0){const open=ph?cityDays(ph.id):[];
+      if(open.length){const od=open[0],oi=dayIdx(od.id);removeDayAt(oi);if(oi<k)k--;od.city=c.id;insertDayAt(k,od,true)}
+      else insertDayAt(k,{id:uid('d'),city:c.id,start:'09:00'},true);
+      k++;add--}
+    if(ph&&!cityDays(ph.id).length)S.cities=S.cities.filter(x=>x!==ph);
+  }else{const keep=ds.slice(0,n),lost=ds.slice(n),to=keep[keep.length-1].id;
+    lost.forEach(d=>{S.places.filter(p=>p.day===d.id).forEach(p=>{p.day=to;if(p.main)p.order=9999})});renumber(to);
+    lost.slice().reverse().forEach(d=>{removeDayAt(dayIdx(d.id));if(S.view.day===d.id)S.view.day='all';if(ph){d.city=ph.id;insertDayAt(S.days.length,d,true)}})}
+}
 function openDays(){const ph=S.cities.find(x=>x.ph);return ph?S.days.filter(d=>d.city===ph.id):[]}
 function saveCity(){
   const name=$('f-cname').value.trim();
   if(!name){$('f-err').textContent='Give the city a name.';$('f-err').hidden=false;return}
   let c=S.cities.find(x=>x.id===ui.form.id);const country=$('f-ccountry').value.trim()||guessCountry(name);
-  if(c){if(c.name!==name){const k=cityCoord(name);if(k){c.lat=k.lat;c.lng=k.lng}}c.name=name;c.country=country;delete c.ph}
+  if(c){if(c.name!==name){const k=cityCoord(name);if(k){c.lat=k.lat;c.lng=k.lng}}c.name=name;c.country=country;delete c.ph;
+    const nd=$('f-cdays2');if(nd)setCityDays(c,+nd.value)}
   else{const k=ui.form.lat!=null?{lat:ui.form.lat,lng:ui.form.lng}:cityCoord(name);c={id:uid('c'),name,country,lat:k?k.lat:null,lng:k?k.lng:null};let n=+$('f-cdays').value||1;
     const ph=S.cities.find(x=>x.ph);
     if(ph){const open=S.days.filter(d=>d.city===ph.id),take=open.slice(0,n);S.cities.splice(S.cities.indexOf(ph),0,c);take.forEach(d=>{d.city=c.id});n-=take.length;
@@ -4281,6 +4306,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if((t.id==='f-ts'||t.id==='f-te')&&ui.dlg==='trip'){ntSync(e);return}
+  if(t.id==='f-cdays2'&&ui.dlg==='city'){const c=S.cities.find(x=>x.id===ui.form.id);if(c)$('f-cdhint').innerHTML=cityRangeText(c,+t.value);return}
   if(t.id==='f-att'){const T=STORE.trips[t.value],l=STORE.library.find(x=>x.id===ui.form.id);if(T&&l){$('f-atd').innerHTML=tripDayOptions(T,bestDay(T,l));atHint()}return}
   if(t.id==='f-atd'){atHint();return}
   if(t.id==='budget-in'){const v=parseFloat(String(t.value).replace(/[^\d.]/g,''));S.budget=v>0?Math.round(v):0;commit()}
