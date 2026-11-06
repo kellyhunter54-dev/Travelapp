@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051735"></script>
+<script src="config.js?v=202611052126"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -429,6 +429,12 @@ html .pin-extra,html .pin-ghost{background:var(--pin-other,#fff)}
 .pop-move{display:block;margin-top:8px;font-size:12.5px;color:var(--muted)}
 .pin-moving .pin{animation:pinWiggle 1.2s ease-in-out infinite;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.35)}
 @keyframes pinWiggle{0%,100%{translate:0 0}50%{translate:0 -4px}}
+.trans-li{list-style:none;margin:6px 0}
+.trans-split{display:flex;flex-wrap:wrap;align-items:center;gap:6px 12px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line)}
+.trans-split .ts-hint{flex:1 1 220px;font-size:12.5px;color:var(--muted)}
+.trans-split .ts-move{display:flex;gap:12px}
+.trans-split .ts-move button[disabled]{opacity:.4;pointer-events:none}
+.day-split{margin-left:8px;font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:10px;background:color-mix(in srgb,var(--dc) 14%,transparent);color:color-mix(in srgb,var(--dc) 70%,var(--fg));white-space:nowrap}
 .nt-days{margin:-4px 0 6px;font-size:14px;color:var(--muted)}
 .nt-days b{color:var(--fg)}
 .nt-days .bad{color:var(--danger)}
@@ -2275,19 +2281,29 @@ function hotelLeg(dayId,part){
   // already at the hotel: the day starts or ends with a stop linked to it
   if((part==='m'?ms[0]:ms[ms.length-1]).stayRef===st.id)return null;
   const from=part==='m'?st:ms[ms.length-1],to=part==='m'?ms[0]:st,k=part==='m'?'mmode':'emode';
-  const mode=d[k]&&MODES[d[k]]?d[k]:legMode(from,{lat:to.lat,lng:to.lng});
+  // on a travel day the morning is still in the old city, so the trip's mode doesn't apply to the hotel walk
+  const pref=part==='m'&&splitIdx(d)>0&&d[k]===d.tmode?null:d[k];
+  const mode=pref&&MODES[pref]?pref:legMode(from,{lat:to.lat,lng:to.lng});
   const r=legRoute(from,to,mode);
-  return {from,to,stay:st,part,mode,auto:!d[k],km:r.km,min:legMins(r,mode),path:r.path,live:r.live,day:dayId};
+  return {from,to,stay:st,part,mode,auto:!pref,km:r.km,min:legMins(r,mode),path:r.path,live:r.live,day:dayId};
 }
 function nightsText(st){const n=st.co-st.ci,o={month:'short',day:'numeric'};return n+' night'+(n===1?'':'s')+' · '+fmt(dayDate(st.ci),o)+' to '+fmt(dayDate(st.co),o)}
 function firstFreeNight(){for(let n=-1;n<S.days.length;n++)if(!stayForNight(n))return n;return Math.max(0,S.days.length-1)}
+// A travel day: the morning in the earlier city, then the trip, then the rest of the day in the new city
+function isSplit(d){const i=d?dayIdx(d.id):-1;return !!(d&&d.split&&i>0&&S.days[i-1].city!==d.city)}
+function splitIdx(d){if(!isSplit(d))return -1;const ms=mains(d.id),di=dayIdx(d.id);
+  if(d.splitAt!=null)return Math.max(0,Math.min(ms.length,d.splitAt));
+  const ref=(cid,st)=>{if(st&&stayCityId(st)===cid)return st;const c=S.cities.find(x=>x.id===cid);return c&&c.lat!=null?c:null};
+  const X=ref(S.days[di-1].city,stayForNight(di-1)),Y=ref(d.city,stayForNight(di));if(!X||!Y)return 0;
+  const dd=(p,q)=>{const c=Math.cos(p.lat*Math.PI/180);return (p.lat-q.lat)**2+((p.lng-q.lng)*c)**2};
+  let k=0;while(k<ms.length&&dd(ms[k],X)<dd(ms[k],Y))k++;return k}
 function transferOf(i){
   if(i<1||i>=S.days.length)return null;
   if(stayForNight(i-1))return null;
   const d=S.days[i],pd=S.days[i-1],a=mains(pd.id),b=mains(d.id);
   if(!a.length||!b.length)return null;
-  const from=a[a.length-1],to=b[0];
-  const mode=d.tmode&&MODES[d.tmode]?d.tmode:legMode(from,{lat:to.lat,lng:to.lng});
+  const from=a[a.length-1],to=b[0],sp=splitIdx(d)>0;
+  const mode=!sp&&d.tmode&&MODES[d.tmode]?d.tmode:legMode(from,{lat:to.lat,lng:to.lng});
   const r=legRoute(from,to,mode);
   return {from,to,mode,auto:!d.tmode,when:d.twhen==='end'?'end':'start',km:r.km,min:legMins(r,mode),path:r.path,live:r.live,day:d.id,prevDay:pd.id,owner:d.twhen==='end'?pd.id:d.id};
 }
@@ -2299,9 +2315,13 @@ function dayPlan(dayId){
   out.morning=hotelLeg(dayId,'m');out.evening=hotelLeg(dayId,'e');
   if(out.tin)t+=out.tin.min;
   if(out.morning)t+=out.morning.min;
+  const sx=splitIdx(d);out.split=sx;
   mains(dayId).forEach((p,i,ms)=>{
     let leg=null;
-    if(i>0){const a=ms[i-1];
+    if(i>0&&i===sx){const a=ms[i-1],j=d.cjr,mode=d.tmode&&MODES[d.tmode]?d.tmode:legMode(a,p),r=legRoute(a,p,mode);
+      if(j&&j.dep&&j.arr){const dep=jrDepMin(j,base),at=jrArrMin(j,base);leg={from:a,mode,auto:false,km:r.km,min:Math.max(0,at-t),path:r.path,live:r.live,travel:true,dep,arr:at};t=Math.max(t,at)}
+      else{leg={from:a,mode,auto:!d.tmode,km:r.km,min:legMins(r,mode),path:r.path,live:r.live,travel:true};t+=leg.min}}
+    else if(i>0){const a=ms[i-1];
       if(jrTimed(a)){const mode=JK[a.jr.kind].mode,r=legRoute(a,p,mode),at=jrArrMin(a.jr,base);leg={from:a,mode,auto:false,km:r.km,min:Math.max(0,at-t),path:r.path,live:r.live,jr:a.jr};t=Math.max(t,at)}
       else{const mode=legMode(a,p),r=legRoute(a,p,mode);leg={from:a,mode,auto:!p.mode,km:r.km,min:legMins(r,mode),path:r.path,live:r.live};t+=leg.min}}
     let fixed=false,early=false;
@@ -2344,6 +2364,7 @@ function cityEnds(di){
 function cityTransition(dayId){
   const di=dayIdx(dayId),d=S.days[di];if(!d||di<1||S.days[di-1].city===d.city)return null;
   const pl=dayPlan(dayId),pd=S.days[di-1];
+  if(pl.split>0){const x=pl[pl.split],a=pl[pl.split-1];return {lg:x.leg,kind:'s',day:dayId,date:di,leave:x.leg.dep!=null?x.leg.dep:a.leave,fromName:a.p.name,toName:x.p.name}}
   if(pl.morning&&stayCityId(pl.morning.stay)!==d.city){const lg=pl.morning;return {lg,kind:'h',day:dayId,date:di,leave:toMin(d.start),fromName:lg.stay.name,toName:lg.to.name}}
   const x=transferOf(di);
   if(!x){
@@ -2373,6 +2394,10 @@ function transitionCard(t,fromC,toC){
   else h+='<div class="trans-times"><span>Add a stop or hotel in '+esc(t.need)+' to see the distance and travel time.</span></div>';
   if(j)h+=jrCardJ(j,base);
   h+='<div class="trans-acts"><button type="button" class="linkbtn sm" data-act="ctr-edit" data-day="'+t.day+'">'+(j?'Edit travel details':'+ Add travel details')+'</button></div>';
+  if(d){const sp=!!d.split,n=mains(d.id).length,si=splitIdx(d);
+    h+='<div class="trans-split"><button type="button" class="mini-toggle" data-act="ctr-split" data-day="'+t.day+'" aria-pressed="'+sp+'"><span class="sw2"></span>Travel during the day</button>'+
+      '<span class="ts-hint">'+(sp?'Morning in '+esc(fromC.name)+', the rest of the day in '+esc(toC.name)+'.':'Turn on to see '+esc(fromC.name)+' in the morning and '+esc(toC.name)+' later the same day.')+'</span>'+
+      (sp&&n?'<span class="ts-move"><button type="button" class="linkbtn sm" data-act="ctr-split-at" data-day="'+t.day+'" data-d="-1"'+(si<=0?' disabled':'')+'>Leave earlier</button><button type="button" class="linkbtn sm" data-act="ctr-split-at" data-day="'+t.day+'" data-d="1"'+(si>=n?' disabled':'')+'>Leave later</button></span>':'')+'</div>'}
   return h+'</div></div></div></div>';
 }
 function openCtr(dayId){
@@ -2954,7 +2979,7 @@ function renderPanel(){
       const tr=cFirst&&i>0?cityTransition(d.id):null;
       if(cFirst){
         const pc=i>0?S.cities.find(c=>c.id===S.days[i-1].city):null,multi=countriesOf().length>1,cn=(cty.country||'').trim();
-        if(tr&&pc&&pc.id!==cty.id)h+=transitionCard(tr,pc,cty);
+        if(tr&&pc&&pc.id!==cty.id&&tr.kind!=='s')h+=transitionCard(tr,pc,cty);
         if(multi&&cn&&(!pc||(pc.country||'').trim()!==cn))h+='<div class="country" data-flip="co-'+esc(cn)+'"><span>'+esc(cn)+'</span></div>';
         h+=cityHead(cty);
       }
@@ -2962,7 +2987,7 @@ function renderPanel(){
       const travel=plan.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+(plan.tin?plan.tin.min:0)+(plan.tout?plan.tout.min:0)+(plan.morning?plan.morning.min:0)+(plan.evening?plan.evening.min:0);
       const mst=stayForNight(i-1),est=stayForNight(i);
       const col=S.view.collapsed.includes(d.id);
-      h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'&&!inView(d.id)?' dim':'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span><span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+ms.length+' stop'+(ms.length===1?'':'s')+'</span>'+
+      h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'&&!inView(d.id)?' dim':'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span>'+(plan.split>0?'<span class="day-split">'+esc((S.cities.find(c=>c.id===S.days[i-1].city)||{}).name||'')+' \u2192 '+esc(cty.name)+'</span>':'')+'<span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+ms.length+' stop'+(ms.length===1?'':'s')+'</span>'+
         (cityDays(d.city).length>1&&!ms.length&&!xs.length?'<button class="ib" data-act="remove-day" data-day="'+d.id+'" aria-label="Remove this day">✕</button>':'')+'</div>';
       h+='<div class="day-body"><div class="day-inner">';
       h+='<div class="day-sum" data-flip="ds-'+d.id+'"><span>Starts</span><button type="button" class="tpick" data-act="day-start" data-day="'+d.id+'" title="Change start time" aria-label="Day '+(i+1)+' starts at '+clock(toMin(d.start))+'. Change"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
@@ -2975,7 +3000,8 @@ function renderPanel(){
         if(plan.tin&&!trX)h+=xferRow(plan.tin,'in');
         plan.forEach((x,k)=>{
           const p=x.p,t=tagOf(p),open=ui.open===p.id;
-          if(x.leg&&x.leg.jr){const jk=JK[x.leg.jr.kind];h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow jr-leg" data-act="edit" data-id="'+x.leg.from.id+'" aria-label="'+esc(jk.label+' details')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+jk.icon+' '+esc(jk.label+(x.leg.jr.num?' '+x.leg.jr.num:''))+'</span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>'}
+          if(x.leg&&x.leg.travel&&tr&&tr.kind==='s'){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}
+          else if(x.leg&&x.leg.jr){const jk=JK[x.leg.jr.kind];h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow jr-leg" data-act="edit" data-id="'+x.leg.from.id+'" aria-label="'+esc(jk.label+' details')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+jk.icon+' '+esc(jk.label+(x.leg.jr.num?' '+x.leg.jr.num:''))+'</span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>'}
           else if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
           h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+(p.jr?'<small class="jr-sub'+(x.late?' bad':'')+'">'+JK[p.jr.kind].icon+' '+esc([p.jr.num||JK[p.jr.kind].label,p.jr.dep?(p.jr.kind==='car'?'pick-up ':'departs ')+clock24(p.jr.dep):'',p.jr.seat?'seat '+p.jr.seat:''].filter(Boolean).join(' · '))+'</small>':'')+'</span><span class="stime'+(x.fixed?' fixed':'')+'">'+clock(x.arrive)+'</span></button></li>';
           if(open)h+=detailHtml(x,true);
@@ -3637,6 +3663,8 @@ document.addEventListener('click',e=>{
     case 'g-on':gSetOn(true);break;
     case 'tab-more':openTabMore(b);break;
     case 'toggle-key':{const lg=document.querySelector('.legend'),on=!lg.classList.contains('show');lg.classList.toggle('show',on);b.setAttribute('aria-expanded',on);b.textContent=on?'Hide key':'Map key';break}
+    case 'ctr-split':{const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.split=!d.split;delete d.splitAt;ui.ctrOpen.add(d.id);commit()}break}
+    case 'ctr-split-at':{const d=S.days.find(x=>x.id===b.dataset.day);if(d){d.splitAt=Math.max(0,Math.min(mains(d.id).length,splitIdx(d)+(+b.dataset.d)));ui.ctrOpen.add(d.id);commit()}break}
     case 'ctr-toggle':{const id=b.dataset.day,box=b.closest('.trans'),now=!ui.ctrOpen.has(id);if(now)ui.ctrOpen.add(id);else ui.ctrOpen.delete(id);
       if(box){box.classList.toggle('open',now);b.setAttribute('aria-expanded',now)}break}
     case 'ctr-edit':openCtr(b.dataset.day);break;
