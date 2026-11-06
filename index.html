@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051532"></script>
+<script src="config.js?v=202611051610"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -397,6 +397,9 @@ path.rt-transit{stroke:var(--transit)}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
 .btn.primary:hover{filter:brightness(1.07)}
 .btn.danger{color:var(--danger)}
+.nt-days{margin:-4px 0 6px;font-size:14px;color:var(--muted)}
+.nt-days b{color:var(--fg)}
+.nt-days .bad{color:var(--danger)}
 .btn.danger.armed{background:var(--danger);border-color:var(--danger);color:#fff}
 .card.set.nuke{border-color:color-mix(in srgb,var(--danger) 45%,var(--line,transparent))}
 .card.set.nuke h2{color:var(--danger)}
@@ -3073,16 +3076,24 @@ function openCity(c,preset){
     '<div class="field"><label for="f-cname">City name</label><input class="inp" id="f-cname" value="'+esc(c?c.name:(preset.name||''))+'" placeholder="e.g. Seville" autocomplete="off"></div>'+
     (c?'':'<p class="cc-line" id="f-ccline">In <b id="f-ccshow">'+esc(preset.country||workingCountry()||'no country yet')+'</b> <button type="button" class="linkbtn sm" data-act="cc-change">Change</button></p>')+
     '<div class="field" id="f-ccfield"'+(c?'':' hidden')+'><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':(preset.country||workingCountry()))+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
-    (c?'':'<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+[1,2,3,4,5,6,7].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">Added after your last city. You can add more days later.</div></div>')+
+    (c?'':(()=>{const open=openDays().length,max=Math.max(7,open),def=open?open:3;
+      return '<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===def?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">'+
+        (open?'You have '+open+' day'+(open>1?'s':'')+' without a city. This city fills the first ones, and any extra days are added at the end.':'Added after your last city. You can add more days later.')+'</div></div>'})())+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
 }
+function openDays(){const ph=S.cities.find(x=>x.ph);return ph?S.days.filter(d=>d.city===ph.id):[]}
 function saveCity(){
   const name=$('f-cname').value.trim();
   if(!name){$('f-err').textContent='Give the city a name.';$('f-err').hidden=false;return}
   let c=S.cities.find(x=>x.id===ui.form.id);const country=$('f-ccountry').value.trim()||guessCountry(name);
-  if(c){if(c.name!==name){const k=cityCoord(name);if(k){c.lat=k.lat;c.lng=k.lng}}c.name=name;c.country=country}
-  else{const k=ui.form.lat!=null?{lat:ui.form.lat,lng:ui.form.lng}:cityCoord(name);c={id:uid('c'),name,country,lat:k?k.lat:null,lng:k?k.lng:null};S.cities.push(c);const n=+$('f-cdays').value||1;for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'},j>0)}
+  if(c){if(c.name!==name){const k=cityCoord(name);if(k){c.lat=k.lat;c.lng=k.lng}}c.name=name;c.country=country;delete c.ph}
+  else{const k=ui.form.lat!=null?{lat:ui.form.lat,lng:ui.form.lng}:cityCoord(name);c={id:uid('c'),name,country,lat:k?k.lat:null,lng:k?k.lng:null};let n=+$('f-cdays').value||1;
+    const ph=S.cities.find(x=>x.ph);
+    if(ph){const open=S.days.filter(d=>d.city===ph.id),take=open.slice(0,n);S.cities.splice(S.cities.indexOf(ph),0,c);take.forEach(d=>{d.city=c.id});n-=take.length;
+      if(take.length===open.length)S.cities.splice(S.cities.indexOf(ph),1)}
+    else S.cities.push(c);
+    for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'},j>0)}
   closeDlg();commit();
 }
 function ensureHotelTag(){let t=S.tags.find(x=>x.name.toLowerCase()==='hotel');if(!t){t={id:uid('t'),name:'Hotel',icon:'🛏️',color:'#334155'};S.tags.push(t)}return t.id}
@@ -4128,24 +4139,33 @@ function saveBooking(){
 }
 function openNewTrip(){
   ui.dlg='trip';ui.form={};
-  const t=new Date();t.setDate(t.getDate()+30);const iso=t.toISOString().slice(0,10);
+  const t=new Date();t.setDate(t.getDate()+30);const iso=t.toISOString().slice(0,10);t.setDate(t.getDate()+6);const isoEnd=t.toISOString().slice(0,10);ui.form={a:iso,span:7};
   openDlg('<h2>Plan a new trip</h2>'+
     '<div class="field"><label for="f-tn">Trip name</label><input class="inp" id="f-tn" placeholder="e.g. Japan in spring" autocomplete="off"></div>'+
-    '<div class="dt-grid2"><div class="field"><label for="f-ts">First day</label><input class="inp" type="date" id="f-ts" value="'+iso+'"></div><div class="field"><label for="f-td">Days in the first city</label><select class="inp" id="f-td">'+[1,2,3,4,5,6,7,10,14].map(n=>'<option value="'+n+'"'+(n===3?' selected':'')+'>'+n+'</option>').join('')+'</select></div></div>'+
-    '<div class="field"><label for="f-tc">First city</label><input class="inp" id="f-tc" placeholder="e.g. Tokyo" autocomplete="off"></div>'+
-    '<p class="modehint">Your tags carry over. Add places by clicking the map in the itinerary.</p>'+
+    '<div class="dt-grid2"><div class="field"><label for="f-ts">From</label><input class="inp" type="date" id="f-ts" value="'+iso+'"></div><div class="field"><label for="f-te">To</label><input class="inp" type="date" id="f-te" value="'+isoEnd+'" min="'+iso+'"></div></div>'+
+    '<p class="nt-days" id="f-tdays">'+ntDaysText(iso,isoEnd)+'</p>'+
+    '<p class="modehint">Next you\u2019ll add your cities and choose how many of these days you spend in each.</p>'+
     '<p class="err" id="f-err" hidden></p><div class="dlg-acts"><span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-trip">Create trip</button></div>');
 }
+function ntSpan(a,b){if(!a||!b)return 0;const d=Math.round((Date.parse(b+'T12:00:00')-Date.parse(a+'T12:00:00'))/864e5)+1;return isFinite(d)?d:0}
+function ntDaysText(a,b){const n=ntSpan(a,b);if(n<1)return '<span class="bad">The last day is before the first day</span>';if(n>90)return '<span class="bad">That\u2019s '+n+' days. Trips can be up to 90 days.</span>';
+  return '<b>'+n+' day'+(n===1?'':'s')+'</b> \u00b7 '+fmtShort(a)+(n>1?' to '+fmtShort(b):'')}
+function fmtShort(iso){try{return new Date(iso+'T12:00:00').toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'})}catch(e){return iso}}
+function ntSync(e){const a=$('f-ts'),b=$('f-te');if(!a||!b)return;
+  if(e&&e.target===a&&a.value){const span=Math.max(1,ui.form.span||ntSpan(ui.form.a||a.value,b.value)||7);const d=new Date(a.value+'T12:00:00');d.setDate(d.getDate()+span-1);b.value=d.toISOString().slice(0,10)}
+  b.min=a.value||'';ui.form.a=a.value;ui.form.span=ntSpan(a.value,b.value);$('f-tdays').innerHTML=ntDaysText(a.value,b.value)}
 function saveNewTrip(){
-  const name=$('f-tn').value.trim(),city=$('f-tc').value.trim(),start=$('f-ts').value,n=+$('f-td').value||3;
+  const name=$('f-tn').value.trim(),start=$('f-ts').value,end=$('f-te').value,n=ntSpan(start,end);
   const err=m=>{$('f-err').textContent=m;$('f-err').hidden=false};
-  if(!name)return err('Give the trip a name.');if(!city)return err('Add the first city.');if(!start)return err('Pick the first day.');
-  const cid=uid('c'),t={id:uid('trip'),trip:{name,start},cities:[{id:cid,name:city,country:guessCountry(city)}],days:[],tags:TAGS,places:[],stays:[],
+  if(!name)return err('Give the trip a name.');if(!start||!end)return err('Pick the first and last day.');if(n<1)return err('The last day has to be on or after the first day.');if(n>90)return err('Trips can be up to 90 days.');
+  // the days start "open" (no city yet); adding a city fills them in order
+  const cid=uid('c'),t={id:uid('trip'),trip:{name,start},cities:[{id:cid,name:'No city yet',country:'',ph:true}],days:[],tags:TAGS,places:[],stays:[],
     view:{day:'all',mainOnly:false,hidden:[],basemap:SET.map||'illustrated',collapsed:[]},currency:SET.currency||'EUR'};
   for(let i=0;i<n;i++)t.days.push({id:uid('d'),city:cid,start:'09:00'});
   normalize(t);STORE.trips[t.id]=t;closeDlg();openTrip(t.id,'plan');
   if(ui.dropSample&&STORE.trips[ui.dropSample]&&ui.dropSample!==t.id){delete STORE.trips[ui.dropSample];save();renderPage(false)}ui.dropSample=null;
   gtoast('Created '+name);
+  setTimeout(()=>{if(S.id===t.id&&!ui.dlg)openSearch('city',{})},450);
 }
 function openTrip(id,view){
   if(!STORE.trips[id])return;
@@ -4260,6 +4280,7 @@ document.addEventListener('click',e=>{
 });
 document.addEventListener('change',e=>{
   const t=e.target;
+  if((t.id==='f-ts'||t.id==='f-te')&&ui.dlg==='trip'){ntSync(e);return}
   if(t.id==='f-att'){const T=STORE.trips[t.value],l=STORE.library.find(x=>x.id===ui.form.id);if(T&&l){$('f-atd').innerHTML=tripDayOptions(T,bestDay(T,l));atHint()}return}
   if(t.id==='f-atd'){atHint();return}
   if(t.id==='budget-in'){const v=parseFloat(String(t.value).replace(/[^\d.]/g,''));S.budget=v>0?Math.round(v):0;commit()}
