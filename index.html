@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051727"></script>
+<script src="config.js?v=202611051735"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1085,7 +1085,7 @@ gmp-advanced-marker,gmp-advanced-marker:focus,gmp-advanced-marker:focus-visible,
   html.plan-view .banner{top:calc(env(safe-area-inset-top,0px) + 104px)}
   html.plan-view .side{position:fixed;left:0;right:0;bottom:var(--tabh);height:calc(100% - var(--tabh) - env(safe-area-inset-top,0px) - 8px);z-index:20;border:0;border-radius:20px 20px 0 0;box-shadow:0 -6px 28px rgba(0,0,0,.16),0 -1px 0 var(--line);transform:translate3d(0,var(--sy,45%),0);will-change:transform}
   html.plan-view .side.snapping{transition:transform .4s cubic-bezier(.2,.9,.25,1)}
-  html.plan-view .side.snapping .side-foot{transition:transform .4s cubic-bezier(.2,.9,.25,1),opacity .2s ease}
+  html.plan-view .side.snapping .side-foot{transition:transform .4s cubic-bezier(.2,.9,.25,1),opacity .35s ease}
   html.plan-view .sheet-grab{display:block;flex:none;height:20px;position:relative;touch-action:none;cursor:grab}
   html.plan-view .sheet-grab i{position:absolute;left:50%;top:8px;width:38px;height:5px;margin-left:-19px;border-radius:3px;background:var(--line);transition:background-color .15s ease,width .2s ease}
   html.plan-view .side.dragging .sheet-grab i{background:var(--muted)}
@@ -1096,8 +1096,9 @@ gmp-advanced-marker,gmp-advanced-marker:focus,gmp-advanced-marker:focus-visible,
   .tabs .tab[aria-selected="true"]{background:var(--accent-soft);color:var(--fg)}
   html.plan-view .side-head{padding-bottom:10px;gap:2px}
   html.plan-view .side-scroll{overflow:auto;overscroll-behavior:contain}
-  html.plan-view .side-foot{transform:translate3d(0,calc(-1 * var(--hide,0px)),0)}
-  html.plan-view .side.peek .side-foot{opacity:0;pointer-events:none}
+  /* the Add city / Add location bar fades in only as the sheet reaches half height */
+  html.plan-view .side-foot{transform:translate3d(0,calc(-1 * var(--hide,0px) + (1 - var(--footo,1)) * 26px),0);opacity:var(--footo,1)}
+  html.plan-view .side.peek:not(.dragging):not(.snapping) .side-foot{opacity:0;pointer-events:none}
   html.plan-view .side.peek .tabs,html.plan-view .side.peek .side-scroll{visibility:hidden}
   html.plan-view .side.peek.dragging .tabs,html.plan-view .side.peek.dragging .side-scroll,html.plan-view .side.peek.snapping .tabs,html.plan-view .side.peek.snapping .side-scroll{visibility:visible}
   /* tab bar: five tabs, the rest under More */
@@ -2200,7 +2201,7 @@ function requestLive(A,B,prof){
 }
 // Google routes: real paths and travel times (including transit), kept for 30 days
 // Spending guard: every Google request is counted on this device and stops well under Google's free monthly allowances
-const G_LIMIT={load:{d:60,m:1500,free:10000,label:'Map opens'},route:{d:200,m:3000,free:5000,label:'Route lookups'},auto:{d:200,m:3000,free:10000,label:'Search suggestions'},
+const G_LIMIT={load:{d:60,m:1500,free:10000,label:'Map opens'},route:{d:300,m:3000,free:5000,label:'Route lookups'},auto:{d:200,m:3000,free:10000,label:'Search suggestions'},
   details:{d:40,m:800,free:5000,label:'Places picked'},info:{d:25,m:600,free:1000,label:'Hours and ratings'},photo:{d:25,m:600,free:1000,label:'Photos'}};
 function gUsage(){let u={};try{u=JSON.parse(localStorage.getItem('waypoint-gusage')||'{}')}catch(e){}const dk=new Date().toISOString().slice(0,10),mk=dk.slice(0,7);
   if(u.mk!==mk){u.mk=mk;u.m={}}if(u.dk!==dk){u.dk=dk;u.d={}}u.m=u.m||{};u.d=u.d||{};return u}
@@ -2226,19 +2227,23 @@ function gPump(){
       // a place's Google ID routes to its real entrance instead of the nearest bit of road to the pin
       const end=(P,g)=>g&&pl&&pl.Place?new pl.Place({id:g}):{lat:P[0],lng:P[1]};
       const base={travelMode:G_TM[mode],fields:['path','distanceMeters','durationMillis']};
-      if(mode==='car'){base.computeAlternativeRoutes=true;base.routingPreference='TRAFFIC_UNAWARE'}
+      if(mode==='car')base.routingPreference='TRAFFIC_UNAWARE';
       const plain=()=>Route.computeRoutes(Object.assign({origin:{lat:A[0],lng:A[1]},destination:{lat:B[0],lng:B[1]}},base));
-      return (ga||gb)?Route.computeRoutes(Object.assign({origin:end(A,ga),destination:end(B,gb)},base)).catch(plain):plain()})
+      const has=res=>res&&res.routes&&res.routes.some(x=>x&&x.path&&x.path.length);
+      // Google has no public transit data in some countries (Japan, for one): draw the road route and estimate the ride
+      const byRoad=()=>!gUse('route')?Promise.reject(Object.assign(new Error('limit'),{none:true})):Route.computeRoutes({origin:{lat:A[0],lng:A[1]},destination:{lat:B[0],lng:B[1]},travelMode:'DRIVING',fields:base.fields}).then(d=>{if(d&&d.routes)d.routes.forEach(x=>{x.durationMillis=Math.round((x.durationMillis||0)*1.3+8*60000);x.est=true});return d});
+      const first=(ga||gb)?Route.computeRoutes(Object.assign({origin:end(A,ga),destination:end(B,gb)},base)).catch(plain):plain();
+      return mode==='transit'?first.then(res=>has(res)?res:byRoad(),()=>byRoad()):first})
       .then(res=>{const rs=(res&&res.routes||[]).filter(x=>x&&x.path&&x.path.length);
         // quickest of the routes Google offers
-        const r=rs.sort((a,b)=>(a.durationMillis||9e15)-(b.durationMillis||9e15))[0];if(!r)throw new Error('no route');
+        const r=rs.sort((a,b)=>(a.durationMillis||9e15)-(b.durationMillis||9e15))[0];if(!r){const e=new Error('no route');e.none=true;throw e}
         let pts=r.path.map(q=>{const la=typeof q.lat==='function'?q.lat():q.lat,ln=typeof q.lng==='function'?q.lng():q.lng;return [+(+la).toFixed(5),+(+ln).toFixed(5)]});
         pts=simplifyPath(pts,300);
         gCache[k]={t:Date.now(),km:(r.distanceMeters||0)/1000,min:Math.max(1,Math.round((r.durationMillis||0)/60000)),path:pts};
         const keys=Object.keys(gCache);if(keys.length>500)keys.sort((a,b)=>gCache[a].t-gCache[b].t).slice(0,keys.length-500).forEach(x=>delete gCache[x]);
         try{localStorage.setItem(GKEY,JSON.stringify(gCache))}catch(e){}
         clearTimeout(gRefreshT);gRefreshT=setTimeout(()=>{renderPanel();renderRoutes()},250)})
-      .catch(()=>{gFail[k]=1;gFails++})
+      .catch(e=>{gFail[k]=1;if(!(e&&e.none))gFails++})
       .finally(()=>{delete gPending[k];gActive--;gPump()})}
 }
 const legMins=(r,mode)=>r.min!=null?r.min:minsFor(mode,r.km);
@@ -4020,10 +4025,11 @@ const sideEl=()=>document.querySelector('.side');
 function sheetFull(){const side=sideEl();side.style.height='';sheet.H=side.offsetHeight;return sheet.H}
 function sheetYs(){const side=sideEl(),H=sheet.H||sheetFull(),peekV=side.querySelector('.sheet-grab').offsetHeight+side.querySelector('.side-head').offsetHeight+4;
   return {H,full:0,half:Math.round(H*.5),peek:Math.max(0,H-peekV)}}
-function sheetPlace(y){const side=sideEl();side.style.setProperty('--sy',y+'px');side.style.setProperty('--hide',y+'px');sheet.y=y}
+function footFor(y){const ys=sheetYs(),fade=Math.max(60,Math.min(140,(ys.peek-ys.half)*.35));return y<=ys.half?1:y>=ys.half+fade?0:1-(y-ys.half)/fade}
+function sheetPlace(y){const side=sideEl();side.style.setProperty('--sy',y+'px');side.style.setProperty('--hide',y+'px');side.style.setProperty('--footo',footFor(y).toFixed(3));sheet.y=y}
 function sheetUnsettle(){const side=sideEl();if(!side.style.height)return;const y=sheet.y||0;sheetFull();sheetPlace(y)}
 function sheetSettle(){const side=sideEl(),y=sheet.y||0,H=sheet.H||sheetFull();side.classList.remove('snapping');
-  side.style.height=(H-y)+'px';side.style.setProperty('--sy','0px');side.style.setProperty('--hide','0px')}
+  side.style.setProperty('--footo',footFor(y).toFixed(3));side.style.height=(H-y)+'px';side.style.setProperty('--sy','0px');side.style.setProperty('--hide','0px')}
 function keepSelVisible(){if(!ui.open)return;const p=S.places.find(x=>x.id===ui.open);if(!p)return;const el=document.querySelector('#map');if(!el)return;
   const W=el.clientWidth,H=el.clientHeight,z=map.getZoom(),c=map.getCenter(),a=MERC.px(c.lat,c.lng,z),b=MERC.px(p.lat,p.lng,z),x=b.x-a.x+W/2,y=b.y-a.y+H/2,top=sheetOn()?150:40;
   if(x<30||x>W-30||y<top||y>H-30)glideTo([p.lat,p.lng],z,420)}
