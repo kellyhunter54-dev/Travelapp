@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051653"></script>
+<script src="config.js?v=202611051701"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -402,18 +402,24 @@ path.rt-transit{stroke:var(--transit)}
 .pin-line{display:none;width:1.15em;height:1.15em}
 .icons-line .pin-ico.has-line i{display:none}
 .icons-line .pin-ico.has-line .pin-line{display:block}
-.icons-line .pin-main .pin-ico{color:#fff}
-.icons-line .pin-main .pin-ico:not(.has-line) i{filter:grayscale(1) brightness(0) invert(1)}
-.icons-line .pin-extra .pin-ico,.icons-line .pin-ghost .pin-ico{color:var(--c)}
-.icons-line .pin-extra .pin-ico:not(.has-line) i,.icons-line .pin-ghost .pin-ico:not(.has-line) i{filter:grayscale(1) brightness(0);opacity:.8}
-.pins-white .pin-main{background:#fff;border-color:var(--c);border-width:3.5px}
-.pins-white .pin-main.sel{box-shadow:0 0 0 2.5px #fff,0 0 0 5px var(--c),0 4px 14px rgba(0,0,0,.4)}
-.pins-white.icons-line .pin-main .pin-ico{color:var(--c)}
-.pins-grey{--pinbg:#5B626B}.pins-black{--pinbg:#15181C}
-.pins-dark .pin-main{background:var(--pinbg);border-color:var(--c);border-width:3.5px}
-.pins-dark .pin-main.sel{box-shadow:0 0 0 2.5px #fff,0 0 0 5px var(--c),0 4px 14px rgba(0,0,0,.4)}
-.pins-dark .pin-main .pin-num{border-color:var(--c)}
-.pins-white.icons-line .pin-main .pin-ico:not(.has-line) i{filter:grayscale(1) brightness(0);opacity:.8}
+html .pin-main{border-color:var(--pin-other,#fff)}
+html .pin-extra,html .pin-ghost{background:var(--pin-other,#fff)}
+.pins-ring .pin-main.pin-main{background:var(--pin-other,#fff);border-color:var(--c);border-width:3.5px}
+.pins-ring .pin-main.sel{box-shadow:0 0 0 2.5px var(--pin-other,#fff),0 0 0 5px var(--c),0 4px 14px rgba(0,0,0,.4)}
+.pins-ring .pin-main .pin-num{border-color:var(--c)}
+.icons-line .pin-main .pin-ico{color:var(--pin-icon-main,#fff)}
+.icons-line.main-icon-day .pin-main .pin-ico{color:var(--c)}
+.icons-line .pin-extra .pin-ico,.icons-line .pin-ghost .pin-ico{color:var(--pin-icon-extra,#fff)}
+.icons-line.extra-icon-day .pin-extra .pin-ico,.icons-line.extra-icon-day .pin-ghost .pin-ico{color:var(--c)}
+.icons-line .pin-main .pin-ico:not(.has-line) i{filter:var(--pin-sil-main,grayscale(1) brightness(0) invert(1))}
+.icons-line .pin-extra .pin-ico:not(.has-line) i,.icons-line .pin-ghost .pin-ico:not(.has-line) i{filter:var(--pin-sil-extra,grayscale(1) brightness(0))}
+.swatches{display:flex;flex-wrap:wrap;gap:11px;align-items:center}
+.swatches .swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);background:var(--sw);cursor:pointer;padding:0;position:relative}
+.swatches .swatch[aria-pressed="true"]{box-shadow:0 0 0 2px var(--surface),0 0 0 4px var(--accent)}
+.swatches .swatch.txt{width:auto;border-radius:15px;padding:0 11px;background:var(--surface-2);font-size:12.5px;font-weight:600;color:var(--fg)}
+.swatches .swatch.day{background:conic-gradient(#2F6FDE 0 25%,#E8590C 0 50%,#2B8A3E 0 75%,#9C36B5 0)}
+.swatches .swatch.custom{overflow:hidden;background:conic-gradient(red,yellow,lime,cyan,blue,magenta,red)}
+.swatch.custom input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer}
 .pin-prev{display:flex;align-items:center;gap:16px;padding:14px 4px 6px;flex-wrap:wrap}
 .pin-prev .pin{flex:none}
 .nt-days{margin:-4px 0 6px;font-size:14px;color:var(--muted)}
@@ -1685,7 +1691,26 @@ function save(){try{STORE.trips[S.id]=S;STORE.current=S.id;localStorage.setItem(
 const ui={ctrOpen:new Set(),open:null,tab:SET.panelTab==='sum'?'sum':'plan',placing:false,dlg:null,form:null,armed:null,anim:{tab:true,detail:null},pills:{},prevPins:new Set(),prevLegs:new Set(),dlgSeq:0};
 const sysReduced=(()=>{try{return window.matchMedia('(prefers-reduced-motion: reduce)').matches}catch(e){return false}})();
 let reduced=sysReduced||SET.motion==='reduce';
-function applyPins(){const r=document.documentElement.classList,f=SET.pinFill;r.toggle('pins-white',f==='white');r.toggle('pins-dark',f==='grey'||f==='black');r.toggle('pins-grey',f==='grey');r.toggle('pins-black',f==='black');r.toggle('icons-line',SET.icons==='line')}
+function swatchRow(act,cur,list,cid,withAuto){
+  const custom=cur&&cur.startsWith('#')&&!list.some(x=>x[0].toLowerCase()===cur.toLowerCase());
+  return '<div class="swatches">'+(withAuto?'<button class="swatch txt" data-act="'+act+'" data-v="auto" aria-pressed="'+(cur==='auto')+'">Auto</button><button class="swatch day" data-act="'+act+'" data-v="day" aria-pressed="'+(cur==='day')+'" title="Day color" aria-label="Day color"></button>':'')+
+    list.map(([v,l])=>'<button class="swatch" style="--sw:'+v+'" data-act="'+act+'" data-v="'+v+'" aria-pressed="'+(cur.toLowerCase()===v.toLowerCase())+'" title="'+l+'" aria-label="'+l+'"></button>').join('')+
+    '<label class="swatch custom" title="Pick any color" aria-pressed="'+custom+'"'+(custom?' style="background:'+cur+'"':'')+'><input type="color" id="'+cid+'" value="'+(cur.startsWith('#')?cur:'#2F6FDE')+'" aria-label="Pick any color"></label></div>'}
+function pinCfg(){
+  // older setting: one "pin style" value
+  if(SET.pinFill&&!SET.pinDay){const m={white:'#FFFFFF',grey:'#5B626B',black:'#15181C'};SET.pinDay=m[SET.pinFill]?'ring':'fill';SET.pinOther=m[SET.pinFill]||'#FFFFFF';delete SET.pinFill;saveSet()}
+  return {day:SET.pinDay==='ring'?'ring':'fill',other:SET.pinOther||'#FFFFFF',icon:SET.pinIcon||'auto'}}
+function isLight(hex){const m=/^#?([0-9a-f]{6})$/i.exec(hex||'');if(!m)return true;const n=parseInt(m[1],16),r=n>>16&255,g=n>>8&255,b=n&255;return (0.299*r+0.587*g+0.114*b)>165}
+function applyPins(){const r=document.documentElement,c=pinCfg(),st=r.style;
+  r.classList.toggle('pins-ring',c.day==='ring');st.setProperty('--pin-other',c.other);
+  // icon colors: "auto" picks white or the day color, whichever reads better
+  const autoMain=c.day==='fill'?'#FFFFFF':(isLight(c.other)?'day':'#FFFFFF'),autoEx=isLight(c.other)?'day':'#FFFFFF';
+  const im=c.icon==='auto'?autoMain:c.icon,ie=c.icon==='auto'?autoEx:c.icon;
+  r.classList.toggle('main-icon-day',im==='day');r.classList.toggle('extra-icon-day',ie==='day');
+  if(im!=='day')st.setProperty('--pin-icon-main',im);if(ie!=='day')st.setProperty('--pin-icon-extra',ie);
+  const sil=v=>v==='day'||!isLight(v)?'grayscale(1) brightness(0)':'grayscale(1) brightness(0) invert(1)';
+  st.setProperty('--pin-sil-main',sil(im));st.setProperty('--pin-sil-extra',sil(ie));
+r.classList.toggle('icons-line',SET.icons==='line')}
 function applyMotion(){reduced=sysReduced||SET.motion==='reduce';document.documentElement.classList.toggle('no-motion',SET.motion==='reduce')}
 const EASE='cubic-bezier(.2,.8,.2,1)';
 if(!Array.isArray(S.view.collapsed))S.view.collapsed=[];
@@ -4315,8 +4340,10 @@ function pgSettings(){
   {const pv=[['⭐','#2F6FDE',1],['🍴','#E8590C',2],['⛩️','#2B8A3E',3],['🛏️','#9C36B5',4]].map(([i,c,n])=>'<div class="pin pin-main" style="--c:'+c+'">'+emo(i,16)+'<span class="pin-num">'+n+'</span></div>').join('')+
      '<div class="pin pin-extra" style="--c:#0891B2">'+emo('📸',13)+'</div>';
    h+='<section class="card set"><div class="card-h"><h2>Map pins</h2></div><div class="pin-prev" aria-hidden="true">'+pv+'</div>'+
-    row('Pin style','White, Grey or Black fills the circle so the icon stands out; the day color moves to the ring',seg('set-pinfill',['white','grey','black'].includes(SET.pinFill)?SET.pinFill:'color',[['color','Colored'],['white','White'],['grey','Grey'],['black','Black']]))+
-    row('Icons','Minimal swaps the colorful emoji for simple line icons',seg('set-icons',SET.icons==='line'?'line':'emoji',[['emoji','Colorful'],['line','Minimal']]))+'</section>'}
+    row('Icons','Minimal swaps the colorful emoji for simple line icons',seg('set-icons',SET.icons==='line'?'line':'emoji',[['emoji','Colorful'],['line','Minimal']]))+
+    row('Day color on','Put each day\u2019s color on the circle or on the ring around it',seg('set-pinday',pinCfg().day,[['fill','Circle'],['ring','Ring']]))+
+    row(pinCfg().day==='ring'?'Inside color':'Ring color','The color that isn\u2019t the day color',swatchRow('set-pinother',pinCfg().other,[['#FFFFFF','White'],['#D1D5DB','Light grey'],['#5B626B','Grey'],['#15181C','Black']],'pin-other-c'))+
+    (SET.icons==='line'?row('Icon color','Auto picks white or the day color, whichever is easier to see',swatchRow('set-pinicon',pinCfg().icon,[['#FFFFFF','White'],['#9CA3AF','Grey'],['#15181C','Black']],'pin-icon-c',true)):'')+'</section>'}
   h+='<section class="card set"><div class="card-h"><h2>Units and formats</h2></div>'+
     row('Distances','',seg('set-units',SET.units,[['km','Kilometres'],['mi','Miles']]))+
     row('Time','',seg('set-clock',SET.clock,[['12','9:30 pm'],['24','21:30']]))+'</section>';
@@ -4508,7 +4535,9 @@ document.addEventListener('click',e=>{
     case 'set-clock':SET.clock=b.dataset.v;saveSet();renderAll();renderPage(false);break;
     case 'set-map':SET.map=b.dataset.v;saveSet();renderPage(false);break;
     case 'set-motion':SET.motion=b.dataset.v;saveSet();applyMotion();renderPage(false);break;
-    case 'set-pinfill':SET.pinFill=b.dataset.v;saveSet();applyPins();renderPage(false);break;
+    case 'set-pinday':pinCfg();SET.pinDay=b.dataset.v;saveSet();applyPins();renderPage(false);break;
+    case 'set-pinother':pinCfg();SET.pinOther=b.dataset.v;saveSet();applyPins();renderPage(false);break;
+    case 'set-pinicon':pinCfg();SET.pinIcon=b.dataset.v;saveSet();applyPins();renderPage(false);break;
     case 'set-icons':SET.icons=b.dataset.v;saveSet();applyPins();renderPage(false);break;
     case 'set-start':SET.start=b.dataset.v;saveSet();renderPage(false);break;
     case 'trip-settings':openTripSettings(b.dataset.trip||S.id);break;
@@ -4518,7 +4547,7 @@ document.addEventListener('click',e=>{
       if(ui.armed!==ak){ui.armed=ak;renderPage(false);clearTimeout(ui.wipeT);ui.wipeT=setTimeout(()=>{if(ui.armed===ak){ui.armed=null;if(SET.view==='settings')renderPage(false)}},5000);break}ui.armed=null;
       try{[KEY,TKEY,SKEY,RKEY,'waypoint-groutes-v1'].forEach(k=>localStorage.removeItem(k))}catch(x){}
       gCache={};ui.ginfo={};
-      SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'settings',map:'illustrated',motion:'system',start:'last'};saveSet();applyTheme();applyMotion();
+      SET={theme:'system',units:'km',clock:'12',currency:'EUR',view:'settings',map:'illustrated',motion:'system',start:'last'};saveSet();applyTheme();applyMotion();applyPins();
       TAGS=null;
       if(mode==='blank'){
         // a truly empty start: no sample trip, no sample saved places
@@ -4551,6 +4580,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if((t.id==='f-ts'||t.id==='f-te')&&ui.dlg==='trip'){ntSync(e);return}
+  if(t.id==='pin-other-c'||t.id==='pin-icon-c'){pinCfg();SET[t.id==='pin-other-c'?'pinOther':'pinIcon']=t.value.toUpperCase();saveSet();applyPins();renderPage(false);return}
   if(t.id==='f-cdays'&&ui.dlg==='city'){const h=$('f-cdnew');if(h)h.innerHTML=addDaysHint(ui.form.open||0,+t.value);return}
   if(t.id==='f-cdays2'&&ui.dlg==='city'){const c=S.cities.find(x=>x.id===ui.form.id);if(c)$('f-cdhint').innerHTML=cityRangeText(c,+t.value);return}
   if(t.id==='f-att'){const T=STORE.trips[t.value],l=STORE.library.find(x=>x.id===ui.form.id);if(T&&l){$('f-atd').innerHTML=tripDayOptions(T,bestDay(T,l));atHint()}return}
@@ -4561,6 +4591,7 @@ document.addEventListener('change',e=>{
 });
 document.addEventListener('input',e=>{
   const t=e.target;
+  if(t.id==='pin-other-c'||t.id==='pin-icon-c'){pinCfg();SET[t.id==='pin-other-c'?'pinOther':'pinIcon']=t.value.toUpperCase();applyPins();return}
   if(t.id==='f-q'&&ui.srch){ui.srch.q=t.value;ui.srch.sel=0;renderSearch();searchOnline();return}
   if(t.id==='lib-q'){ui.libQ=t.value;clearTimeout(ui.libT);ui.libT=setTimeout(()=>renderPage(false),120);return}
   if(t.id==='f-lct'){const cc=$('f-lco'),g=guessCountry(t.value);if(cc&&g&&(!cc.value||cc.dataset.auto==='1'))cc.value=g}
