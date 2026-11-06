@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611051714"></script>
+<script src="config.js?v=202611051719"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -1876,7 +1876,7 @@ const GL=GM&&(()=>{
       this.el.querySelector('.leaflet-popup-close-button').addEventListener('click',e=>{e.stopPropagation();map.closePopup()});
       ['click','pointerdown','mousedown','touchstart','wheel','dblclick','contextmenu'].forEach(t=>this.el.addEventListener(t,e=>e.stopPropagation()));
       this.m=new GM.marker.AdvancedMarkerElement({map:map.g,position:this.ll,content:this.el,zIndex:1e6});
-      map.popup=this;map.fire('popupopen',{popup:this});requestAnimationFrame(()=>this.autopan());setTimeout(()=>{if(map.popup===this)this.autopan()},520);return this}
+      map.popup=this;map.fire('popupopen',{popup:this});const ph=typeof sheetOn==='function'&&sheetOn();if(!ph)requestAnimationFrame(()=>this.autopan());setTimeout(()=>{if(map.popup===this)this.autopan()},ph?430:520);return this}
     getElement(){return this.el}
     autopan(){if(!this.m||!this.map)return;const map=this.map,W=map.el.clientWidth,H=map.el.clientHeight;
       const w=this.el.offsetWidth,h=this.el.offsetHeight;if(!w||!h){if(!this.tries||this.tries<8){this.tries=(this.tries||0)+1;setTimeout(()=>this.autopan(),80)}return}
@@ -1884,7 +1884,7 @@ const GL=GM&&(()=>{
       const pad=24,top=(typeof sheetOn==='function'&&sheetOn())?112:pad,L=px-w/2,R=px+w/2,T=py-h-24,B=py+12;let dx=0,dy=0;
       if(T<top)dy=T-top;else if(B>H-pad)dy=B-(H-pad);
       if(L<pad)dx=L-pad;else if(R>W-pad)dx=R-(W-pad);
-      if(dx||dy)map.g.panBy(Math.round(dx),Math.round(dy))}
+      if(Math.abs(dx)<6)dx=0;if(Math.abs(dy)<6)dy=0;if(dx||dy)map.g.panBy(Math.round(dx),Math.round(dy))}
     remove(){if(this.m){this.m.map=null;this.m=null}}}
   class Map extends Evt{
     constructor(id){super();this.el=document.getElementById(id);this.popup=null;this.attributionControl={setPrefix(){}};this.shown=new Set();
@@ -1931,7 +1931,7 @@ const GL=GM&&(()=>{
       this.raf=requestAnimationFrame(frame)}
     closePopup(){if(this.popup){this.popup.remove();this.popup=null}}
     removeLayer(l){if(l&&l.remove)l.remove()}
-    invalidateSize(){const h=this.el.clientHeight;if(this._h&&h&&h!==this._h)this.g.panBy(0,Math.round((h-this._h)/2));this._h=h}
+    invalidateSize(){const h=this.el.clientHeight;if(this._h&&h&&h!==this._h){const z=this.getZoom(),c=this.getCenter(),q=MERC.px(c.lat,c.lng,z),ll=MERC.ll(q.x,q.y+(h-this._h)/2,z);this.g.moveCamera({center:ll})}this._h=h}
     createPane(){return {style:{}}}
     setCursor(on){this.g.setOptions({draggableCursor:on?'crosshair':null})}}
   return {map:id=>new Map(id),marker:(ll,o)=>new Marker(ll,o),divIcon:o=>({html:o.html||''}),polyline:(p,o)=>new Line(p,o),popup:o=>new Popup(o),layerGroup:()=>new Group()};
