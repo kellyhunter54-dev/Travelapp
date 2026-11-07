@@ -1,5 +1,5 @@
 /* Waypoint Planner service worker: makes the app open offline and keeps it up to date. */
-const VERSION = 'waypoint-20261106-1627';
+const VERSION = 'waypoint-20261106-1635';
 const RUNTIME = 'waypoint-runtime';
 const TILES = 'waypoint-tiles';
 const MAX_TILES = 1500;
