@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611061635"></script>
+<script src="config.js?v=202611061642"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -94,6 +94,13 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .side-cog{position:absolute;top:12px;right:12px;width:36px;height:36px}
 .side-cog.side-cog{border-radius:50%;background:var(--surface-2);color:var(--fg)}
 .side-cog.side-cog:hover{background:var(--accent-soft)}
+.side-share{position:absolute;top:12px;right:56px;width:36px;height:36px}
+.side-share.side-share{border-radius:50%;background:var(--surface-2);color:var(--fg)}
+.side-share.side-share:hover{background:var(--accent-soft)}
+.side-share svg{width:18px;height:18px}
+.side-head .tsw{margin-right:92px;max-width:calc(100% - 92px)}
+.share-opt{margin:6px 0}
+.share-link{margin-top:14px}.share-link .inp{width:100%;font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
 .side-cog svg{width:19px;height:19px;transition:rotate .5s var(--ease,ease)}
 .side-cog:hover svg{rotate:60deg}
 .eyebrow{font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--muted);font-weight:600}
@@ -280,6 +287,7 @@ path.rt-transit{stroke:var(--transit)}
 .hst-n{font-weight:600;min-width:0;flex:0 1 auto;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .hst-d{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--muted);white-space:nowrap;padding-left:6px}
 .city-hotel svg{width:20px;height:20px}
+.city-head .ib[data-act="edit-city"] svg{width:19px;height:19px}
 @media (max-width:520px){.hst-r{display:none}}
 .addstop{display:flex;align-items:center;gap:6px;margin:-2px 0 0;min-width:0}
 .add-btns{display:flex;flex-wrap:wrap;justify-content:center;gap:6px;max-width:100%}
@@ -1165,6 +1173,7 @@ gmp-advanced-marker,gmp-advanced-marker:focus,gmp-advanced-marker:focus-visible,
   <aside class="side" aria-label="Trip">
     <div class="sheet-grab" aria-hidden="true"><i></i></div>
     <div class="side-head">
+      <button class="ib side-share" data-act="share-trip" aria-label="Share itinerary" title="Share itinerary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 12v8a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-8"/><path d="M16 6l-4-4-4 4"/><path d="M12 2v13"/></svg></button>
       <button class="ib side-cog" data-act="trip-settings" aria-label="Trip settings" title="Trip settings"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><g transform="scale(.8333)" stroke-width="1.9"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/></g></svg></button>
       <button class="tsw" data-act="trip-menu" aria-haspopup="menu" aria-expanded="false" title="Switch trip">
         <span class="eyebrow" id="trip-eyebrow">Trip plan</span>
@@ -2464,7 +2473,7 @@ function ctrOptions(dayId,attr){
   const di=dayIdx(dayId),t=cityTransition(dayId);if(!t)return '';
   const ends=t.lg?{from:t.lg.from,to:t.lg.to}:cityEnds(di),cur=t.lg?t.lg.mode:t.mode;
   return MODE_KEYS.map(m=>{const r=ends.from&&ends.to?legRoute(ends.from,ends.to,m,true):null;
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(cur===m)+'" '+attr+'="'+(attr==='data-pact'?'cmode':'ctr-mode')+'" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+(r?dur(legMins(r,m)):'')+'</span>'+CHECK+'</button>'}).join('');
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(cur===m)+'" '+attr+'="'+(attr==='data-pact'?'cmode':'ctr-mode')+'" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+(r?qtime(r,m):'')+'</span>'+CHECK+'</button>'}).join('');
 }
 function cityPair(dayId){const di=dayIdx(dayId),a=S.cities.find(c=>c.id===S.days[di-1].city),b=S.cities.find(c=>c.id===S.days[di].city);return (a?a.name:'')+' to '+(b?b.name:'')}
 function drawLeg(lg,dc,p,isNew,isSel,onBadge,title,cls){
@@ -2574,6 +2583,43 @@ function selectStop(p,fromMap){
     else glideTo([p.lat,p.lng],Math.max(map.getZoom(),15));
   }
 }
+/* ---------- Share a read-only overview ---------- */
+const SHARE_BASE=(location.protocol==='https:'&&/\.github\.io$/.test(location.hostname))?location.origin+location.pathname:'https://kellyhunter54-dev.github.io/Travelapp/';
+function b64u(bytes){let s='';for(let i=0;i<bytes.length;i+=0x8000)s+=String.fromCharCode.apply(null,bytes.subarray(i,i+0x8000));return btoa(s).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'')}
+async function packShare(obj){const raw=new TextEncoder().encode(JSON.stringify(obj));
+  if(typeof CompressionStream==='function'){try{const cs=new Blob([raw]).stream().pipeThrough(new CompressionStream('deflate-raw'));const buf=new Uint8Array(await new Response(cs).arrayBuffer());return 'z'+b64u(buf)}catch(e){}}
+  return 'j'+b64u(raw)}
+function sharePayload(o){
+  const ci=id=>S.cities.findIndex(c=>c.id===id);
+  const days=S.days.map((d,i)=>{
+    const pl=dayPlan(d.id),out={c:ci(d.city)};
+    out.st=pl.map(x=>{const p=x.p,t=tagOf(p),a=[p.name,Math.round(x.arrive),t.icon||'',+(+p.lat).toFixed(5),+(+p.lng).toFixed(5)];
+      a.push(o.notes&&p.notes?String(p.notes).slice(0,400):'');a.push(p.gid||'');return a});
+    if(o.hotels){const st=stayForNight(i);if(st)out.h=st.name;const ms=stayForNight(i-1);if(ms&&(!st||ms.id!==st.id))out.ho=ms.name}
+    if(i>0&&S.days[i-1].city!==d.city){const tr=cityTransition(d.id),j=d.cjr,jk=j&&JK[j.kind],m=tr&&(tr.lg?tr.lg.mode:tr.mode)||d.tmode;
+      const t={i:jk?jk.icon:m&&MODES[m]?MODES[m].icon:'',l:jk?jk.label:m&&MODES[m]?MODES[m].label:'Travel'};
+      if(o.travel&&j){if(j.carrier||j.num)t.x=[j.carrier,j.num].filter(Boolean).join(' ');if(j.dep)t.d=j.dep;if(j.arr)t.a=j.arr;if(j.from)t.f=j.from;if(j.to)t.to=j.to}
+      else if(tr&&tr.lg&&tr.lg.min)t.m=Math.round(tr.lg.min);
+      out.t=t;
+      if(tr&&tr.kind==='s'){out.p=ci(S.days[i-1].city);out.k=tr.end?pl.length:tr.start?0:pl.split}}
+    return out});
+  return {v:1,n:S.trip.name||'Trip',s:S.trip.start,dn:SET.dayNum==='city'?'city':'trip',ck:SET.clock,at:new Date().toISOString().slice(0,10),
+    c:S.cities.map(c=>[c.ph?'':c.name,c.country||'']),d:days}}
+function openShare(){
+  ui.dlg='share';ui.form={hotels:true,travel:true,notes:false};
+  const box=(k,l,h)=>'<label class="chk share-chk share-opt"><input type="checkbox" data-sopt="'+k+'"'+(ui.form[k]?' checked':'')+'><span>'+l+'<small>'+h+'</small></span></label>';
+  openDlg('<h2>Share itinerary</h2><p class="modehint" style="margin:-4px 0 12px">Anyone with the link sees a read-only overview: your cities, days, stops and times. Booking codes, seats, budget and packing always stay private. It’s a snapshot, so share again after you make changes.</p>'+
+    box('hotels','Hotel names','Where you’re staying each night')+box('travel','Travel details','Train, flight or bus numbers and times, never codes or seats')+box('notes','Stop notes','The notes you wrote on each stop')+
+    '<div class="share-link"><input class="inp" id="f-slink" readonly value="Making link…" aria-label="Share link"></div><p class="modehint" id="f-sinfo"></p>'+
+    '<div class="dlg-acts"><button class="btn" data-act="share-open">Preview</button><span class="spacer"></span>'+(navigator.share?'<button class="btn" data-act="share-native">Share…</button>':'')+'<button class="btn primary" data-act="share-copy">Copy link</button></div>');
+  makeShareLink()}
+async function makeShareLink(){const seq=(ui.shareSeq=(ui.shareSeq||0)+1);const url=SHARE_BASE+'#v='+await packShare(sharePayload(ui.form));if(seq!==ui.shareSeq||ui.dlg!=='share')return;
+  ui.form.url=url;const f=$('f-slink');if(f)f.value=url;const n=$('f-sinfo');if(n)n.textContent=url.length>6000?'This is a long link because the trip is big. It works in texts, email and most chat apps.':''}
+async function shareAction(kind){if(!ui.form.url)await makeShareLink();const url=ui.form.url;if(!url)return;
+  if(kind==='open'){window.open(url,'_blank','noopener');return}
+  if(kind==='native'){try{await navigator.share({title:S.trip.name,text:S.trip.name+' itinerary',url});closeDlg();return}catch(e){if(e&&e.name==='AbortError')return}}
+  try{await navigator.clipboard.writeText(url);closeDlg();gtoast('Link copied. Paste it into a text or email.')}
+  catch(e){const f=$('f-slink');if(f){f.focus();f.select()}toast('Select the link and copy it.')}}
 const stayMarkers={};
 // pins stay put; "Move pin" unlocks one until you drop it
 function setMoving(m,on){
@@ -2585,10 +2631,12 @@ function closeDetail(){
   const was=ui.open;ui.open=null;collapseDom(was);refreshSel(was);renderRoutes();
 }
 const CHECK='<svg class="qc" viewBox="0 0 16 16" aria-hidden="true"><path d="M3.5 8.5l3 3 6-7" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>';
+// in the mode menu, show a time only when it's Google's real one (estimates changed once picked)
+function qtime(r,m){return !GL||r.live?dur(legMins(r,m)):''}
 function quickOptions(p,attr){
   const x=planOf(p);if(!x||!x.leg)return '';
   return MODE_KEYS.map(m=>{const r=legRoute(x.leg.from,p,m,true);
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.leg.mode===m)+'" '+attr+'="'+(attr==='data-pact'?'mode':'quick-mode')+'" data-id="'+p.id+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(legMins(r,m))+'</span>'+CHECK+'</button>'}).join('');
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.leg.mode===m)+'" '+attr+'="'+(attr==='data-pact'?'mode':'quick-mode')+'" data-id="'+p.id+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+qtime(r,m)+'</span>'+CHECK+'</button>'}).join('');
 }
 function openLegPopup(p,at){
   const x=planOf(p);if(!x||!x.leg)return;
@@ -2630,7 +2678,7 @@ function xferOptions(dayId,attr){
   const pre=attr==='data-pact'?'x':'xfer-';
   const when='<div class="whenseg" role="group" aria-label="When"><button type="button" '+attr+'="'+pre+'when" data-day="'+dayId+'" data-when="end" aria-pressed="'+(x.when==='end')+'">End of Day '+dn(i-1)+'</button><button type="button" '+attr+'="'+pre+'when" data-day="'+dayId+'" data-when="start" aria-pressed="'+(x.when==='start')+'">Start of Day '+dn(i)+'</button></div>';
   return when+MODE_KEYS.map(m=>{const r=legRoute(x.from,x.to,m,true);
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(legMins(r,m))+'</span>'+CHECK+'</button>'}).join('');
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(x.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+qtime(r,m)+'</span>'+CHECK+'</button>'}).join('');
 }
 function openXferPopup(dayId,at){
   const i=dayIdx(dayId),x=transferOf(i);if(!x)return;
@@ -2652,7 +2700,7 @@ function showQuick(btn,head,html,color){
 function hlegOptions(dayId,part,attr){
   const lg=hotelLeg(dayId,part);if(!lg)return '';const pre=attr==='data-pact'?'h':'hleg-';
   return MODE_KEYS.map(m=>{const r=legRoute(lg.from,lg.to,m,true);
-    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(lg.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-part="'+part+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+dur(legMins(r,m))+'</span>'+CHECK+'</button>'}).join('');
+    return '<button type="button" class="qopt" role="menuitemradio" aria-checked="'+(lg.mode===m)+'" '+attr+'="'+pre+'mode" data-day="'+dayId+'" data-part="'+part+'" data-mode="'+m+'"><span class="qi">'+MODES[m].icon+'</span><span>'+MODES[m].label+'</span><span class="qt">'+qtime(r,m)+'</span>'+CHECK+'</button>'}).join('');
 }
 function hlegHead(lg){return (lg.part==='m'?'From ':'To ')+esc(lg.stay.name)+' · '+fmtKm(lg.km)}
 function openHleg(btn,dayId,part){const lg=hotelLeg(dayId,part);if(lg)showQuick(btn,hlegHead(lg),hlegOptions(dayId,part,'data-act'),dayColor(dayId))}
@@ -4689,6 +4737,10 @@ document.addEventListener('click',e=>{
     case 'set-icons':SET.icons=b.dataset.v;saveSet();applyPins();renderPage(false);break;
     case 'set-start':SET.start=b.dataset.v;saveSet();renderPage(false);break;
     case 'trip-settings':openTripSettings(b.dataset.trip||S.id);break;
+    case 'share-trip':openShare();break;
+    case 'share-copy':shareAction('copy');break;
+    case 'share-native':shareAction('native');break;
+    case 'share-open':shareAction('open');break;
     case 'save-tripset':saveTripSettings();break;
     case 'backup-all':save();copyText(JSON.stringify({waypointBackup:1,trips:STORE.trips,tags:TAGS,library:STORE.library}),'Backup copied');break;
     case 'wipe-all':{const mode=b.dataset.mode==='blank'?'blank':'sample',ak='wipe-'+mode;
@@ -4728,6 +4780,7 @@ document.addEventListener('click',e=>{
 document.addEventListener('change',e=>{
   const t=e.target;
   if((t.id==='f-ts'||t.id==='f-te')&&ui.dlg==='trip'){ntSync(e);return}
+  if(t.dataset&&t.dataset.sopt&&ui.dlg==='share'){ui.form[t.dataset.sopt]=t.checked;ui.form.url=null;const f=$('f-slink');if(f)f.value='Making link\u2026';makeShareLink();return}
   if(t.id==='pin-other-c'||t.id==='pin-icon-c'){pinCfg();SET[t.id==='pin-other-c'?'pinOther':'pinIcon']=t.value.toUpperCase();saveSet();applyPins();renderPage(false);return}
   if(t.id==='f-cdays'&&ui.dlg==='city'){const h=$('f-cdnew');if(h)h.innerHTML=addDaysHint(ui.form.open||0,+t.value);return}
   if(t.id==='f-cdays2'&&ui.dlg==='city'){const c=S.cities.find(x=>x.id===ui.form.id);if(c)$('f-cdhint').innerHTML=cityRangeText(c,+t.value);return}
@@ -4778,9 +4831,90 @@ if(window.GFAIL&&gCfg()&&gCfg().on)setTimeout(()=>toast(window.GFAIL==='limit'?'
 if(window.GAUTHFAIL)window.onGoogleAuthFail();
 })();
 </script>
+<script type="text/x-waypoint" id="share-js">
+/* Read-only trip overview opened from a shared link (#v=...). Nothing is saved on this device. */
+(async function(){
+  const esc=s=>String(s==null?'':s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  const code=location.hash.slice(3);
+  const fromB64=s=>{s=s.replace(/-/g,'+').replace(/_/g,'/');while(s.length%4)s+='=';const b=atob(s),u=new Uint8Array(b.length);for(let i=0;i<b.length;i++)u[i]=b.charCodeAt(i);return u};
+  let T=null;
+  try{const k=code[0],bytes=fromB64(code.slice(1));let txt;
+    if(k==='z'){const ds=new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));txt=await new Response(ds).text()}
+    else txt=new TextDecoder().decode(bytes);
+    T=JSON.parse(txt)}catch(e){T=null}
+  document.title=T?T.n+' · itinerary':'Waypoint';
+  const css=`
+  :root{--bg:#F3F5F4;--card:#fff;--fg:#17201C;--muted:#5D6B65;--line:#DDE3E0;--accent:#0F766E;--soft:#E3F1EE;--f:"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+  @media (prefers-color-scheme:dark){:root{--bg:#0F1513;--card:#18201D;--fg:#E8EEEB;--muted:#9AA8A2;--line:#2A3531;--accent:#5EC4B6;--soft:#1D3530}}
+  *{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 var(--f);-webkit-text-size-adjust:100%}
+  .sv{max-width:760px;margin:0 auto;padding:max(20px,env(safe-area-inset-top)) 16px 48px}
+  .sv-top{padding:8px 4px 18px}.sv-eye{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600}
+  .sv h1{font-size:clamp(28px,7vw,40px);line-height:1.1;margin:6px 0 8px;letter-spacing:-.02em}
+  .sv-meta{color:var(--muted);font-size:14.5px}
+  .sv-route{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}.sv-route span{background:var(--soft);color:var(--fg);border-radius:999px;padding:4px 11px;font-size:13px;font-weight:600}
+  .sv-city{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:16px 16px 6px;margin:14px 0}
+  .sv-ch{display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+  .sv-ch h2{margin:0;font-size:22px;letter-spacing:-.01em}.sv-ch small{color:var(--muted);font-size:13px}
+  .sv-hotel{font-size:13.5px;color:var(--muted);margin:2px 0 8px}.sv-hotel b{color:var(--fg);font-weight:600}
+  .sv-day{border-top:1px solid var(--line);padding:12px 0 10px}
+  .sv-dh{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px}.sv-dh b{font-size:16px}.sv-dh span{color:var(--muted);font-size:13.5px}
+  .sv-dh .tag{background:var(--soft);color:var(--fg);border-radius:8px;padding:1px 8px;font-size:12px;font-weight:600}
+  .sv-dh a{margin-left:auto;font-size:12.5px;color:var(--accent);text-decoration:none;font-weight:600}
+  ol.sv-st{list-style:none;margin:0;padding:0}
+  .sv-st li{display:grid;grid-template-columns:62px 26px 1fr;align-items:start;gap:4px;padding:6px 0}
+  .sv-st .tm{font:600 12.5px/1.6 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--accent);white-space:nowrap}
+  .sv-st .ic{font-size:16px;line-height:1.3;text-align:center}
+  .sv-st a{color:var(--fg);text-decoration:none;font-weight:500}.sv-st a:hover{text-decoration:underline}
+  .sv-st .nt{display:block;color:var(--muted);font-size:13px;margin-top:1px;white-space:pre-line}
+  .sv-empty{color:var(--muted);font-size:13.5px;padding:4px 0}
+  .sv-tr{display:flex;gap:12px;align-items:center;margin:10px 0;padding:12px 14px;border-radius:14px;background:var(--soft);font-size:14px}
+  .sv-tr .i{font-size:20px}.sv-tr b{display:block}.sv-tr small{color:var(--muted);font-size:13px}
+  .sv-foot{text-align:center;color:var(--muted);font-size:12.5px;margin-top:26px}
+  .sv-bad{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:28px;margin-top:40px;text-align:center}`;
+  document.head.insertAdjacentHTML('beforeend','<style>'+css+'</style>');
+  if(!T||!T.d){document.body.innerHTML='<div class="sv"><div class="sv-bad"><h2>This link doesn’t work</h2><p>It may have been cut off when it was copied. Ask for the link again.</p></div></div>';return}
+  const base=new Date(T.s+'T12:00:00'),dateOf=i=>{const d=new Date(base);d.setDate(d.getDate()+i);return d};
+  const fd=(d,o)=>d.toLocaleDateString(undefined,o||{weekday:'short',month:'short',day:'numeric'});
+  const clk=m=>{m=((Math.round(m)%1440)+1440)%1440;const h=Math.floor(m/60),mm=String(m%60).padStart(2,'0');return T.ck==='24'?String(h).padStart(2,'0')+':'+mm:((h%12)||12)+':'+mm+(h<12?' am':' pm')};
+  const hm=s=>{const m=/^(\d{1,2}):(\d{2})$/.exec(s||'');return m?clk(+m[1]*60+ +m[2]):esc(s||'')};
+  const cityName=i=>(T.c[i]&&T.c[i][0])||'Not decided yet';
+  const mapUrl=st=>'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(st[0]+' '+st[3]+','+st[4])+(st[6]?'&query_place_id='+encodeURIComponent(st[6]):'');
+  const dirUrl=sts=>{if(sts.length<2)return '';const ll=s=>s[3]+','+s[4],w=sts.slice(1,-1).slice(0,8);return 'https://www.google.com/maps/dir/?api=1&origin='+ll(sts[0])+'&destination='+ll(sts[sts.length-1])+(w.length?'&waypoints='+encodeURIComponent(w.map(ll).join('|')):'')};
+  // day numbers: whole trip, or again from 1 in each city
+  const runStart=i=>{let k=i;while(k>0&&T.d[k-1].c===T.d[i].c)k--;return k};
+  const num=(i,part)=>T.dn!=='city'?i+1:part==='a'?(i-runStart(i-1)+1):(i-runStart(i)+1);
+  const stopsHtml=sts=>sts.length?'<ol class="sv-st">'+sts.map(st=>'<li><span class="tm">'+clk(st[1])+'</span><span class="ic">'+esc(st[2])+'</span><span><a href="'+mapUrl(st)+'" target="_blank" rel="noopener">'+esc(st[0])+'</a>'+(st[5]?'<span class="nt">'+esc(st[5])+'</span>':'')+'</span></li>').join('')+'</ol>':'<div class="sv-empty">Nothing planned yet</div>';
+  const travelHtml=(t,from,to)=>{if(!t)return '';const sub=[t.x,t.d||t.a?(t.d?'leaves '+hm(t.d):'')+(t.d&&t.a?' · ':'')+(t.a?'arrives '+hm(t.a):''):'',t.m?'about '+(t.m>=60?Math.floor(t.m/60)+' h '+(t.m%60?t.m%60+' min':''):t.m+' min'):''].filter(Boolean).join(' · ');
+    return '<div class="sv-tr"><span class="i">'+esc(t.i||'➡️')+'</span><div><b>'+esc(from)+' → '+esc(to)+'</b><small>'+esc(t.l||'Travel')+(sub?' · '+sub:'')+'</small></div></div>'};
+  const dayHtml=(i,sts,part,extra)=>{const D=T.d[i],r=dirUrl(sts);
+    return '<div class="sv-day"><div class="sv-dh"><b>Day '+num(i,part)+'</b><span>'+fd(dateOf(i))+'</span>'+(extra||'')+(r?'<a href="'+r+'" target="_blank" rel="noopener">Route in Google Maps</a>':'')+'</div>'+stopsHtml(sts)+'</div>'};
+  // group days into cities; a travel day shows in both
+  const groups=[];let cur=null;
+  T.d.forEach((D,i)=>{
+    const split=D.p!=null&&i>0;
+    if(split&&cur){const k=Math.max(0,Math.min(D.st.length,D.k||0));cur.items.push({i,sts:D.st.slice(0,k),part:'a',after:travelHtml(D.t,cityName(D.p),cityName(D.c)),tag:'→ '+cityName(D.c)});
+      cur.last=i;cur=null;groups.push(cur={c:D.c,first:i,last:i,items:[{i,sts:D.st.slice(k),part:'b',tag:'from '+cityName(D.p)}],hotels:[]})}
+    else if(!cur||cur.c!==D.c){groups.push(cur={c:D.c,first:i,last:i,items:[],hotels:[],before:i>0?travelHtml(D.t,cityName(T.d[i-1].c),cityName(D.c)):''});cur.items.push({i,sts:D.st})}
+    else{cur.items.push({i,sts:D.st});cur.last=i}
+    if(D.h&&!cur.hotels.includes(D.h))cur.hotels.push(D.h)});
+  const last=T.d.length-1,cities=groups.map(g=>cityName(g.c)).filter((v,i,a)=>v&&a.indexOf(v)===i);
+  let h='<div class="sv"><header class="sv-top"><div class="sv-eye">Trip itinerary</div><h1>'+esc(T.n)+'</h1><div class="sv-meta">'+fd(dateOf(0),{month:'short',day:'numeric'})+' to '+fd(dateOf(last),{month:'short',day:'numeric',year:'numeric'})+' · '+T.d.length+' day'+(T.d.length===1?'':'s')+' · '+cities.length+' cit'+(cities.length===1?'y':'ies')+'</div>'+
+    '<div class="sv-route">'+cities.map(c=>'<span>'+esc(c)+'</span>').join('')+'</div></header>';
+  groups.forEach(g=>{
+    if(g.before)h+=g.before;
+    h+='<section class="sv-city"><div class="sv-ch"><h2>'+esc(cityName(g.c))+'</h2><small>'+fd(dateOf(g.first),{month:'short',day:'numeric'})+(g.last>g.first?' to '+fd(dateOf(g.last),{month:'short',day:'numeric'}):'')+'</small></div>'+
+      (g.hotels.length?'<div class="sv-hotel">Staying at '+g.hotels.map(x=>'<b>'+esc(x)+'</b>').join(', then ')+'</div>':'');
+    g.items.forEach(it=>{h+=dayHtml(it.i,it.sts,it.part,it.tag?'<span class="tag">'+esc(it.tag)+'</span>':'');if(it.after)h+=it.after});
+    h+='</section>'});
+  h+='<div class="sv-foot">Shared from Waypoint'+(T.at?' on '+fd(new Date(T.at+'T12:00:00'),{month:'short',day:'numeric',year:'numeric'}):'')+'. Times are estimates.</div></div>';
+  document.body.innerHTML=h;document.body.className='';
+})();
+</script>
 <script>
 /* Starts the app. With a Google Maps key saved in Settings, Google Maps loads first; if it can't (offline, bad key), the built-in map is used. */
 (function(){
+  // a shared itinerary link opens the read-only overview instead of the app
+  if(/^#v=[zj]/.test(location.hash)){var v=document.createElement('script');v.textContent=document.getElementById('share-js').textContent;document.body.appendChild(v);return}
   var started=false,run=function(){if(started)return;started=true;var s=document.createElement('script');s.textContent=document.getElementById('app-js').textContent;document.body.appendChild(s)};
   var cfg=null;try{cfg=JSON.parse(localStorage.getItem('waypoint-google')||'null')}catch(e){}
   var built=window.WAYPOINT_CONFIG||{};
