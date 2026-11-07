@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611052134"></script>
+<script src="config.js?v=202611061618"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -430,6 +430,13 @@ html .pin-extra,html .pin-ghost{background:var(--pin-other,#fff)}
 .pin-moving .pin{animation:pinWiggle 1.2s ease-in-out infinite;box-shadow:0 0 0 4px rgba(255,255,255,.9),0 8px 20px rgba(0,0,0,.35)}
 @keyframes pinWiggle{0%,100%{translate:0 0}50%{translate:0 -4px}}
 .trans-li{list-style:none;margin:6px 0}
+.share-chk{display:flex;gap:10px;align-items:flex-start;margin:10px 0 4px;font-size:14px;line-height:1.35;cursor:pointer}
+.share-chk input{margin-top:3px;width:18px;height:18px;accent-color:var(--accent);flex:none}
+.share-chk small{display:block;color:var(--muted);font-size:12.5px;margin-top:2px}
+.day.part-a{margin-bottom:4px}
+.day-t{white-space:nowrap}
+@media (max-width:820px){.day-h{flex-wrap:wrap;row-gap:3px}.day-split{order:9;flex-basis:100%;max-width:max-content;margin-left:22px}}
+.day.part-b .day-sum{color:var(--muted)}
 .trans-day{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;margin-top:10px}
 .trans-day .td-l{font-size:12.5px;font-weight:600;color:var(--muted)}
 .td-seg{display:flex;flex-wrap:wrap;gap:6px}
@@ -2296,6 +2303,8 @@ function hotelLeg(dayId,part){
 function nightsText(st){const n=st.co-st.ci,o={month:'short',day:'numeric'};return n+' night'+(n===1?'':'s')+' · '+fmt(dayDate(st.ci),o)+' to '+fmt(dayDate(st.co),o)}
 function firstFreeNight(){for(let n=-1;n<S.days.length;n++)if(!stayForNight(n))return n;return Math.max(0,S.days.length-1)}
 // A travel day: the morning in the earlier city, then the trip, then the rest of the day in the new city
+function sharedAfter(cid){const ds=cityDays(cid);if(!ds.length)return null;const i=dayIdx(ds[ds.length-1].id),n=S.days[i+1];if(!n||!isSplit(n))return null;const t=cityTransition(n.id);return t&&t.kind==='s'?n:null}
+function cityDaysAll(cid){const ds=cityDays(cid),x=sharedAfter(cid);return x?ds.concat([x]):ds}
 function isSplit(d){const i=d?dayIdx(d.id):-1;return !!(d&&d.split&&i>0&&S.days[i-1].city!==d.city)}
 function splitIdx(d){if(!isSplit(d))return -1;const ms=mains(d.id),di=dayIdx(d.id);
   if(d.splitAt!=null)return Math.max(0,Math.min(ms.length,d.splitAt));
@@ -2371,6 +2380,9 @@ function cityTransition(dayId){
   const di=dayIdx(dayId),d=S.days[di];if(!d||di<1||S.days[di-1].city===d.city)return null;
   const pl=dayPlan(dayId),pd=S.days[di-1];
   if(pl.split>0&&pl.split<pl.length){const x=pl[pl.split],a=pl[pl.split-1];return {lg:x.leg,kind:'s',day:dayId,date:di,leave:x.leg.dep!=null?x.leg.dep:a.leave,fromName:a.p.name,toName:x.p.name}}
+  if(isSplit(d)&&!(pl.split>0)){const nc=S.cities.find(c=>c.id===d.city),lg=pl.morning||pl.tin||null,st=stayForNight(di-1);
+    // the trip starts the day: still shown under both cities
+    return {lg,mode:d.tmode||null,kind:'s',start:true,day:dayId,date:di,leave:toMin(d.start),fromName:st?st.name:'',toName:pl.length?pl[0].p.name:(nc?nc.name:''),need:lg?null:(!pl.length?(nc?nc.name:'the next city'):(S.cities.find(c=>c.id===S.days[di-1].city)||{}).name)}}
   if(pl.split>0){const a=pl[pl.length-1],ev=pl.evening,nc=S.cities.find(c=>c.id===d.city);
     // every stop so far is in the old city: the trip ends the day
     return {lg:ev,kind:'s',end:true,day:dayId,date:di,leave:a.leave,fromName:a.p.name,toName:ev?ev.stay.name:(nc?nc.name:''),need:ev?null:(nc?nc.name:'the next city')}}
@@ -2404,10 +2416,10 @@ function transitionCard(t,fromC,toC){
   if(j)h+=jrCardJ(j,base);
   h+='<div class="trans-acts"><button type="button" class="linkbtn sm" data-act="ctr-edit" data-day="'+t.day+'">'+(j?'Edit travel details':'+ Add travel details')+'</button></div>';
   if(d){const sp=!!d.split,n=mains(d.id).length,si=splitIdx(d),di=dayIdx(d.id),ce=canTravelEarly(d);
-    if(ce||d.early)h+='<div class="trans-day"><span class="td-l">Travel on</span><div class="seg td-seg" role="group">'+
+    if(ce||d.early)h+='<div class="trans-day"><span class="td-l">Travel on</span><div class="td-seg" role="group">'+
       '<button type="button" data-act="ctr-day" data-day="'+t.day+'" data-v="early" aria-pressed="'+!!d.early+'"'+(!d.early&&!ce?' disabled':'')+'>Day '+(d.early?di+1:di)+' · last day in '+esc(fromC.name)+'</button>'+
       '<button type="button" data-act="ctr-day" data-day="'+t.day+'" data-v="late" aria-pressed="'+!d.early+'">Day '+(d.early?di+2:di+1)+' · first day in '+esc(toC.name)+'</button></div></div>';
-    h+='<div class="trans-split"><button type="button" class="mini-toggle" data-act="ctr-split" data-day="'+t.day+'" aria-pressed="'+sp+'"><span class="sw2"></span>Travel during the day</button>'+
+    h+='<div class="trans-split">'+(d.early?'':'<button type="button" class="mini-toggle" data-act="ctr-split" data-day="'+t.day+'" aria-pressed="'+sp+'"><span class="sw2"></span>Travel during the day</button>')+
       '<span class="ts-hint">'+(sp?'Morning in '+esc(fromC.name)+', the rest of the day in '+esc(toC.name)+'.':'Turn on to see '+esc(fromC.name)+' in the morning and '+esc(toC.name)+' later the same day.')+'</span>'+
       (sp&&n?'<span class="ts-move"><button type="button" class="linkbtn sm" data-act="ctr-split-at" data-day="'+t.day+'" data-d="-1"'+(si<=0?' disabled':'')+'>Leave earlier</button><button type="button" class="linkbtn sm" data-act="ctr-split-at" data-day="'+t.day+'" data-d="1"'+(si>=n?' disabled':'')+'>Leave later</button></span>':'')+'</div>'}
   return h+'</div></div></div></div>';
@@ -2967,7 +2979,7 @@ function stopName(p,i,last){
 // Everything is folded when every day is collapsed, or every city is
 function allFolded(){return S.days.length>0&&(S.days.every(d=>S.view.collapsed.includes(d.id))||S.cities.every(c=>(S.view.ccol||[]).includes(c.id)))}
 function cityHead(c){
-  const ds=cityDays(c.id),a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id),o={month:'short',day:'numeric'},v=S.view.day;
+  const ds=cityDaysAll(c.id),a=dayIdx(ds[0].id),b=dayIdx(ds[ds.length-1].id),o={month:'short',day:'numeric'},v=S.view.day;
   const cc=(S.view.ccol||[]).includes(c.id),mine=v===c.id||ds.some(d=>d.id===v);
   const stops=ds.reduce((n,d)=>n+mains(d.id).length,0);
   return '<section class="city'+(cc?' ccol':'')+(v===c.id?' cfocus':'')+(v!=='all'&&!mine?' cdim':'')+'" data-city="'+c.id+'"><div class="city-head" data-flip="ch-'+c.id+'">'+
@@ -3002,6 +3014,45 @@ function xferRow(x,dir){
     '<span class="xto">'+(dir==='in'?'from ':'to ')+'<b style="--oc:'+dayColor(other)+'">Day '+oi+'</b> '+esc(place.name)+'</span>'+
     '<span class="legt">'+dur(x.min)+'</span></button></li>';
 }
+function daySection(d,i,part,tr,cty){let h='';const col=S.view.collapsed.includes(d.id),cLast=i===S.days.length-1||S.days[i+1].city!==d.city;
+      const plan=dayPlan(d.id),ms=plan.map(x=>x.p),xs=part==='a'?[]:extras(d.id),dc=dayColor(d.id);
+      const sx=part?(tr&&tr.end?plan.length:plan.split):0,inPart=k=>!part||(part==='a'?k<sx:k>=sx),pcName=i>0?((S.cities.find(c=>c.id===S.days[i-1].city)||{}).name||''):'';
+      const travel=plan.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+(plan.tin?plan.tin.min:0)+(plan.tout?plan.tout.min:0)+(plan.morning?plan.morning.min:0)+(plan.evening?plan.evening.min:0);
+      const mst=part==='b'?null:stayForNight(i-1),est=part==='a'?null:stayForNight(i);
+      h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'&&!inView(d.id)?' dim':'')+(part?' part-'+part:'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span>'+(part==='a'?'<span class="day-split">\u2192 '+esc(cty.name)+'</span>':part==='b'?'<span class="day-split">from '+esc(pcName)+'</span>':plan.split>0?'<span class="day-split">'+esc(pcName)+' \u2192 '+esc(cty.name)+'</span>':'')+'<span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+(part?(()=>{const n=plan.filter((x,k)=>inPart(k)).length;return n+' stop'+(n===1?'':'s')})():ms.length+' stop'+(ms.length===1?'':'s'))+'</span>'+
+        (!part&&cityDays(d.city).length>1&&!ms.length&&!xs.length?'<button class="ib" data-act="remove-day" data-day="'+d.id+'" aria-label="Remove this day">✕</button>':'')+'</div>';
+      h+='<div class="day-body"><div class="day-inner">';
+      if(part==='b'){const ar=sx<plan.length?plan[sx].arrive:plan.end;h+='<div class="day-sum"><span>Arrive about '+clock(ar)+'</span>'+(plan.length?'<span>· ends about '+clock(plan.end)+'</span>':'')+'</div>'}
+      else h+='<div class="day-sum" data-flip="ds-'+d.id+(part?'a':'')+'"><span>Starts</span><button type="button" class="tpick" data-act="day-start" data-day="'+d.id+'" title="Change start time" aria-label="Day '+(i+1)+' starts at '+clock(toMin(d.start))+'. Change"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
+        (plan.length?'<span>· ends about '+clock(plan.end)+'</span>'+(travel?'<span>· '+dur(travel)+' getting around</span>':''):'')+'</div>';
+      h+='<ol class="stops" data-day="'+d.id+'"'+(part?' data-part="'+part+'"':'')+'>';
+      const trH=tr&&tr.kind==='h',trX=tr&&tr.kind==='x',nextNew=i<S.days.length-1&&S.days[i+1].city!==d.city;
+      if(mst&&!trH)h+=hotelRow(mst,'m',i,clock(toMin(d.start)));
+      if(plan.length){
+        if(plan.morning&&!trH&&part!=='b'&&!(part==='a'&&tr&&tr.start))h+=hlegRow(plan.morning);
+        if(plan.tin&&!trX&&part!=='b'&&!(part==='a'&&tr&&tr.start))h+=xferRow(plan.tin,'in');
+        plan.forEach((x,k)=>{
+          if(!inPart(k))return;
+          const p=x.p,t=tagOf(p),open=ui.open===p.id;
+          if(x.leg&&x.leg.travel&&tr&&tr.kind==='s'){if(!part){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}}
+          else if(x.leg&&x.leg.jr){const jk=JK[x.leg.jr.kind];h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow jr-leg" data-act="edit" data-id="'+x.leg.from.id+'" aria-label="'+esc(jk.label+' details')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+jk.icon+' '+esc(jk.label+(x.leg.jr.num?' '+x.leg.jr.num:''))+'</span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>'}
+          else if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
+          h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+(p.jr?'<small class="jr-sub'+(x.late?' bad':'')+'">'+JK[p.jr.kind].icon+' '+esc([p.jr.num||JK[p.jr.kind].label,p.jr.dep?(p.jr.kind==='car'?'pick-up ':'departs ')+clock24(p.jr.dep):'',p.jr.seat?'seat '+p.jr.seat:''].filter(Boolean).join(' · '))+'</small>':'')+'</span><span class="stime'+(x.fixed?' fixed':'')+'">'+clock(x.arrive)+'</span></button></li>';
+          if(open)h+=detailHtml(x,true);
+        });
+        if(plan.tout&&!nextNew&&part!=='a')h+=xferRow(plan.tout,'out');
+        if(tr&&tr.kind==='s'&&(part==='a'||(!part&&tr.end))){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}
+        else if(plan.evening&&part!=='a')h+=hlegRow(plan.evening);
+      }
+      if(!plan.length&&part==='a'&&tr){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}
+      if(est&&!plan.endsHome)h+=hotelRow(est,'e',i,plan.length?clock(plan.end):'');
+      h+='<li class="empty-li"><span class="add-btns"><button class="add-first" data-act="add-stop" data-day="'+d.id+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>Add a stop</button></span><span>or drag one here from another day</span></li></ol>';
+      if(plan.length&&part!=='a')h+='<div class="addstop" data-flip="ast-'+d.id+'"><button class="add-row" data-act="add-stop" data-day="'+d.id+'"><span class="add-dot"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg></span>Add a stop</button></div>';
+      if(xs.length){const xc=(S.view.xcol||[]).includes(d.id);
+        h+='<div class="xwrap'+(xc?' xcol':'')+'" data-flip="sh-'+d.id+'"><button class="sub-h xtoggle" data-act="toggle-extras" data-day="'+d.id+'" aria-expanded="'+!xc+'">'+CHEV+'<span>Extras if there is time</span><span class="xcount">'+xs.length+'</span></button>'+
+          '<div class="xbody"><div class="xinner"><ul class="extras">'+xs.map(p=>rowExtra(p,false)).join('')+'</ul></div></div></div>'}
+      h+='</div></div></section>';
+  return h}
 function renderPanel(){
   let h='';
   if(ui.tab==='plan'){
@@ -3009,47 +3060,15 @@ function renderPanel(){
       (S.days.length>1?'<button class="linkbtn" data-act="collapse-all">'+(allFolded()?'Expand all':'Collapse all days')+'</button>':'')+'</div>';
     S.days.forEach((d,i)=>{
       const cty=S.cities.find(c=>c.id===d.city)||S.cities[0],cFirst=i===0||S.days[i-1].city!==d.city,cLast=i===S.days.length-1||S.days[i+1].city!==d.city;
-      const tr=cFirst&&i>0?cityTransition(d.id):null;
+      const tr=cFirst&&i>0?cityTransition(d.id):null,part=tr&&tr.kind==='s'?'b':null;
       if(cFirst){
         const pc=i>0?S.cities.find(c=>c.id===S.days[i-1].city):null,multi=countriesOf().length>1,cn=(cty.country||'').trim();
         if(tr&&pc&&pc.id!==cty.id&&tr.kind!=='s')h+=transitionCard(tr,pc,cty);
         if(multi&&cn&&(!pc||(pc.country||'').trim()!==cn))h+='<div class="country" data-flip="co-'+esc(cn)+'"><span>'+esc(cn)+'</span></div>';
         h+=cityHead(cty);
       }
-      const plan=dayPlan(d.id),ms=plan.map(x=>x.p),xs=extras(d.id),dc=dayColor(d.id);
-      const travel=plan.reduce((a,x)=>a+(x.leg?x.leg.min:0),0)+(plan.tin?plan.tin.min:0)+(plan.tout?plan.tout.min:0)+(plan.morning?plan.morning.min:0)+(plan.evening?plan.evening.min:0);
-      const mst=stayForNight(i-1),est=stayForNight(i);
-      const col=S.view.collapsed.includes(d.id);
-      h+='<section class="day'+(col?' collapsed':'')+(S.view.day===d.id?' focus':S.view.day!=='all'&&!inView(d.id)?' dim':'')+'" data-day="'+d.id+'" style="--dc:'+dc+'"><div class="day-head" data-flip="dh-'+d.id+'"><button class="ib chev" data-act="collapse" data-day="'+d.id+'" aria-expanded="'+!col+'" aria-label="Show or hide Day '+(i+1)+'">'+SVG.down+'</button><button class="day-h" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(S.view.day===d.id)+'" title="Show only this day on the map"><span class="dot"></span><span class="day-t">Day '+(i+1)+'</span>'+(plan.split>0?'<span class="day-split">'+esc((S.cities.find(c=>c.id===S.days[i-1].city)||{}).name||'')+' \u2192 '+esc(cty.name)+'</span>':'')+'<span class="day-d">'+fmt(dayDate(i),{weekday:'short',month:'short',day:'numeric'})+'</span>'+'</button><span class="cnt">'+ms.length+' stop'+(ms.length===1?'':'s')+'</span>'+
-        (cityDays(d.city).length>1&&!ms.length&&!xs.length?'<button class="ib" data-act="remove-day" data-day="'+d.id+'" aria-label="Remove this day">✕</button>':'')+'</div>';
-      h+='<div class="day-body"><div class="day-inner">';
-      h+='<div class="day-sum" data-flip="ds-'+d.id+'"><span>Starts</span><button type="button" class="tpick" data-act="day-start" data-day="'+d.id+'" title="Change start time" aria-label="Day '+(i+1)+' starts at '+clock(toMin(d.start))+'. Change"><span>'+clock(toMin(d.start))+'</span><svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></button>'+
-        (plan.length?'<span>· ends about '+clock(plan.end)+'</span>'+(travel?'<span>· '+dur(travel)+' getting around</span>':''):'')+'</div>';
-      h+='<ol class="stops" data-day="'+d.id+'">';
-      const trH=tr&&tr.kind==='h',trX=tr&&tr.kind==='x',nextNew=i<S.days.length-1&&S.days[i+1].city!==d.city;
-      if(mst&&!trH)h+=hotelRow(mst,'m',i,clock(toMin(d.start)));
-      if(plan.length){
-        if(plan.morning&&!trH)h+=hlegRow(plan.morning);
-        if(plan.tin&&!trX)h+=xferRow(plan.tin,'in');
-        plan.forEach((x,k)=>{
-          const p=x.p,t=tagOf(p),open=ui.open===p.id;
-          if(x.leg&&x.leg.travel&&tr&&tr.kind==='s'){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}
-          else if(x.leg&&x.leg.jr){const jk=JK[x.leg.jr.kind];h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow jr-leg" data-act="edit" data-id="'+x.leg.from.id+'" aria-label="'+esc(jk.label+' details')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+jk.icon+' '+esc(jk.label+(x.leg.jr.num?' '+x.leg.jr.num:''))+'</span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>'}
-          else if(x.leg)h+='<li class="leg" data-flip="l-'+p.id+'"><button class="legrow" data-act="leg-menu" data-id="'+p.id+'" aria-haspopup="menu" aria-expanded="false" aria-label="'+esc(MODES[x.leg.mode].label+' to '+p.name+'. Change how you get there')+'"><span class="legline '+x.leg.mode+'"></span><span class="legmode">'+MODES[x.leg.mode].icon+' '+MODES[x.leg.mode].label+'<svg viewBox="0 0 10 6" aria-hidden="true"><path d="M1 1l4 4 4-4" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span class="legt">'+dur(x.leg.min)+' · '+fmtKm(x.leg.km)+'</span></button></li>';
-          h+='<li class="row'+(open?' open':'')+'" data-flip="r-'+p.id+'" data-drag="'+p.id+'"><span class="num">'+(k+1)+'</span><button class="row-main" data-act="open" data-id="'+p.id+'" aria-expanded="'+open+'"><span class="ico">'+esc(t.icon)+'</span><span class="nm">'+stopName(p,i,k===plan.length-1)+(p.jr?'<small class="jr-sub'+(x.late?' bad':'')+'">'+JK[p.jr.kind].icon+' '+esc([p.jr.num||JK[p.jr.kind].label,p.jr.dep?(p.jr.kind==='car'?'pick-up ':'departs ')+clock24(p.jr.dep):'',p.jr.seat?'seat '+p.jr.seat:''].filter(Boolean).join(' · '))+'</small>':'')+'</span><span class="stime'+(x.fixed?' fixed':'')+'">'+clock(x.arrive)+'</span></button></li>';
-          if(open)h+=detailHtml(x,true);
-        });
-        if(plan.tout&&!nextNew)h+=xferRow(plan.tout,'out');
-        if(tr&&tr.kind==='s'&&tr.end){const pc=S.cities.find(c=>c.id===S.days[i-1].city);h+='<li class="trans-li">'+transitionCard(tr,pc,cty)+'</li>'}
-        else if(plan.evening)h+=hlegRow(plan.evening);
-      }
-      if(est&&!plan.endsHome)h+=hotelRow(est,'e',i,plan.length?clock(plan.end):'');
-      h+='<li class="empty-li"><span class="add-btns"><button class="add-first" data-act="add-stop" data-day="'+d.id+'"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg>Add a stop</button></span><span>or drag one here from another day</span></li></ol>';
-      if(plan.length)h+='<div class="addstop" data-flip="ast-'+d.id+'"><button class="add-row" data-act="add-stop" data-day="'+d.id+'"><span class="add-dot"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3.5v9M3.5 8h9"/></svg></span>Add a stop</button></div>';
-      if(xs.length){const xc=(S.view.xcol||[]).includes(d.id);
-        h+='<div class="xwrap'+(xc?' xcol':'')+'" data-flip="sh-'+d.id+'"><button class="sub-h xtoggle" data-act="toggle-extras" data-day="'+d.id+'" aria-expanded="'+!xc+'">'+CHEV+'<span>Extras if there is time</span><span class="xcount">'+xs.length+'</span></button>'+
-          '<div class="xbody"><div class="xinner"><ul class="extras">'+xs.map(p=>rowExtra(p,false)).join('')+'</ul></div></div></div>'}
-      h+='</div></div></section>';
+      h+=daySection(d,i,part,tr,cty);
+      if(cLast&&i<S.days.length-1){const nd=S.days[i+1],ntr=cityTransition(nd.id);if(ntr&&ntr.kind==='s')h+=daySection(nd,i+1,'a',ntr,S.cities.find(c=>c.id===nd.city)||S.cities[0])}
       if(cLast)h+='<div class="addday" data-flip="ad-'+cty.id+'"><button class="linkbtn sm" data-act="add-day" data-city="'+cty.id+'">+ Add a day in '+esc(cty.name)+'</button></div></div></div></section>';
     });
   }else h+=summaryHtml();
@@ -3063,7 +3082,7 @@ function renderBar(){
   const v=S.view;
   $('dayseg').innerHTML='<button data-act="set-day" data-day="all" aria-pressed="'+(v.day==='all')+'">All</button>'+
     S.cities.map(c=>'<i class="seg-sep" aria-hidden="true"></i><button class="seg-city" data-act="set-day" data-day="'+c.id+'" aria-pressed="'+(v.day===c.id)+'">'+esc(c.name)+'</button>'+
-      cityDays(c.id).map(d=>'<button class="seg-day" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(v.day===d.id)+'" aria-label="Day '+(dayIdx(d.id)+1)+'"><span class="dot" style="--dc:'+dayColor(d.id)+'"></span>'+(dayIdx(d.id)+1)+'</button>').join('')).join('');
+      cityDaysAll(c.id).map(d=>'<button class="seg-day" data-act="set-day" data-day="'+d.id+'" aria-pressed="'+(v.day===d.id)+'" aria-label="Day '+(dayIdx(d.id)+1)+'"><span class="dot" style="--dc:'+dayColor(d.id)+'"></span>'+(dayIdx(d.id)+1)+'</button>').join('')).join('');
   pill($('dayseg'),'[aria-pressed="true"]','seg');
   $('mainonly').setAttribute('aria-pressed',v.mainOnly);
   $('chips').innerHTML=S.tags.filter(t=>v.hidden.includes(t.id)||S.places.some(p=>p.tag===t.id)).map(t=>{const c=S.places.filter(p=>p.tag===t.id&&(!v.mainOnly||p.main)&&(v.day==='all'||(p.day&&inView(p.day)))).length;
@@ -3441,21 +3460,23 @@ function openCity(c,preset){
     '<div class="field"><label for="f-cname">City name</label><input class="inp" id="f-cname" value="'+esc(c?c.name:(preset.name||''))+'" placeholder="e.g. Seville" autocomplete="off"></div>'+
     (c?'':'<p class="cc-line" id="f-ccline">In <b id="f-ccshow">'+esc(preset.country||workingCountry()||'no country yet')+'</b> <button type="button" class="linkbtn sm" data-act="cc-change">Change</button></p>')+
     '<div class="field" id="f-ccfield"'+(c?'':' hidden')+'><label for="f-ccountry">Country</label><input class="inp" id="f-ccountry" list="f-clist" value="'+esc(c?c.country||'':(preset.country||workingCountry()))+'"'+(c?'':' data-auto="1"')+' placeholder="e.g. Spain" autocomplete="off"><datalist id="f-clist">'+countriesOf().map(x=>'<option value="'+esc(x)+'">').join('')+'</datalist></div>'+
-    (c&&!c.ph?(()=>{const cur=cityDays(c.id).length,max=Math.max(14,cur+7);ui.form.cur=cur;
-      return '<div class="field"><label for="f-cdays2">Days in '+esc(c.name)+'</label><select class="inp" id="f-cdays2">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===cur?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint" id="f-cdhint">'+cityRangeText(c,cur)+'</div></div>'})():'')+
+    (c&&!c.ph?(()=>{const sh=sharedAfter(c.id)?1:0,cur=cityDays(c.id).length+sh,max=Math.max(14,cur+7);ui.form.cur=cur;
+      return '<div class="field"><label for="f-cdays2">Days in '+esc(c.name)+'</label><select class="inp" id="f-cdays2">'+Array.from({length:max},(_,i)=>i+1).filter(n=>n>sh).map(n=>'<option value="'+n+'"'+(n===cur?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint" id="f-cdhint">'+cityRangeText(c,cur)+'</div></div>'})():'')+
     (c?'':(()=>{const open=openDays().length,max=Math.max(7,open),def=open?Math.min(open,3):3;ui.form.open=open;
       return '<div class="field"><label for="f-cdays">Days</label><select class="inp" id="f-cdays">'+Array.from({length:max},(_,i)=>i+1).map(n=>'<option value="'+n+'"'+(n===def?' selected':'')+'>'+n+' day'+(n>1?'s':'')+'</option>').join('')+'</select><div class="modehint">'+
-        '<span id="f-cdnew">'+addDaysHint(open,def)+'</span></div></div>'})())+
+        '<span id="f-cdnew">'+addDaysHint(open,def)+'</span></div></div>'+
+        (()=>{const od=openDays(),k=od.length?dayIdx(od[0].id)-1:S.days.length-1,pd=S.days[k];if(!pd)return '';const pc=S.cities.find(x=>x.id===pd.city);if(!pc||pc.ph||cityDays(pc.id).length<2)return '';
+          return '<label class="chk share-chk"><input type="checkbox" id="f-cshare" checked> <span>Arrive on <b>'+fmt(dayDate(k),{weekday:'short',month:'short',day:'numeric'})+'</b>, your last day in '+esc(pc.name)+'<small>That day shows under both cities, and counts as day 1 here.</small></span></label>'})()})())+
     '<p class="err" id="f-err" hidden></p>'+
     '<div class="dlg-acts">'+(c?'<button class="btn danger" data-act="delete-city">Delete</button>':'')+'<span class="spacer"></span><button class="btn" data-act="close">Cancel</button><button class="btn primary" data-act="save-city">'+(c?'Save':'Add city')+'</button></div>');
 }
 function cityRangeText(c,n){
-  const ds=cityDays(c.id);if(!ds.length)return '';const k0=dayIdx(ds[0].id),cur=ds.length,f=d=>d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
+  const ds=cityDays(c.id);if(!ds.length)return '';const sh=sharedAfter(c.id)?1:0,k0=dayIdx(ds[0].id),cur=ds.length+sh,f=d=>d.toLocaleDateString(undefined,{weekday:'short',month:'short',day:'numeric'});
   let h='<b>'+f(dayDate(k0))+(n>1?' to '+f(dayDate(k0+n-1)):'')+'</b>';
   if(n!==cur){const ph=S.cities.find(x=>x.ph),open=ph?cityDays(ph.id).length:0,last=S.days.length-1;
     if(n>cur){const take=Math.min(open,n-cur),grow=n-cur-take;
       h+='<br>'+(take?'Uses '+take+' of your open day'+(take>1?'s':'')+'. ':'')+(grow?'Adds '+grow+' day'+(grow>1?'s':'')+', so later cities move '+grow+' day'+(grow>1?'s':'')+' later and the trip ends '+f(dayDate(last+grow))+'.':'')}
-    else{const lost=cityDays(c.id).slice(n),stops=S.places.filter(p=>p.main&&lost.some(d=>d.id===p.day)).length;
+    else{const lost=cityDays(c.id).slice(n-sh),stops=S.places.filter(p=>p.main&&lost.some(d=>d.id===p.day)).length;
       h+='<br>Removes '+(cur-n)+' day'+(cur-n>1?'s':'')+(ph?' (they become open days at the end of the trip)':', so later cities move earlier and the trip ends '+f(dayDate(last-(cur-n))))+'.'+(stops?' The '+stops+' stop'+(stops>1?'s':'')+' on '+(cur-n>1?'those days move':'that day moves')+' to '+f(dayDate(k0+n-1))+'.':'')}}
   return h}
 function setCityDays(c,n){
@@ -3483,13 +3504,17 @@ function saveCity(){
   if(!name){$('f-err').textContent='Give the city a name.';$('f-err').hidden=false;return}
   let c=S.cities.find(x=>x.id===ui.form.id);const country=$('f-ccountry').value.trim()||guessCountry(name);
   if(c){if(c.name!==name){const k=cityCoord(name);if(k){c.lat=k.lat;c.lng=k.lng}}c.name=name;c.country=country;delete c.ph;
-    const nd=$('f-cdays2');if(nd)setCityDays(c,+nd.value)}
+    const nd=$('f-cdays2');if(nd)setCityDays(c,+nd.value-(sharedAfter(c.id)?1:0))}
   else{const k=ui.form.lat!=null?{lat:ui.form.lat,lng:ui.form.lng}:cityCoord(name);c={id:uid('c'),name,country,lat:k?k.lat:null,lng:k?k.lng:null};let n=+$('f-cdays').value||1;
     const ph=S.cities.find(x=>x.ph);
     if(ph){const open=S.days.filter(d=>d.city===ph.id),take=open.slice(0,n);S.cities.splice(S.cities.indexOf(ph),0,c);take.forEach(d=>{d.city=c.id});n-=take.length;
       if(take.length===open.length)S.cities.splice(S.cities.indexOf(ph),1)}
     else S.cities.push(c);
-    for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'},j>0)}
+    for(let j=0;j<n;j++)insertDayAt(S.days.length,{id:uid('d'),city:c.id,start:'09:00'},j>0);
+    // arrive on the last day in the previous city: that day becomes day 1 here, so one day is freed
+    const sh=$('f-cshare');
+    if(sh&&sh.checked){const f=cityDays(c.id)[0];if(f&&canTravelEarly(f)&&moveTravel(f,true)){const ds=cityDays(c.id),last=ds[ds.length-1];
+      if(last&&!S.places.some(p=>p.day===last.id)){if(ph){if(!S.cities.includes(ph))S.cities.push(ph);last.city=ph.id}else removeDayAt(dayIdx(last.id))}}}}
   closeDlg();commit();
 }
 function ensureHotelTag(){let t=S.tags.find(x=>x.name.toLowerCase()==='hotel');if(!t){t={id:uid('t'),name:'Hotel',icon:'🛏️',color:'#334155'};S.tags.push(t)}return t.id}
@@ -3836,7 +3861,7 @@ function flipMove(fn){
     if(Math.abs(dy)>.5)n.animate([{transform:'translateY('+dy+'px)'},{transform:'none'}],{duration:200,easing:EASE})});
 }
 function renumberDom(){
-  $('panel').querySelectorAll('.stops[data-day]').forEach(l=>l.querySelectorAll(':scope > .row[data-drag]').forEach((r,i)=>{const n=r.querySelector('.num');if(n)n.textContent=i+1}));
+  {const cnt={};$('panel').querySelectorAll('.stops[data-day]').forEach(l=>l.querySelectorAll(':scope > .row[data-drag]').forEach(r=>{const dd=l.dataset.day;cnt[dd]=(cnt[dd]||0)+1;const n=r.querySelector('.num');if(n)n.textContent=cnt[dd]}))}
 }
 function beginDrag(x,y){
   const st=drag.st;if(!st)return;st.active=true;clearTimeout(st.timer);
@@ -3893,8 +3918,11 @@ function endDrag(cancel){
     st.ghost.remove();
     if(!cancel){
       const touched=new Set();
-      $('panel').querySelectorAll('.stops[data-day]').forEach(l=>{const day=l.dataset.day;
-        l.querySelectorAll(':scope > .row[data-drag]').forEach((r,i)=>{
+      const cnt={};
+      $('panel').querySelectorAll('.stops[data-day]').forEach(l=>{const day=l.dataset.day,base=cnt[day]||0,rows=l.querySelectorAll(':scope > .row[data-drag]');cnt[day]=base+rows.length;
+        // on a travel day, what you drop above the trip stays before it
+        if(l.dataset.part==='a'){const dd=S.days.find(x=>x.id===day);if(dd)dd.splitAt=rows.length}
+        rows.forEach((r,j)=>{const i=base+j;
           if(r.dataset.drag==='__new'&&st.hotel){const hs=st.hotel;S.places.push({id:uid('p'),name:hs.name,lat:hs.lat,lng:hs.lng,tag:ensureHotelTag(),day,main:true,order:i+1,stay:30,notes:'',stayRef:hs.id});return}
           const p=S.places.find(x=>x.id===r.dataset.drag);if(p){if(p.day!==day){touched.add(p.day);delete p.mode}p.day=day;p.main=true;p.order=i+1}})});
       touched.forEach(d=>renumber(d));
