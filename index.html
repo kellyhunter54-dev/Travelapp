@@ -14,7 +14,7 @@
 <link rel="icon" href="icons/favicon-32.png" sizes="32x32" type="image/png">
 <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<script src="config.js?v=202611061642"></script>
+<script src="config.js?v=202611091138"></script>
 <title>Waypoint Planner</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Figtree:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
@@ -100,6 +100,11 @@ h1,h2,h3{font-family:var(--f-display);text-wrap:balance;margin:0}
 .side-share svg{width:18px;height:18px}
 .side-head .tsw{margin-right:92px;max-width:calc(100% - 92px)}
 .share-opt{margin:6px 0}
+.imp-cities{display:flex;flex-wrap:wrap;gap:6px}.imp-cities span{background:var(--surface-2);border-radius:999px;padding:4px 10px;font-size:13px}.imp-cities b,.imp-tags b{font-weight:700;margin-left:2px}
+.imp-tags .chip{cursor:default}
+.imp-list{border:1px solid var(--line);border-radius:12px;padding:6px 10px;margin:4px 0 8px}
+.imp-list>div{display:grid;grid-template-columns:24px 1fr auto;gap:8px;align-items:center;padding:5px 0;font-size:14px}
+.imp-list>div+div{border-top:1px solid var(--line)}.imp-list b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.imp-list small{color:var(--muted)}
 .share-link{margin-top:14px}.share-link .inp{width:100%;font:12.5px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted)}
 .side-cog svg{width:19px;height:19px;transition:rotate .5s var(--ease,ease)}
 .side-cog:hover svg{rotate:60deg}
@@ -3244,6 +3249,7 @@ document.addEventListener('pointerdown',e=>{if(dial.el&&!dial.el.contains(e.targ
 document.addEventListener('keydown',e=>{if(dial.el&&e.key==='Escape'){e.preventDefault();e.stopImmediatePropagation();closeDial()}},true);
 addEventListener('resize',()=>closeDial(true));
 function closeDlg(){
+  if(ui.dlg==='import'&&ui.importNewTags){ui.importNewTags.forEach(t=>{const k=TAGS.indexOf(t);if(k>=0)TAGS.splice(k,1)});ui.importNewTags=null;ui.imp=null}
   closeDial(true);
   ui.dlg=null;ui.form=null;ui.armed=null;const dl=$('dlg'),seq=++ui.dlgSeq;
   if(reduced||dl.hidden){dl.hidden=true;return}
@@ -4259,14 +4265,117 @@ function renderPage(anim){
 }
 
 function libTrips(id){const out=[];Object.values(STORE.trips).forEach(T=>{const ps=T.places.filter(p=>p.libRef===id);if(ps.length)out.push({T,p:ps[0]})});return out}
+/* ---------- Import saved places from a file (CSV, TSV, KML, GeoJSON) ---------- */
+function parseDelimited(txt){
+  txt=txt.replace(/^﻿/,'');const first=txt.split(/\r?\n/,1)[0]||'';
+  const del=[',',';','\t'].map(d=>[d,first.split(d).length]).sort((a,b)=>b[1]-a[1])[0][0];
+  const rows=[];let row=[],f='',q=false;
+  for(let i=0;i<txt.length;i++){const c=txt[i];
+    if(q){if(c==='"'){if(txt[i+1]==='"'){f+='"';i++}else q=false}else f+=c}
+    else if(c==='"')q=true;else if(c===del){row.push(f);f=''}
+    else if(c==='\n'||c==='\r'){if(c==='\r'&&txt[i+1]==='\n')i++;row.push(f);f='';if(row.some(x=>x.trim()))rows.push(row);row=[]}
+    else f+=c}
+  row.push(f);if(row.some(x=>x.trim()))rows.push(row);return rows}
+const coordsFromUrl=u=>{u=String(u||'');let m=/!3d(-?\d+(?:\.\d+)?)!4d(-?\d+(?:\.\d+)?)/.exec(u)||/@(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/.exec(u)||/[?&](?:q|query|ll|destination)=(-?\d+(?:\.\d+)?)(?:,|%2C)\s*(-?\d+(?:\.\d+)?)/i.exec(u);return m?{lat:+m[1],lng:+m[2]}:null};
+// city from an address like "..., Mueang Chiang Mai District, Chiang Mai 50200, Thailand"
+function addrParts(a){const p=String(a||'').split(',').map(x=>x.trim()).filter(Boolean);if(p.length<2)return {country:p[0]&&!/\d/.test(p[0])?p[0]:'',city:'',raw:[]};
+  const country=p[p.length-1].replace(/\b\d{3,7}\b/g,'').trim();
+  const clean=x=>x.replace(/[^\u0000-ɏ\s'’.-]+/g,' ').replace(/\S*\d\S*/g,' ').replace(/^(Chang Wat|Changwat|Amphoe|Mueang|Muang|Tambon)\s+/i,'').replace(/\s+(Province|District|City)$/i,'').replace(/\s+/g,' ').trim();
+  const raw=p.slice(0,-1).reverse().map(clean);
+  let city=raw.find(x=>x)||'';const isl=raw[1]&&/^(Ko|Koh)\s/i.test(raw[1])?raw[1]:'';
+  if(isl)city=isl;if(/^Krung Thep/i.test(city))city='Bangkok';
+  return {country,city,raw}}
+// a sensible tag from the place name
+const IMPORT_RULES=[
+  [/airport/,'Airport','✈️','#0F172A'],[/\b(pier|ferry)\b/,'Ferry','⛴️','#1E40AF'],[/\b(train|railway) station\b|\bstation\b/,'Train Station','🚆','#334155'],
+  [/\b(hotel|resort|villas?|hostel|homestay|lodge|inn|suites?)\b|soneva|rayavadee|four seasons|hilton|hyatt|banyan tree|panviman|raya heritage/,'Hotel','🛏️','#334155'],
+  [/theme park|water ?park|world\b|go.?kart|\batv\b|zipline|mini golf|andamanda|hanuman|land of angels/,'Theme Park','🎢','#A21CAF'],
+  [/\b(wat|temple|pagodas?|stupa|chedi)\b|วัด/,'Buddhist Temple','🛕','#9A3412'],
+  [/museum|gallery|ancient city|sanctuary of truth/,'Museum','🏛️','#2563EB'],
+  [/elephant|safari|\bzoo\b|capybara(?! coffee)/,'Zoo','🦁','#B45309'],[/aquarium/,'Aquarium','🐠','#0E7490'],
+  [/waterfall|\bfalls\b|emerald pool|lagoon/,'Scenic Spot','🏞️','#4F46E5'],[/view ?point|summit|mountain|\bdoi\b|\bkhao\b/,'Scenic Spot','🏞️','#4F46E5'],
+  [/national (marine )?park|marine park/,'Park','🌲','#15803D'],
+  [/beach|\bbay\b|\bao\b/,'Beach','🏖️','#0891B2'],[/\b(ko|koh)\b|island|similan|lipe/,'Island','🏝️','#0E7490'],
+  [/market|bazaar|riverfront/,'Shop','🛒','#F59E0B'],[/\bmall\b|iconsiam|emsphere|plaza|kingsquare|central park/,'Mall','🏬','#7C3AED'],
+  [/burger|pizza|pasta|kitchen|restaurant|dining|bistro|grill|noodle|bbq|steak|sushi|ramen|focaccia|breakfast|poutine|\brice\b|nobu|le du|fornaio|verandah|ma doo bua|su va na|food/,'Restaurant','🍴','#EA580C'],
+  [/caf[eé]|coffee|bakery|espresso|tea ?house/,'Cafe','☕','#92400E'],
+  [/\bbar\b|rooftop|\bpub\b|club|brew|ale house|baccarat|rabbit hole/,'Bar','🍸','#C026D3'],
+  [/stadium|muay thai|kart|kayak|immersive|cube/,'Attraction','🎡','#DB2777'],
+  [/monument|memorial|statue|buddha|gate|spirit/,'Monument','🗽','#0284C7'],
+  [/garden|flower/,'Garden','🌷','#65A30D'],[/\bpark\b/,'Park','🌲','#15803D'],
+  [/palace|castle|old town|heritage|shrine|historic/,'Historic Site','🏺','#A16207'],
+  [/trail|hike|trek/,'Hiking','🥾','#57534E'],[/pottery|craft|workshop|class/,'Workshop','🛠️','#78716C']];
+function importTag(name,cat){const n=String(name||'').toLowerCase();
+  const get=(nm,ic,co)=>{let t=TAGS.find(x=>normTxt(x.name)===normTxt(nm));if(!t){t={id:'t'+Math.random().toString(36).slice(2,8),name:nm,icon:ic||'📍',color:co||'#64748B'};TAGS.push(t)}return t.id};
+  if(cat){const t=TAGS.find(x=>normTxt(x.name)===normTxt(cat));if(t)return t.id;const r=IMPORT_RULES.find(r=>r[0].test(String(cat).toLowerCase()));if(r)return get(r[1],r[2],r[3])}
+  const r=IMPORT_RULES.find(r=>r[0].test(n));return r?get(r[1],r[2],r[3]):get('Point of Interest','📍','#64748B')}
+function rowsFromFile(name,txt){
+  const ext=(name.split('.').pop()||'').toLowerCase();
+  if(ext==='kml'||/^\s*<\?xml|<kml/i.test(txt)){const doc=new DOMParser().parseFromString(txt,'text/xml');
+    return [...doc.getElementsByTagName('Placemark')].map(pm=>{const g=t=>{const e=pm.getElementsByTagName(t)[0];return e?e.textContent.trim():''};const c=g('coordinates').split(/[\s]+/)[0].split(',');
+      return {name:g('name'),notes:g('description').replace(/<[^>]+>/g,' ').replace(/\s+/g,' ').trim(),lat:+c[1],lng:+c[0],addr:g('address')}}).filter(r=>r.name)}
+  if(ext==='json'||ext==='geojson'||/^\s*[\[{]/.test(txt)){const j=JSON.parse(txt);const fs=j.features||(Array.isArray(j)?j:[]);
+    return fs.map(f=>{const p=f.properties||f,c=f.geometry&&f.geometry.coordinates;const loc=p.location||{};
+      return {name:p.name||p.title||p.Title||(loc.name)||'',notes:p.note||p.notes||p.description||'',lat:c?+c[1]:+(p.lat||p.latitude||loc.latitude),lng:c?+c[0]:+(p.lng||p.lon||p.longitude||loc.longitude),addr:p.address||loc.address||'',url:p.google_maps_url||p.url||''}}).filter(r=>r.name)}
+  const rows=parseDelimited(txt);if(rows.length<2)return [];
+  const H=rows[0].map(h=>h.trim().toLowerCase()),col=(...res)=>{for(const re of res){const i=H.findIndex(h=>re.test(h));if(i>=0)return i}return -1};
+  const ci={name:col(/^(place ?name|name|title|place|location name)$/,/name|title/),lat:col(/^(lat|latitude|y)$/,/latitude/),lng:col(/^(lng|lon|long|longitude|x)$/,/longitude/),
+    addr:col(/full address/,/address/),url:col(/^(final url)$/,/^(url|link|google maps url|maps url)$/,/url|link/),url2:col(/^(url|link)$/),notes:col(/^(note|notes|comment|comments|description)$/),
+    city:col(/^(city|town)$/),country:col(/^country$/),cat:col(/^(tag|category|type|categories)$/)};
+  if(ci.name<0)ci.name=0;
+  return rows.slice(1).map(r=>{const v=k=>ci[k]>=0?String(r[ci[k]]||'').trim():'';
+    let lat=parseFloat(v('lat')),lng=parseFloat(v('lng'));
+    if(!(isFinite(lat)&&isFinite(lng))){const c=coordsFromUrl(v('url'))||coordsFromUrl(v('url2'));if(c){lat=c.lat;lng=c.lng}}
+    if(isFinite(lat)&&isFinite(lng)&&Math.abs(lat)>90&&Math.abs(lng)<=90){const t=lat;lat=lng;lng=t}
+    return {name:v('name'),lat:isFinite(lat)?lat:null,lng:isFinite(lng)?lng:null,addr:v('addr'),url:v('url')||v('url2'),notes:v('notes'),city:v('city'),country:v('country'),cat:v('cat')}}).filter(r=>r.name)}
+function prepImport(rows){
+  const near=(a,b)=>a.lat!=null&&b.lat!=null&&Math.abs(a.lat-b.lat)<.002&&Math.abs(a.lng-b.lng)<.002;
+  const items=[],seen=[];let dup=0;
+  rows.forEach(r=>{const ap=addrParts(r.addr),it={name:r.name.slice(0,140),lat:r.lat!=null?+(+r.lat).toFixed(6):null,lng:r.lng!=null?+(+r.lng).toFixed(6):null,
+      city:r.city||ap.city,country:r.country||ap.country||(r.city?guessCountry(r.city):''),notes:r.notes||'',url:r.url||'',addr:r.addr||'',cat:r.cat||'',raw:ap.raw};
+    const nn=normTxt(it.name);
+    if(STORE.library.concat(seen).some(l=>normTxt(l.name)===nn&&(near(l,it)||l.lat==null||it.lat==null))){dup++;return}
+    seen.push(it);items.push(it)});
+  // cities that read oddly: use a well-known city from the same file, or the nearest one
+  const cnt={};items.forEach(i=>{if(i.city)cnt[i.city]=(cnt[i.city]||0)+1});
+  const known=Object.keys(cnt).filter(c=>c.split(' ').length<=3),common=known.filter(c=>cnt[c]>=2);
+  items.forEach(i=>{if(!i.city)return;const k=common.filter(k=>k!==i.city&&(i.city.endsWith(' '+k)||i.city.includes(' '+k+' '))).sort((a,b)=>b.length-a.length)[0];
+    if(k)i.city=k;else if(!known.includes(i.city))i.city=''});
+  items.forEach(i=>{if(!i.city&&i.lat!=null){let best=null,bd=1e9;items.forEach(o=>{if(o!==i&&o.city&&o.lat!=null){const d=(o.lat-i.lat)**2+(o.lng-i.lng)**2;if(d<bd){bd=d;best=o}}});if(best&&bd<.16){i.city=best.city;i.country=i.country||best.country}}});
+  return {items,dup}}
+function openImport(){const inp=document.createElement('input');inp.type='file';inp.accept='.csv,.tsv,.txt,.kml,.json,.geojson,text/csv';
+  inp.onchange=()=>{const f=inp.files&&inp.files[0];if(!f)return;const rd=new FileReader();
+    rd.onload=()=>{let rows=[];try{rows=rowsFromFile(f.name,String(rd.result||''))}catch(e){rows=[]}
+      if(!rows.length){toast('Couldn’t find any places in that file. Use a CSV with a name column and either latitude and longitude, or Google Maps links.');return}
+      showImport(f.name,prepImport(rows))};rd.readAsText(f)};inp.click()}
+function showImport(fname,res){
+  const tagsBefore=TAGS.length;res.items.forEach(i=>{i.tag=importTag(i.name,i.cat)});ui.importNewTags=TAGS.splice(tagsBefore);TAGS.push(...ui.importNewTags);
+  ui.dlg='import';ui.imp=res;ui.form={tagAll:''};
+  const items=res.items,noLoc=items.filter(i=>i.lat==null).length,byCity={},byTag={};
+  const many=new Set(items.map(i=>i.country||'')).size>1;
+  items.forEach(i=>{const k=(i.city||'Other')+(many&&i.country?', '+i.country:'');byCity[k]=(byCity[k]||0)+1;byTag[i.tag]=(byTag[i.tag]||0)+1});
+  const chip=(t,n)=>'<span class="chip" style="--tc:'+esc(t.color)+'" aria-pressed="true">'+esc(t.icon)+' '+esc(t.name)+' <b>'+n+'</b></span>';
+  openDlg('<h2>Import places</h2><p class="modehint" style="margin:-4px 0 12px">'+esc(fname)+': <b>'+items.length+'</b> new place'+(items.length===1?'':'s')+(res.dup?', '+res.dup+' already saved (skipped)':'')+(noLoc?', '+noLoc+' without a location':'')+'.</p>'+
+    '<div class="field"><span>Where they are</span><div class="imp-cities">'+Object.entries(byCity).sort((a,b)=>b[1]-a[1]).map(([c,n])=>'<span>'+esc(c)+' <b>'+n+'</b></span>').join('')+'</div></div>'+
+    '<div class="field"><span>Tags, guessed from each name</span><div class="chips imp-tags">'+Object.entries(byTag).sort((a,b)=>b[1]-a[1]).map(([id,n])=>{const t=TAGS.find(x=>x.id===id);return t?chip(t,n):''}).join('')+'</div>'+
+    '<label class="field" style="margin-top:10px"><span>Or tag them all as</span><select class="inp" id="f-imptag"><option value="">Keep the guesses</option>'+TAGS.map(t=>'<option value="'+t.id+'">'+esc(t.icon)+' '+esc(t.name)+'</option>').join('')+'</select></label></div>'+
+    '<div class="imp-list">'+items.slice(0,6).map(i=>{const t=TAGS.find(x=>x.id===i.tag)||{};return '<div><span>'+esc(t.icon||'')+'</span><b>'+esc(i.name)+'</b><small>'+esc(i.city||'')+'</small></div>'}).join('')+(items.length>6?'<p class="modehint">and '+(items.length-6)+' more</p>':'')+'</div>'+
+    '<p class="modehint">You can change any tag or city later from Saved places.</p>'+
+    '<div class="dlg-acts"><span class="spacer"></span><button class="btn" data-act="imp-cancel">Cancel</button><button class="btn primary" data-act="imp-go"'+(items.length?'':' disabled')+'>Import '+items.length+' place'+(items.length===1?'':'s')+'</button></div>')}
+function doImport(){const res=ui.imp;if(!res)return;const all=$('f-imptag')&&$('f-imptag').value;
+  const used=new Set();res.items.forEach(i=>{const tag=all||i.tag;used.add(tag);const l={id:uid('l'),name:i.name,lat:i.lat,lng:i.lng,tag,notes:i.notes,country:i.country,city:i.city};if(i.url)l.url=i.url;if(i.addr)l.addr=i.addr;STORE.library.push(l)});
+  // tags created just for the guesses that ended up unused are dropped again
+  (ui.importNewTags||[]).forEach(t=>{if(!used.has(t.id)){const k=TAGS.indexOf(t);if(k>=0)TAGS.splice(k,1)}});
+  const n=res.items.length;ui.imp=null;ui.importNewTags=null;closeDlg();ui.libQ='';ui.libTags=[];commit();gtoast('Imported '+n+' place'+(n===1?'':'s')+' into Saved places.')}
+function cancelImport(){(ui.importNewTags||[]).forEach(t=>{const k=TAGS.indexOf(t);if(k>=0)TAGS.splice(k,1)});ui.imp=null;ui.importNewTags=null;closeDlg()}
 function pgSaved(){
   const L=STORE.library,q=(ui.libQ||'').trim().toLowerCase(),tf=ui.libTags||[];
   const match=l=>{if(tf.length&&!tf.includes(l.tag))return false;if(!q)return true;const t=TAGS.find(x=>x.id===l.tag);return [l.name,l.city,l.country,l.notes,t&&t.name].some(x=>String(x||'').toLowerCase().includes(q))};
   const list=L.filter(match),countries=[...new Set(L.map(l=>l.country||'Somewhere'))];
-  let h=pageHead('Saved places',L.length+' place'+(L.length===1?'':'s')+' in '+countries.length+' countr'+(countries.length===1?'y':'ies')+'. Add any of them to a trip.','<button class="btn primary" data-act="lib-add">+ Add place</button>','All trips');
+  let h=pageHead('Saved places',L.length+' place'+(L.length===1?'':'s')+' in '+countries.length+' countr'+(countries.length===1?'y':'ies')+'. Add any of them to a trip.','<button class="btn" data-act="lib-import">Import</button><button class="btn primary" data-act="lib-add">+ Add place</button>','All trips');
   h+='<section class="libbar"><label class="libsearch">'+ico('<circle cx="9" cy="9" r="5.5"/><path d="M13.2 13.2 17 17"/>')+'<input class="inp" id="lib-q" placeholder="Search places, cities, notes" value="'+esc(ui.libQ||'')+'" autocomplete="off" aria-label="Search saved places"></label>'+
     '<div class="chips libtags">'+TAGS.filter(t=>L.some(l=>l.tag===t.id)).map(t=>'<button class="chip" style="--tc:'+esc(t.color)+'" data-act="lib-tag" data-tag="'+t.id+'" aria-pressed="'+(!tf.length||tf.includes(t.id))+'">'+esc(t.icon)+' '+esc(t.name)+'</button>').join('')+(tf.length?'<button class="linkbtn" data-act="lib-tag-all">Show all</button>':'')+'</div></section>';
-  if(!list.length)return h+'<section class="card"><p class="empty">'+(L.length?'Nothing matches. Try another search or tag.':'Save places you want to remember. Add them here, or pick "Not on a day" when adding a place on the map.')+'</p></section>';
+  if(!list.length)return h+'<section class="card"><p class="empty">'+(L.length?'Nothing matches. Try another search or tag.':'Save places you want to remember. Add them here, import a list (a spreadsheet saved as CSV, or a KML file), or pick "Not on a day" when adding a place on the map.')+'</p></section>';
   const byC={};list.forEach(l=>{const c=l.country||'Somewhere',ct=l.city||'Other';(byC[c]=byC[c]||{})[ct]=(byC[c][ct]||[]).concat(l)});
   const col=SET.libCol||[];
   Object.keys(byC).sort((a,b)=>a.localeCompare(b)).forEach(c=>{
@@ -4738,6 +4847,9 @@ document.addEventListener('click',e=>{
     case 'set-start':SET.start=b.dataset.v;saveSet();renderPage(false);break;
     case 'trip-settings':openTripSettings(b.dataset.trip||S.id);break;
     case 'share-trip':openShare();break;
+    case 'lib-import':openImport();break;
+    case 'imp-go':doImport();break;
+    case 'imp-cancel':cancelImport();break;
     case 'share-copy':shareAction('copy');break;
     case 'share-native':shareAction('native');break;
     case 'share-open':shareAction('open');break;
